@@ -7344,13 +7344,13 @@ class planPriceSubOneView(APIView):
             }
             return Response(post_result)
         except:
-            msg = "在建企划项目成本不存在!",
+            msg = "在建企划项目成本不存在!"
             error_code = 10020
             request = request.method + '  ' + request.get_full_path()
             post_result = {
                 "error_code": error_code,
                 "message": msg,
-                "request": request,
+                "request": request
             }
             return Response(post_result)
 
@@ -9253,6 +9253,37 @@ class shortShipView(APIView):
                 "request": request,
             }
             return Response(post_result)
+        # 批量删除用料单位
+
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = ShortShip.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "短溢装删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "短溢装不存在!"
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request
+            }
+            return Response(post_result)
 
 class shortShipOneView(APIView):
     #订单类型更新-active
@@ -9333,6 +9364,271 @@ class shortShipSortView(APIView):
                 post_result = {
                     "error_code": error_code,
                     "message": "短溢装排序成功!",
+                    "request": request,
+                }
+                return Response(post_result)
+            else:
+                # 返回数据
+                request = request.method + '  ' + request.get_full_path()
+                error_code = 0
+                post_result = {
+                    "error_code": error_code,
+                    "message": "偏移量超出范围!",
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+############################订单日期设置###############################################
+class orderDateSetView(APIView):
+    # 样品类型名称
+    @csrf_exempt
+    def get(self, request):
+        data = request.query_params
+        valObj = orderDateSetSerializer(data=request.query_params)
+        result = []
+        if valObj.is_valid():
+            result = []
+            try:
+                mid = valObj.data['id'] if valObj.data['id'] is not None else 0
+                rObj = OrderDateSet.objects.filter(delete_time=None).order_by('weight')
+                if mid:
+                    rObj = rObj.filter(id = mid)
+                for one in rObj:
+                    temp = {}
+                    if one.active == 1:
+                        temp['active'] = True
+                    else:
+                        temp['active'] = False
+                    temp["port_type"] = one.port_type
+                    temp["send_num"] = one.send_num
+                    temp["in_num"] = one.in_num
+                    temp["takeover_num"] = one.takeover_num
+                    temp['id'] = one.id
+                    temp['weight'] = one.weight
+                    result.append(temp)
+                return Response(result)
+            except:
+                msg = "未找到对应的时间日期设置"
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+    # 添加用料单位
+    @csrf_exempt
+    def post(self, request):
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认api接口名称！"
+            samp['key_num'] = "api_name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = orderDateSetOneSerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
+        dt = datetime.now()
+        if d_flag == 0:
+            for done in data:
+                try:
+                    mid = done["id"]
+                    if mid:
+                        bObj = OrderDateSet.objects.get(id=mid)
+                        bObj.update_time = dt
+                    else:
+                        bObj = OrderDateSet()
+                        bObj.create_time = dt
+                    num = OrderDateSet.objects.all().count() + 1
+                    bObj.port_type = done['port_type']
+                    bObj.send_num = done['send_num']
+                    bObj.in_num = done['in_num']
+                    bObj.takeover_num = done['takeover_num']
+                    bObj.active = done['active']
+                    if not mid:
+                        bObj.weight = num
+                    bObj.save()
+                except:
+                    msg = "参数校验不通过！"
+                    error_code = 10030
+                    request = request.method + '  ' + request.get_full_path()
+                    post_result = {
+                        "error_code": error_code,
+                        "message": msg,
+                        "request": request,
+                    }
+                    return Response(post_result)
+            if d_flag == 0:
+                msg = "创建/更新订单时间日期设置信息"
+            else:
+                msg = l_msg
+            error_code = 0
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+        else:
+            msg = l_msg
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+        # 批量删除用料单位
+
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = OrderDateSet.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "短溢装删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "订单时间日期设置不存在!"
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request
+            }
+            return Response(post_result)
+
+class orderDateSetOneView(APIView):
+    #订单类型更新-active
+    @csrf_exempt
+    def put(self, request, nid):
+        data = request.query_params
+        valObj = orderDateSetOneSerializer(data=request.query_params)
+        if valObj.is_valid():
+            dt = datetime.now()
+            bObj = OrderDateSet.objects.get(id=nid)
+            bObj.active = data['active']
+            bObj.port_type = data['port_type']
+            bObj.send_num = data['send_num']
+            bObj.in_num = data['in_num']
+            bObj.takeover_num = data['takeover_num']
+            bObj.update_time = dt
+            bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "更新订单时间日期成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+    #删除用料单位
+    @csrf_exempt
+    def delete(self, request, nid):
+        try:
+            bObj = OrderDateSet.objects.get(id=nid)
+            dt = datetime.now()
+            bObj.delete_time = dt
+            bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "订单日期时间设置删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "订单时间日期设置不存在!",
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+class orderDateSetSortView(APIView):
+    #样品类型名称排序
+    def put(self,request,bid):
+        data = request.query_params
+        valObj = BasicSortSerializer(data=request.query_params)
+        if valObj.is_valid():
+            obj = OrderDateSet.objects.all()
+            offset = int(data['offset'])
+            bid = bid
+            begin_weight = OrderDateSet.objects.get(id=bid).weight
+            result = Msort(obj, offset, bid, begin_weight)
+            if result:
+                # 返回数据
+                request = request.method + '  ' + request.get_full_path()
+                error_code = 0
+                post_result = {
+                    "error_code": error_code,
+                    "message": "订单时间日期设置排序成功!",
                     "request": request,
                 }
                 return Response(post_result)

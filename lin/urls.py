@@ -191,10 +191,14 @@ urlpatterns = [
     url('^warmSet$', views.warmSetView.as_view()),
     url('^warmSet/(?P<nid>\d+)', views.warmSetOneView.as_view()),
     url('^warmSet/sort/(?P<bid>\d+)', views.warmSetSortView.as_view()),
-
+    # 短溢装
     url('^shortShip$', views.shortShipView.as_view()),
     url('^shortShip/(?P<nid>\d+)', views.shortShipOneView.as_view()),
     url('^shortShip/sort/(?P<bid>\d+)', views.shortShipSortView.as_view()),
+    #订单时间设置
+    url('^orderDateSet$', views.orderDateSetView.as_view()),
+    url('^orderDateSet/(?P<nid>\d+)', views.orderDateSetOneView.as_view()),
+    url('^orderDateSet/sort/(?P<bid>\d+)', views.orderDateSetSortView.as_view()),
 
 
 

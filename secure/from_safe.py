@@ -702,5 +702,14 @@ class shortShipOneSerializer(serializers.Serializer):
     defalut = serializers.CharField(error_messages={'required': '必须传入默认信息'})
     active = serializers.IntegerField(error_messages={'required': '数据参数不可为空！'})
 
+class orderDateSetSerializer(serializers.Serializer):
+    id = serializers.IntegerField(default=0)
+
+class orderDateSetOneSerializer(serializers.Serializer):
+    port_type = serializers.CharField(error_messages={'required':'必须传入出口运输方式'})
+    send_num = serializers.CharField(error_messages={'required': '必须传入送检日提前天数'})
+    in_num = serializers.CharField(error_messages={'required': '必须传入进仓日天前天数'})
+    takeover_num = serializers.CharField(error_messages={'required': '必须传入提货日提前天数'})
+    active = serializers.IntegerField(error_messages={'required': '数据参数不可为空！'})
 
 
