@@ -692,4 +692,15 @@ class shipmentInStockLineShipSerializer(serializers.Serializer):
     short_send_num = serializers.CharField(error_messages={'required': '必须传入欠货数量'})
     add_up_num = serializers.CharField(error_messages={'required': '必须传入累计数量'})
 
+# 短溢装
+class shortShipSerializer(serializers.Serializer):
+    active = serializers.IntegerField(default=2)
+    short_num = serializers.IntegerField(default=0)
+
+class shortShipOneSerializer(serializers.Serializer):
+    short_num = serializers.CharField(error_messages={'required':'必须传入短溢装'})
+    defalut = serializers.CharField(error_messages={'required': '必须传入默认信息'})
+    active = serializers.IntegerField(error_messages={'required': '数据参数不可为空！'})
+
+
 

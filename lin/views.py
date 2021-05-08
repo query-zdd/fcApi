@@ -104,45 +104,74 @@ class basicView(APIView):
     #添加用料单位
     @csrf_exempt
     def post(self, request):
-        data = request.query_params
-        valObj = BasicInsertSerializer(data=request.query_params)
+        # data = request.query_params
+        # valObj = BasicInsertSerializer(data=request.query_params)
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认api接口名称！"
+            samp['key_num'] = "api_name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = BasicInsertSerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
         result = []
         dt = datetime.now()
-        if valObj.is_valid():
-            bTypeObj = BasicType.objects.filter(type=data['type_name'])
-            if bTypeObj.count()>0:
-                try:
-                    num = Basic.objects.all().count()+1
-                    bObj = Basic()
-                    bObj.basic_value_en = data['basic_value_en']
-                    bObj.basic_value_zh = data['basic_value_zh']
-                    bObj.active = data['active']
-                    bObj.type_id = bTypeObj[0].id
-                    bObj.create_time = dt
-                    bObj.weight = num
-                    bObj.save()
-
-                    msg = "添加基础资料成功"
-                    error_code = 0
-                    request = request.method + '  ' + request.get_full_path()
-                    post_result = {
-                        "error_code": error_code,
-                        "message": msg,
-                        "request": request,
-                    }
-                    return Response(post_result)
-                except:
-                    msg = "参数校验不通过！"
-                    error_code = 10030
-                    request = request.method + '  ' + request.get_full_path()
-                    post_result = {
-                        "error_code": error_code,
-                        "message": msg,
-                        "request": request,
-                    }
-                    return Response(post_result)
+        if d_flag == 0:
+            for done in data:
+                bTypeObj = BasicType.objects.filter(type=done['type_name'])
+                if bTypeObj.count()>0:
+                    try:
+                        num = Basic.objects.all().count()+1
+                        mid = done["id"]
+                        if mid:
+                            bObj = Basic.objects.get(id=mid)
+                            bObj.update_time = dt
+                        else:
+                            bObj = Basic()
+                            bObj.create_time = dt
+                        bObj.basic_value_en = done['basic_value_en']
+                        bObj.basic_value_zh = done['basic_value_zh']
+                        bObj.active = done['active']
+                        bObj.type_id = bTypeObj[0].id
+                        if not mid:
+                            bObj.weight = num
+                        bObj.save()
+                    except:
+                        msg = "参数校验不通过！"
+                        error_code = 10030
+                        request = request.method + '  ' + request.get_full_path()
+                        post_result = {
+                            "error_code": error_code,
+                            "message": msg,
+                            "request": request,
+                        }
+                        return Response(post_result)
+            msg = "添加基础资料成功"
+            error_code = 0
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         else:
-            msg = valObj.errors
+            msg = l_msg
             error_code = 10030
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -295,42 +324,73 @@ class sampleTypeView(APIView):
     # 添加用料单位
     @csrf_exempt
     def post(self, request):
-        data = request.query_params
-        valObj = SampleInsertSerializer(data=request.query_params)
+        # data = request.query_params
+        # valObj = SampleInsertSerializer(data=request.query_params)
         result = []
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认api接口名称！"
+            samp['key_num'] = "api_name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = SampleInsertSerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
         dt = datetime.now()
-        if valObj.is_valid():
-            try:
-                num = SampleType.objects.all().count() + 1
-                bObj = SampleType()
-                bObj.sample_type_zh = data['sample_type_zh']
-                bObj.sample_type_en = data['sample_type_en']
-                bObj.active = data['active']
-                bObj.balance = data['balance']
-                bObj.create_time = dt
-                bObj.weight = num
-                bObj.save()
-                msg = "创建样品分类成功"
-                error_code = 0
-                request = request.method + '  ' + request.get_full_path()
-                post_result = {
-                    "error_code": error_code,
-                    "message": msg,
-                    "request": request,
-                }
-                return Response(post_result)
-            except:
-                msg = "参数校验不通过！"
-                error_code = 10030
-                request = request.method + '  ' + request.get_full_path()
-                post_result = {
-                    "error_code": error_code,
-                    "message": msg,
-                    "request": request,
-                }
-                return Response(post_result)
+        if d_flag == 0:
+            for done in data:
+                try:
+                    mid = done["id"]
+                    if mid:
+                        bObj = SampleType.objects.get(id=mid)
+                        bObj.update_time = dt
+                    else:
+                        bObj = SampleType()
+                        bObj.create_time = dt
+                    num = SampleType.objects.all().count() + 1
+
+                    bObj.sample_type_zh = done['sample_type_zh']
+                    bObj.sample_type_en = done['sample_type_en']
+                    bObj.active = done['active']
+                    bObj.balance = done['balance']
+                    if not mid:
+                        bObj.weight = num
+                    bObj.save()
+                except:
+                    msg = "参数校验不通过！"
+                    error_code = 10030
+                    request = request.method + '  ' + request.get_full_path()
+                    post_result = {
+                        "error_code": error_code,
+                        "message": msg,
+                        "request": request,
+                    }
+                    return Response(post_result)
+            msg = "创建样品分类成功"
+            error_code = 0
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         else:
-            msg = valObj.errors
+            msg = l_msg
             error_code = 10030
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -494,20 +554,68 @@ class harbourView(APIView):
     # 添加用料单位
     @csrf_exempt
     def post(self, request):
-        data = request.query_params
-        valObj = harborOneSerializer(data=request.query_params)
+        # data = request.query_params
+        # valObj = harborOneSerializer(data=request.query_params)
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认api接口名称！"
+            samp['key_num'] = "api_name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = harborOneSerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
         dt = datetime.now()
-        if valObj.is_valid():
-            try:
-                harbour = Harbour.objects.filter(
-                    harbour_zh=data['harbour_zh'],
-                    order_id=data['harbour_en'],
-                    harbour_type= data['harbour_type'],
-                    delete_time=None
-                )
-                if harbour.count()>0:
-                    msg = "港口信息已存在"
-                    error_code = 400
+        if d_flag == 0:
+            for done in data:
+                try:
+                    harbour = Harbour.objects.filter(
+                        harbour_zh=done['harbour_zh'],
+                        order_id=done['harbour_en'],
+                        harbour_type= done['harbour_type'],
+                        delete_time=None
+                    )
+                    if harbour.count()>0:
+                        d_flag = 1
+                        samp = {}
+                        samp['msg'] = "港口信息已经存在"
+                        samp['key_num'] = done['harbour_zh']
+                        l_msg.append(samp)
+                    else:
+                        mid = done["id"]
+                        if mid:
+                            bObj = Harbour.objects.get(id=mid)
+                            bObj.update_time = dt
+                        else:
+                            bObj = Harbour()
+                            bObj.create_time = dt
+                        num = Harbour.objects.all().count() + 1
+                        bObj.harbour_zh = done['harbour_zh']
+                        bObj.harbour_en = done['harbour_en']
+                        bObj.harbour_type = done['harbour_type']
+                        bObj.active = done['active']
+                        bObj.order_id = done['order_id']
+                        bObj.create_time = dt
+                        if not mid:
+                            bObj.weight = num
+                        bObj.save()
+                except:
+                    msg = "参数校验不通过！"
+                    error_code = 10030
                     request = request.method + '  ' + request.get_full_path()
                     post_result = {
                         "error_code": error_code,
@@ -515,38 +623,20 @@ class harbourView(APIView):
                         "request": request,
                     }
                     return Response(post_result)
-                else:
-                    num = Harbour.objects.all().count() + 1
-                    bObj = Harbour()
-                    bObj.harbour_zh = data['harbour_zh']
-                    bObj.harbour_en = data['harbour_en']
-                    bObj.harbour_type = data['harbour_type']
-                    bObj.active = data['active']
-                    bObj.order_id = data['order_id']
-                    bObj.create_time = dt
-                    bObj.weight = num
-                    bObj.save()
-                    msg = "创建港口信息"
-                    error_code = 0
-                    request = request.method + '  ' + request.get_full_path()
-                    post_result = {
-                        "error_code": error_code,
-                        "message": msg,
-                        "request": request,
-                    }
-                    return Response(post_result)
-            except:
-                msg = "参数校验不通过！"
-                error_code = 10030
-                request = request.method + '  ' + request.get_full_path()
-                post_result = {
-                    "error_code": error_code,
-                    "message": msg,
-                    "request": request,
-                }
-                return Response(post_result)
+            if d_flag == 0:
+                msg = "创建港口信息"
+            else:
+                msg = l_msg
+            error_code = 0
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         else:
-            msg = valObj.errors
+            msg = l_msg
             error_code = 10030
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -9024,3 +9114,245 @@ class warmSetSortView(APIView):
             }
             return Response(post_result)
 
+
+############################短溢装###############################################
+class shortShipView(APIView):
+    # 样品类型名称
+    @csrf_exempt
+    def get(self, request):
+        data = request.query_params
+        valObj = shortShipSerializer(data=request.query_params)
+        result = []
+        if valObj.is_valid():
+            result = []
+            try:
+                active = valObj.data['active'] if valObj.data['active'] is not None else 2
+                short_num = valObj.data['short_num'] if valObj.data['short_num'] is not None else 0
+                rObj = ShortShip.objects.filter(delete_time=None).order_by('weight')
+                if active !=2:
+                    rObj = rObj.filter(active = active)
+                if short_num:
+                    rObj = rObj.filter(short_num = short_num)
+                for one in rObj:
+                    temp = {}
+                    if one.active == 1:
+                        temp['active'] = True
+                    else:
+                        temp['active'] = False
+                    temp["short_num"] = one.short_num
+                    temp["defalut"] = one.defalut
+                    temp['id'] = one.id
+                    temp['weight'] = one.weight
+                    result.append(temp)
+                return Response(result)
+            except:
+                msg = "未找到对应的短溢装"
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+    # 添加用料单位
+    @csrf_exempt
+    def post(self, request):
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认api接口名称！"
+            samp['key_num'] = "api_name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = shortShipOneSerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
+        dt = datetime.now()
+        if d_flag == 0:
+            for done in data:
+                try:
+                    shortship = ShortShip.objects.filter(
+                        short_num=done['short_num']
+                    )
+                    if shortship.count()>0:
+                        d_flag = 1
+                        samp = {}
+                        samp['msg'] = "短溢装已经存在"
+                        samp['key_num'] = done['short_num']
+                        l_msg.append(samp)
+                    else:
+                        mid = done["id"]
+                        if mid:
+                            bObj = ShortShip.objects.get(id=mid)
+                            bObj.update_time = dt
+                        else:
+                            bObj = ShortShip()
+                            bObj.create_time = dt
+                        num = ShortShip.objects.all().count() + 1
+                        bObj.short_num = done['short_num']
+                        bObj.defalut = done['defalut']
+                        bObj.active = done['active']
+                        bObj.create_time = dt
+                        if not mid:
+                            bObj.weight = num
+                        bObj.save()
+                except:
+                    msg = "参数校验不通过！"
+                    error_code = 10030
+                    request = request.method + '  ' + request.get_full_path()
+                    post_result = {
+                        "error_code": error_code,
+                        "message": msg,
+                        "request": request,
+                    }
+                    return Response(post_result)
+            if d_flag == 0:
+                msg = "创建/更新短溢装信息"
+            else:
+                msg = l_msg
+            error_code = 0
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+        else:
+            msg = l_msg
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+class shortShipOneView(APIView):
+    #订单类型更新-active
+    @csrf_exempt
+    def put(self, request, nid):
+        data = request.query_params
+        valObj = shortShipOneSerializer(data=request.query_params)
+        if valObj.is_valid():
+            dt = datetime.now()
+            bObj = ShortShip.objects.get(id=nid)
+            bObj.active = data['active']
+            bObj.short_num = data['short_num']
+            bObj.defalut = data['defalut']
+            bObj.update_time = dt
+            bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "更新短溢装成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+    #删除用料单位
+    @csrf_exempt
+    def delete(self, request, nid):
+        try:
+            bObj = ShortShip.objects.get(id=nid)
+            dt = datetime.now()
+            bObj.delete_time = dt
+            bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "短溢装删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "短溢装不存在!",
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+class shortShipSortView(APIView):
+    #样品类型名称排序
+    def put(self,request,bid):
+        data = request.query_params
+        valObj = BasicSortSerializer(data=request.query_params)
+        if valObj.is_valid():
+            obj = ShortShip.objects.all()
+            offset = int(data['offset'])
+            bid = bid
+            begin_weight = ShortShip.objects.get(id=bid).weight
+            result = Msort(obj, offset, bid, begin_weight)
+            if result:
+                # 返回数据
+                request = request.method + '  ' + request.get_full_path()
+                error_code = 0
+                post_result = {
+                    "error_code": error_code,
+                    "message": "短溢装排序成功!",
+                    "request": request,
+                }
+                return Response(post_result)
+            else:
+                # 返回数据
+                request = request.method + '  ' + request.get_full_path()
+                error_code = 0
+                post_result = {
+                    "error_code": error_code,
+                    "message": "偏移量超出范围!",
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)

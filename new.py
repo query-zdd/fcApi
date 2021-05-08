@@ -579,6 +579,23 @@ class OrderClothShip(models.Model):
         db_table = 'order_cloth_ship'
 
 
+class OrderDateSet(models.Model):
+    create_time = models.DateTimeField(blank=True, null=True)
+    update_time = models.DateTimeField(blank=True, null=True)
+    delete_time = models.DateTimeField(blank=True, null=True)
+    takeover_num = models.IntegerField(blank=True, null=True)
+    in_num = models.IntegerField(blank=True, null=True)
+    send_num = models.IntegerField(blank=True, null=True)
+    port_type = models.CharField(max_length=255)
+    defalut = models.SmallIntegerField()
+    active = models.SmallIntegerField()
+    weight = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'order_date_set'
+
+
 class OrderLinePacking(models.Model):
     create_time = models.DateTimeField(blank=True, null=True)
     update_time = models.DateTimeField(blank=True, null=True)
@@ -1126,6 +1143,20 @@ class SampleType(models.Model):
     class Meta:
         managed = False
         db_table = 'sample_type'
+
+
+class ShortShip(models.Model):
+    create_time = models.DateTimeField(blank=True, null=True)
+    update_time = models.DateTimeField(blank=True, null=True)
+    delete_time = models.DateTimeField(blank=True, null=True)
+    short_num = models.CharField(max_length=100)
+    defalut = models.SmallIntegerField()
+    active = models.SmallIntegerField()
+    weight = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'short_ship'
 
 
 class SingleSet(models.Model):

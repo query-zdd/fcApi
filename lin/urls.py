@@ -192,6 +192,10 @@ urlpatterns = [
     url('^warmSet/(?P<nid>\d+)', views.warmSetOneView.as_view()),
     url('^warmSet/sort/(?P<bid>\d+)', views.warmSetSortView.as_view()),
 
+    url('^shortShip$', views.shortShipView.as_view()),
+    url('^shortShip/(?P<nid>\d+)', views.shortShipOneView.as_view()),
+    url('^shortShip/sort/(?P<bid>\d+)', views.shortShipSortView.as_view()),
+
 
 
 ]
