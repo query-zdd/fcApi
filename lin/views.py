@@ -181,6 +181,37 @@ class basicView(APIView):
             }
             return Response(post_result)
 
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = Basic.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "样品分类删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "样品分类不存在!"
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request
+            }
+            return Response(post_result)
+
+
 class basicUpdateView(APIView):
     #订单类型更新-active
     @csrf_exempt
@@ -243,6 +274,7 @@ class basicUpdateView(APIView):
                 "request": request,
             }
             return Response(post_result)
+
 
 class basicSortView(APIView):
     #基础资料排序
@@ -397,6 +429,36 @@ class sampleTypeView(APIView):
                 "error_code": error_code,
                 "message": msg,
                 "request": request,
+            }
+            return Response(post_result)
+
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = SampleType.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "样品分类删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "样品分类不存在!"
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request
             }
             return Response(post_result)
 
@@ -625,9 +687,10 @@ class harbourView(APIView):
                     return Response(post_result)
             if d_flag == 0:
                 msg = "创建港口信息"
+                error_code = 0
             else:
                 msg = l_msg
-            error_code = 0
+                error_code = 10030
             request = request.method + '  ' + request.get_full_path()
             post_result = {
                 "error_code": error_code,
@@ -643,6 +706,36 @@ class harbourView(APIView):
                 "error_code": error_code,
                 "message": msg,
                 "request": request,
+            }
+            return Response(post_result)
+
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = Harbour.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "样品分类删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "样品分类不存在!"
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request
             }
             return Response(post_result)
 
@@ -797,18 +890,62 @@ class sizeView(APIView):
     # 添加用料单位
     @csrf_exempt
     def post(self, request):
-        data = request.query_params
-        valObj = sizeOneSerializer(data=request.query_params)
+        # data = request.query_params
+        # valObj = sizeOneSerializer(data=request.query_params)
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认api接口名称！"
+            samp['key_num'] = "api_name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = sizeOneSerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
         dt = datetime.now()
-        if valObj.is_valid():
-            try:
-                goods_size = GoodsSize.objects.filter(
-                    goods_size=data['goods_size'],
-                    delete_time=None
-                )
-                if goods_size.count()>0:
-                    msg = "商品尺码已经存在"
-                    error_code = 400
+        if d_flag == 0:
+            for done in data:
+                try:
+                    goods_size = GoodsSize.objects.filter(
+                        goods_size=done['goods_size'],
+                        delete_time=None
+                    )
+                    if goods_size.count()>0:
+                        d_flag = 1
+                        samp = {}
+                        samp['msg'] = "商品尺码已经存在"
+                        samp['key_num'] = done['goods_size']
+                        l_msg.append(samp)
+                    else:
+                        mid = done["id"]
+                        if mid:
+                            bObj = GoodsSize.objects.get(id=mid)
+                            bObj.update_time = dt
+                        else:
+                            bObj = GoodsSize()
+                            bObj.create_time = dt
+                        num = GoodsSize.objects.all().count() + 1
+                        bObj.goods_size = done['goods_size']
+                        bObj.active = done['active']
+                        if not mid:
+                            bObj.weight = num
+                        bObj.save()
+                except:
+                    msg = "参数校验不通过！"
+                    error_code = 10030
                     request = request.method + '  ' + request.get_full_path()
                     post_result = {
                         "error_code": error_code,
@@ -816,35 +953,21 @@ class sizeView(APIView):
                         "request": request,
                     }
                     return Response(post_result)
-                else:
-                    num = GoodsSize.objects.all().count() + 1
-                    bObj = GoodsSize()
-                    bObj.goods_size = data['goods_size']
-                    bObj.active = data['active']
-                    bObj.create_time = dt
-                    bObj.weight = num
-                    bObj.save()
-                    msg = "创建商品尺码"
-                    error_code = 0
-                    request = request.method + '  ' + request.get_full_path()
-                    post_result = {
-                        "error_code": error_code,
-                        "message": msg,
-                        "request": request,
-                    }
-                    return Response(post_result)
-            except:
-                msg = "参数校验不通过！"
+            if d_flag == 0:
+                msg = "创建商品尺码"
+                error_code = 0
+            else:
+                msg = l_msg
                 error_code = 10030
-                request = request.method + '  ' + request.get_full_path()
-                post_result = {
-                    "error_code": error_code,
-                    "message": msg,
-                    "request": request,
-                }
-                return Response(post_result)
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         else:
-            msg = valObj.errors
+            msg = l_msg
             error_code = 10030
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -853,6 +976,37 @@ class sizeView(APIView):
                 "request": request,
             }
             return Response(post_result)
+
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = GoodsSize.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "尺码删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "尺码不存在!"
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request
+            }
+            return Response(post_result)
+
 
 class sizeOneView(APIView):
     #订单类型更新-active
@@ -964,17 +1118,62 @@ class subsizeView(APIView):
     def post(self, request):
         data = request.query_params
         valObj = subsizeOneSerializer(data=request.query_params)
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认api接口名称！"
+            samp['key_num'] = "api_name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = subsizeOneSerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
         dt = datetime.now()
-        if valObj.is_valid():
-            try:
-                size = Size.objects.filter(
-                    goods_size_id=data['goods_size_id'],
-                    size=data['size'],
-                    delete_time=None
-                )
-                if size.count()>0:
-                    msg = "商品子尺码已经存在"
-                    error_code = 400
+        if d_flag == 0:
+            for done in data:
+                try:
+                    size = Size.objects.filter(
+                        goods_size_id=done['goods_size_id'],
+                        size=done['size'],
+                        delete_time=None
+                    )
+                    if size.count()>0:
+                        d_flag = 1
+                        samp = {}
+                        samp['msg'] = "商品子尺码已经存在"
+                        samp['key_num'] = done['size']
+                        l_msg.append(samp)
+                    else:
+                        mid = done["id"]
+                        if mid:
+                            bObj = Size.objects.get(id=mid)
+                            bObj.update_time = dt
+                        else:
+                            bObj = Size()
+                            bObj.create_time = dt
+                        num = Size.objects.all().count() + 1
+                        bObj.size = done['size']
+                        bObj.goods_size_id = done['goods_size_id']
+                        bObj.active = done['active']
+                        if not mid:
+                            bObj.weight = num
+                        bObj.save()
+                except:
+                    msg = "参数校验不通过！"
+                    error_code = 10030
                     request = request.method + '  ' + request.get_full_path()
                     post_result = {
                         "error_code": error_code,
@@ -982,42 +1181,57 @@ class subsizeView(APIView):
                         "request": request,
                     }
                     return Response(post_result)
-                else:
-                    num = Size.objects.all().count() + 1
-                    bObj = Size()
-                    bObj.size = data['size']
-                    bObj.goods_size_id = data['goods_size_id']
-                    bObj.active = data['active']
-                    bObj.create_time = dt
-                    bObj.weight = num
-                    bObj.save()
-                    msg = "创建商品子尺码"
-                    error_code = 0
-                    request = request.method + '  ' + request.get_full_path()
-                    post_result = {
-                        "error_code": error_code,
-                        "message": msg,
-                        "request": request,
-                    }
-                    return Response(post_result)
-            except:
-                msg = "参数校验不通过！"
+            if d_flag == 0:
+                msg = "创建商品子尺码"
+                error_code = 0
+            else:
+                msg = l_msg
                 error_code = 10030
-                request = request.method + '  ' + request.get_full_path()
-                post_result = {
-                    "error_code": error_code,
-                    "message": msg,
-                    "request": request,
-                }
-                return Response(post_result)
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         else:
-            msg = valObj.errors
+            msg = l_msg
             error_code = 10030
             request = request.method + '  ' + request.get_full_path()
             post_result = {
                 "error_code": error_code,
                 "message": msg,
                 "request": request,
+            }
+            return Response(post_result)
+
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = Size.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "子尺码删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "子尺码不存在!"
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request
             }
             return Response(post_result)
 
@@ -1204,18 +1418,65 @@ class receivingView(APIView):
     # 添加收货方式
     @csrf_exempt
     def post(self, request):
-        data = request.query_params
-        valObj = receivingOneSerializer(data=request.query_params)
+        # data = request.query_params
+        # valObj = receivingOneSerializer(data=request.query_params)
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认api接口名称！"
+            samp['key_num'] = "api_name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = receivingOneSerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
         dt = datetime.now()
-        if valObj.is_valid():
-            try:
-                receiObj = ReceivingGoodsMethod.objects.filter(
-                    method_name=data['method_name'],
-                    delete_time=None
-                )
-                if receiObj.count()>0:
-                    msg = "收货方式已经存在"
-                    error_code = 400
+        if d_flag == 0:
+            for done in data:
+                try:
+                    receiObj = ReceivingGoodsMethod.objects.filter(
+                        method_name=done['method_name'],
+                        delete_time=None
+                    )
+                    if receiObj.count()>0:
+                        d_flag = 1
+                        samp = {}
+                        samp['msg'] = "收货已经存在"
+                        samp['key_num'] = done['method_name']
+                        l_msg.append(samp)
+                    else:
+                        mid = done["id"]
+                        if mid:
+                            bObj = ReceivingGoodsMethod.objects.get(id=mid)
+                            bObj.update_time = dt
+                        else:
+                            bObj = ReceivingGoodsMethod()
+                            bObj.create_time = dt
+                        num = ReceivingGoodsMethod.objects.all().count() + 1
+
+                        bObj.method_name = done['method_name']
+                        bObj.active = done['active']
+                        bObj.create_time = dt
+                        if not mid:
+                            bObj.weight = num
+                        bObj.save()
+
+                except:
+                    msg = "参数校验不通过！"
+                    error_code = 10030
                     request = request.method + '  ' + request.get_full_path()
                     post_result = {
                         "error_code": error_code,
@@ -1223,35 +1484,21 @@ class receivingView(APIView):
                         "request": request,
                     }
                     return Response(post_result)
-                else:
-                    num = ReceivingGoodsMethod.objects.all().count() + 1
-                    bObj = ReceivingGoodsMethod()
-                    bObj.method_name = data['method_name']
-                    bObj.active = data['active']
-                    bObj.create_time = dt
-                    bObj.weight = num
-                    bObj.save()
-                    msg = "创建收货方式"
-                    error_code = 0
-                    request = request.method + '  ' + request.get_full_path()
-                    post_result = {
-                        "error_code": error_code,
-                        "message": msg,
-                        "request": request,
-                    }
-                    return Response(post_result)
-            except:
-                msg = "参数校验不通过！"
+            if d_flag ==0:
+                msg = "创建收货方式"
+                error_code = 0
+            else:
+                msg = l_msg
                 error_code = 10030
-                request = request.method + '  ' + request.get_full_path()
-                post_result = {
-                    "error_code": error_code,
-                    "message": msg,
-                    "request": request,
-                }
-                return Response(post_result)
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         else:
-            msg = valObj.errors
+            msg = l_msg
             error_code = 10030
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -1260,6 +1507,37 @@ class receivingView(APIView):
                 "request": request,
             }
             return Response(post_result)
+
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = ReceivingGoodsMethod.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "收货方式删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "收货方式不存在!"
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request
+            }
+            return Response(post_result)
+
 
 class receivingOneView(APIView):
     # 收货方式-更新
@@ -1368,19 +1646,65 @@ class warehouseView(APIView):
     # 添加商品子尺码
     @csrf_exempt
     def post(self, request):
-        data = request.query_params
-        valObj = warehouseSerializer(data=request.query_params)
+        # data = request.query_params
+        # valObj = warehouseSerializer(data=request.query_params)
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认api接口名称！"
+            samp['key_num'] = "api_name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = warehouseSerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
         dt = datetime.now()
-        if valObj.is_valid():
-            try:
-                whouse = WarehouseClassification.objects.filter(
-                    warehouse_name=data['warehouse_name'],
-                    method_id=data['method_id'],
-                    delete_time=None
-                )
-                if whouse.count()>0:
-                    msg = "子仓库已存在"
-                    error_code = 400
+        if d_flag == 0:
+            for done in data:
+                try:
+                    whouse = WarehouseClassification.objects.filter(
+                        warehouse_name=done['warehouse_name'],
+                        method_id=done['method_id'],
+                        delete_time=None
+                    )
+                    if whouse.count()>0:
+                        d_flag = 1
+                        samp = {}
+                        samp['msg'] = "子仓库已经存在"
+                        samp['key_num'] = done['warehouse_name']
+                        l_msg.append(samp)
+                    else:
+                        mid = done["id"]
+                        if mid:
+                            bObj = WarehouseClassification.objects.get(id=mid)
+                            bObj.update_time = dt
+                        else:
+                            bObj = WarehouseClassification()
+                            bObj.create_time = dt
+                        num = WarehouseClassification.objects.all().count() + 1
+                        bObj.warehouse_name = done['warehouse_name']
+                        bObj.method_id = done['method_id']
+                        bObj.active = done['active']
+                        if not mid:
+                            bObj.weight = num
+                        bObj.save()
+
+                except:
+                    msg = "参数校验不通过！"
+                    error_code = 10030
                     request = request.method + '  ' + request.get_full_path()
                     post_result = {
                         "error_code": error_code,
@@ -1388,36 +1712,21 @@ class warehouseView(APIView):
                         "request": request,
                     }
                     return Response(post_result)
-                else:
-                    num = WarehouseClassification.objects.all().count() + 1
-                    bObj = WarehouseClassification()
-                    bObj.warehouse_name = data['warehouse_name']
-                    bObj.method_id = data['method_id']
-                    bObj.active = data['active']
-                    bObj.create_time = dt
-                    bObj.weight = num
-                    bObj.save()
-                    msg = "创建子仓库"
-                    error_code = 0
-                    request = request.method + '  ' + request.get_full_path()
-                    post_result = {
-                        "error_code": error_code,
-                        "message": msg,
-                        "request": request,
-                    }
-                    return Response(post_result)
-            except:
-                msg = "参数校验不通过！"
+            if d_flag==0:
+                msg = "创建/更新子仓库"
+                error_code = 0
+            else:
+                msg = l_msg
                 error_code = 10030
-                request = request.method + '  ' + request.get_full_path()
-                post_result = {
-                    "error_code": error_code,
-                    "message": msg,
-                    "request": request,
-                }
-                return Response(post_result)
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         else:
-            msg = valObj.errors
+            msg = l_msg
             error_code = 10030
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -1426,6 +1735,37 @@ class warehouseView(APIView):
                 "request": request,
             }
             return Response(post_result)
+
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = WarehouseClassification.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "子仓库删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "子仓库不存在!"
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request
+            }
+            return Response(post_result)
+
 
 class warehouseOneView(APIView):
 
@@ -1602,30 +1942,60 @@ class singlesetView(APIView):
     # 添加 订单号设置
     @csrf_exempt
     def post(self, request):
-        data = request.query_params
-        valObj = singleSetOneSerializer(data=request.query_params)
+        # data = request.query_params
+        # valObj = singleSetOneSerializer(data=request.query_params)
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认api接口名称！"
+            samp['key_num'] = "api_name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = singleSetOneSerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
         dt = datetime.now()
-        if valObj.is_valid():
-            try:
-                btObj = BasicType.objects.filter(type=data['type_name'])
-                if btObj.count() > 0:
-                    bObj = SingleSet()
-                    bObj.customer_type_id = data['customer_type_id']
-                    bObj.prefix_name = data['prefix_name']
-                    bObj.time_type = data['time_type']
-                    bObj.code_sign_start = data['code_sign_start']
-                    bObj.code_number_start = data['code_number_start']
-                    cObj = CustomerType.objects.filter(id=data['customer_type_id'])
-                    if cObj.count()>0:
-                        cObj[0].seleted_single = 1
-                        cObj[0].seleted_invoice = 1
-                        cObj[0].update_time = dt
-                        cObj[0].save()
-                    bObj.create_time = dt
-                    bObj.type_id = btObj[0].id
-                    bObj.save()
-                    msg = "创建订单号"
-                    error_code = 0
+        if d_flag == 0:
+            for done in data:
+                try:
+                    btObj = BasicType.objects.filter(type=done['type_name'])
+                    if btObj.count() > 0:
+                        mid = done["id"]
+                        if mid:
+                            bObj = SingleSet.objects.get(id=mid)
+                            bObj.update_time = dt
+                        else:
+                            bObj = SingleSet()
+                            bObj.create_time = dt
+                        bObj.customer_type_id = done['customer_type_id']
+                        bObj.prefix_name = done['prefix_name']
+                        bObj.time_type = done['time_type']
+                        bObj.code_sign_start = done['code_sign_start']
+                        bObj.code_number_start = done['code_number_start']
+                        cObj = CustomerType.objects.filter(id=done['customer_type_id'])
+                        if cObj.count()>0:
+                            cObj[0].seleted_single = 1
+                            cObj[0].seleted_invoice = 1
+                            cObj[0].update_time = dt
+                            cObj[0].save()
+                        bObj.type_id = btObj[0].id
+                        bObj.save()
+                except:
+                    msg = "参数校验不通过！"
+                    error_code = 10030
                     request = request.method + '  ' + request.get_full_path()
                     post_result = {
                         "error_code": error_code,
@@ -1633,18 +2003,17 @@ class singlesetView(APIView):
                         "request": request,
                     }
                     return Response(post_result)
-            except:
-                msg = "参数校验不通过！"
-                error_code = 10030
-                request = request.method + '  ' + request.get_full_path()
-                post_result = {
-                    "error_code": error_code,
-                    "message": msg,
-                    "request": request,
-                }
-                return Response(post_result)
+            msg = "创建/更新订单号"
+            error_code = 0
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         else:
-            msg = valObj.errors
+            msg = l_msg
             error_code = 10030
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -1653,6 +2022,37 @@ class singlesetView(APIView):
                 "request": request,
             }
             return Response(post_result)
+
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = SingleSet.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "设置信息删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "设置信息不存在!"
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request
+            }
+            return Response(post_result)
+
 
 class singlesetOneView(APIView):
     #订单号更新-active
@@ -1905,18 +2305,62 @@ class cloth_classView(APIView):
     # 添加面辅料类别
     @csrf_exempt
     def post(self, request):
-        data = request.query_params
-        valObj = cloth_classOneSerializer(data=request.query_params)
+        # data = request.query_params
+        # valObj = cloth_classOneSerializer(data=request.query_params)
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认api接口名称！"
+            samp['key_num'] = "api_name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = cloth_classOneSerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
         dt = datetime.now()
-        if valObj.is_valid():
-            try:
-                clothClass = ClothClass.objects.filter(
-                    cloth_class_name=data['cloth_class_name'],
-                    delete_time=None
-                )
-                if clothClass.count()>0:
-                    msg = "面料分类已存在"
-                    error_code = 400
+        if d_flag == 0:
+            for done in data:
+                try:
+                    clothClass = ClothClass.objects.filter(
+                        cloth_class_name=done['cloth_class_name'],
+                        delete_time=None
+                    )
+                    if clothClass.count()>0:
+                        d_flag = 1
+                        samp = {}
+                        samp['msg'] = "面辅料分类已经存在"
+                        samp['key_num'] = done['cloth_class_name']
+                        l_msg.append(samp)
+                    else:
+                        mid = done["id"]
+                        if mid:
+                            bObj = ClothClass.objects.get(id=mid)
+                            bObj.update_time = dt
+                        else:
+                            bObj = ClothClass()
+                            bObj.create_time = dt
+                        num = ClothClass.objects.all().count() + 1
+                        bObj.cloth_class_name = done['cloth_class_name']
+                        bObj.active = done['active']
+                        if not mid:
+                            bObj.weight = num
+                        bObj.save()
+                except:
+                    msg = "参数校验不通过！"
+                    error_code = 10030
                     request = request.method + '  ' + request.get_full_path()
                     post_result = {
                         "error_code": error_code,
@@ -1924,35 +2368,21 @@ class cloth_classView(APIView):
                         "request": request,
                     }
                     return Response(post_result)
-                else:
-                    num = ClothClass.objects.all().count() + 1
-                    bObj = ClothClass()
-                    bObj.cloth_class_name = data['cloth_class_name']
-                    bObj.active = data['active']
-                    bObj.create_time = dt
-                    bObj.weight = num
-                    bObj.save()
-                    msg = "创建面料分类"
-                    error_code = 0
-                    request = request.method + '  ' + request.get_full_path()
-                    post_result = {
-                        "error_code": error_code,
-                        "message": msg,
-                        "request": request,
-                    }
-                    return Response(post_result)
-            except:
-                msg = "参数校验不通过！"
+            if d_flag==0:
+                msg = "创建/更新面料分类"
+                error_code = 0
+            else:
+                msg = l_msg
                 error_code = 10030
-                request = request.method + '  ' + request.get_full_path()
-                post_result = {
-                    "error_code": error_code,
-                    "message": msg,
-                    "request": request,
-                }
-                return Response(post_result)
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         else:
-            msg = valObj.errors
+            msg = l_msg
             error_code = 10030
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -1961,6 +2391,37 @@ class cloth_classView(APIView):
                 "request": request,
             }
             return Response(post_result)
+
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = ClothClass.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "面辅料类别删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "面辅料类别不存在!"
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request
+            }
+            return Response(post_result)
+
 
 class cloth_classOneView(APIView):
     # 面辅料类别更新-active
@@ -2069,19 +2530,65 @@ class clothmaterialView(APIView):
     # 添加面辅料成分
     @csrf_exempt
     def post(self, request):
-        data = request.query_params
-        valObj = clothMaterialOneSerializer(data=request.query_params)
+        # data = request.query_params
+        # valObj = clothMaterialOneSerializer(data=request.query_params)
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认api接口名称！"
+            samp['key_num'] = "api_name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = clothMaterialOneSerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
         dt = datetime.now()
-        if valObj.is_valid():
-            try:
-                clothM = ClothMaterial.objects.filter(
-                    material=data['material'],
-                    cloth_id=data['cloth_id'],
-                    delete_time=None
-                )
-                if clothM.count()>0:
-                    msg = "面辅料材料已经存在"
-                    error_code = 400
+        if d_flag == 0:
+            for done in data:
+                try:
+                    clothM = ClothMaterial.objects.filter(
+                        material=done['material'],
+                        cloth_id=done['cloth_id'],
+                        delete_time=None
+                    )
+                    if clothM.count()>0:
+                        d_flag = 1
+                        samp = {}
+                        samp['msg'] = "面辅料材料已经存在"
+                        samp['key_num'] = done['material']
+                        l_msg.append(samp)
+                    else:
+                        mid = done["id"]
+                        if mid:
+                            bObj = ClothMaterial.objects.get(id=mid)
+                            bObj.update_time = dt
+                        else:
+                            bObj = ClothMaterial()
+                            bObj.create_time = dt
+                        num = ClothMaterial.objects.all().count() + 1
+                        bObj.material = done['material']
+                        bObj.active = done['active']
+                        bObj.cloth_id = done['cloth_id']
+                        bObj.create_time = dt
+                        if not mid:
+                            bObj.weight = num
+                        bObj.save()
+                except:
+                    msg = "参数校验不通过！"
+                    error_code = 10030
                     request = request.method + '  ' + request.get_full_path()
                     post_result = {
                         "error_code": error_code,
@@ -2089,36 +2596,21 @@ class clothmaterialView(APIView):
                         "request": request,
                     }
                     return Response(post_result)
-                else:
-                    num = ClothMaterial.objects.all().count() + 1
-                    bObj = ClothMaterial()
-                    bObj.material = data['material']
-                    bObj.active = data['active']
-                    bObj.cloth_id = data['cloth_id']
-                    bObj.create_time = dt
-                    bObj.weight = num
-                    bObj.save()
-                    msg = "创建面料材料"
-                    error_code = 0
-                    request = request.method + '  ' + request.get_full_path()
-                    post_result = {
-                        "error_code": error_code,
-                        "message": msg,
-                        "request": request,
-                    }
-                    return Response(post_result)
-            except:
-                msg = "参数校验不通过！"
+            if d_flag == 0:
+                msg = "创建/更新面料材料"
+                error_code = 0
+            else:
+                msg = l_msg
                 error_code = 10030
-                request = request.method + '  ' + request.get_full_path()
-                post_result = {
-                    "error_code": error_code,
-                    "message": msg,
-                    "request": request,
-                }
-                return Response(post_result)
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         else:
-            msg = valObj.errors
+            msg = l_msg
             error_code = 10030
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -2127,6 +2619,37 @@ class clothmaterialView(APIView):
                 "request": request,
             }
             return Response(post_result)
+
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = ClothMaterial.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "面辅料成分删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "面辅料成分不存在!"
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request
+            }
+            return Response(post_result)
+
 
 class clothmaterialOneView(APIView):
     # 面辅料类别
@@ -2353,19 +2876,66 @@ class clothView(APIView):
     # 添加面辅料名称
     @csrf_exempt
     def post(self, request):
-        data = request.query_params
-        valObj = clothOneSerializer(data=request.query_params)
+        # data = request.query_params
+        # valObj = clothOneSerializer(data=request.query_params)
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认api接口名称！"
+            samp['key_num'] = "api_name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = clothOneSerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
         dt = datetime.now()
-        if valObj.is_valid():
-            try:
-                cloth = Cloth.objects.filter(
-                    cloth=data['cloth'],
-                    class_id=data['class_id'],
-                    delete_time=None
-                )
-                if cloth.count()>0:
-                    msg = "面料已经存在"
-                    error_code = 400
+        if d_flag == 0:
+            for done in data:
+                try:
+                    cloth = Cloth.objects.filter(
+                        cloth=done['cloth'],
+                        class_id=done['class_id'],
+                        delete_time=None
+                    )
+                    if cloth.count()>0:
+                        d_flag = 1
+                        samp = {}
+                        samp['msg'] = "面料名称已经存在"
+                        samp['key_num'] = done['cloth']
+                        l_msg.append(samp)
+                    else:
+                        mid = done["id"]
+                        if mid:
+                            bObj = Cloth.objects.get(id=mid)
+                            bObj.update_time = dt
+                        else:
+                            bObj = Cloth()
+                            bObj.create_time = dt
+                        num = Cloth.objects.all().count() + 1
+                        bObj.cloth = done['cloth']
+                        bObj.active = done['active']
+                        bObj.checked = done['checked']
+                        bObj.class_id = done['class_id']
+                        if not mid:
+                            bObj.weight = num
+                        bObj.save()
+
+                except:
+                    msg = "参数校验不通过！"
+                    error_code = 10030
                     request = request.method + '  ' + request.get_full_path()
                     post_result = {
                         "error_code": error_code,
@@ -2373,37 +2943,21 @@ class clothView(APIView):
                         "request": request,
                     }
                     return Response(post_result)
-                else:
-                    num = Cloth.objects.all().count() + 1
-                    bObj = Cloth()
-                    bObj.cloth = data['cloth']
-                    bObj.active = data['active']
-                    bObj.checked = data['checked']
-                    bObj.class_id = data['class_id']
-                    bObj.create_time = dt
-                    bObj.weight = num
-                    bObj.save()
-                    msg = "创建面料"
-                    error_code = 0
-                    request = request.method + '  ' + request.get_full_path()
-                    post_result = {
-                        "error_code": error_code,
-                        "message": msg,
-                        "request": request,
-                    }
-                    return Response(post_result)
-            except:
-                msg = "参数校验不通过！"
+            if d_flag == 0:
+                msg = "创建面料"
+                error_code = 0
+            else:
+                msg = l_msg
                 error_code = 10030
-                request = request.method + '  ' + request.get_full_path()
-                post_result = {
-                    "error_code": error_code,
-                    "message": msg,
-                    "request": request,
-                }
-                return Response(post_result)
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         else:
-            msg = valObj.errors
+            msg = l_msg
             error_code = 10030
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -2412,6 +2966,37 @@ class clothView(APIView):
                 "request": request,
             }
             return Response(post_result)
+
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = Cloth.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "面辅料名称删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "面辅料名称不存在!"
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request
+            }
+            return Response(post_result)
+
 
 class clothOneView(APIView):
     # 面辅料类别更新-active
@@ -2582,18 +3167,62 @@ class colourView(APIView):
     # 添加面辅料名称
     @csrf_exempt
     def post(self, request):
-        data = request.query_params
-        valObj = colourOneSerializer(data=request.query_params)
+        # data = request.query_params
+        # valObj = colourOneSerializer(data=request.query_params)
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认api接口名称！"
+            samp['key_num'] = "api_name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = colourOneSerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
         dt = datetime.now()
-        if valObj.is_valid():
-            try:
-                colour = ClothColour.objects.filter(
-                    colour_name=data['colour_name'],
-                    delete_time=None
-                )
-                if colour.count()>0:
-                    msg = "面辅料颜色已经存在"
-                    error_code = 400
+        if d_flag == 0:
+            for done in data:
+                try:
+                    colour = ClothColour.objects.filter(
+                        colour_name=done['colour_name'],
+                        delete_time=None
+                    )
+                    if colour.count()>0:
+                        d_flag = 1
+                        samp = {}
+                        samp['msg'] = "面料颜色已经存在"
+                        samp['key_num'] = done['colour_name']
+                        l_msg.append(samp)
+                    else:
+                        mid = done["id"]
+                        if mid:
+                            bObj = ClothColour.objects.get(id=mid)
+                            bObj.update_time = dt
+                        else:
+                            bObj = ClothColour()
+                            bObj.create_time = dt
+                        num = ClothColour.objects.all().count() + 1
+                        bObj.colour_name = done['colour_name']
+                        bObj.active = done['active']
+                        if not mid:
+                            bObj.weight = num
+                        bObj.save()
+                except:
+                    msg = "参数校验不通过！"
+                    error_code = 10030
                     request = request.method + '  ' + request.get_full_path()
                     post_result = {
                         "error_code": error_code,
@@ -2601,35 +3230,21 @@ class colourView(APIView):
                         "request": request,
                     }
                     return Response(post_result)
-                else:
-                    num = ClothColour.objects.all().count() + 1
-                    bObj = ClothColour()
-                    bObj.colour_name = data['colour_name']
-                    bObj.active = data['active']
-                    bObj.create_time = dt
-                    bObj.weight = num
-                    bObj.save()
-                    msg = "创建面料颜色"
-                    error_code = 0
-                    request = request.method + '  ' + request.get_full_path()
-                    post_result = {
-                        "error_code": error_code,
-                        "message": msg,
-                        "request": request,
-                    }
-                    return Response(post_result)
-            except:
-                msg = "参数校验不通过！"
+            if d_flag == 0:
+                msg = "创建/更新面料颜色"
+                error_code = 0
+            else:
+                msg = l_msg
                 error_code = 10030
-                request = request.method + '  ' + request.get_full_path()
-                post_result = {
-                    "error_code": error_code,
-                    "message": msg,
-                    "request": request,
-                }
-                return Response(post_result)
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         else:
-            msg = valObj.errors
+            msg = l_msg
             error_code = 10030
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -2638,6 +3253,37 @@ class colourView(APIView):
                 "request": request,
             }
             return Response(post_result)
+
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = ClothColour.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "面辅料颜色删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "面辅料颜色不存在!"
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request
+            }
+            return Response(post_result)
+
 
 class colourOneView(APIView):
     # 面辅料类别更新-active
@@ -2743,22 +3389,68 @@ class colourSortView(APIView):
 
 ############################面辅料子颜色###############################################
 class sub_colourView(APIView):
-    # 添加面辅料成分
+    # 添加面辅料子颜色
     @csrf_exempt
     def post(self, request):
-        data = request.query_params
-        valObj = subcolourOneSerializer(data=request.query_params)
+        # data = request.query_params
+        # valObj = subcolourOneSerializer(data=request.query_params)
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认api接口名称！"
+            samp['key_num'] = "api_name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = subcolourOneSerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
         dt = datetime.now()
-        if valObj.is_valid():
-            try:
-                scol = SubColour.objects.filter(
-                    sub_colour_name=data['sub_colour_name'],
-                    colour_id=data['colour_id'],
-                    delete_time=None
-                )
-                if scol.count()>0:
-                    msg = "子颜色已存在"
-                    error_code = 400
+        if d_flag == 0:
+            for done in data:
+                try:
+                    scol = SubColour.objects.filter(
+                        sub_colour_name=done['sub_colour_name'],
+                        colour_id=done['colour_id'],
+                        delete_time=None
+                    )
+                    if scol.count()>0:
+                        d_flag = 1
+                        samp = {}
+                        samp['msg'] = "子颜色已经存在"
+                        samp['key_num'] = done['sub_colour_name']
+                        l_msg.append(samp)
+                    else:
+                        mid = done["id"]
+                        if mid:
+                            bObj = SubColour.objects.get(id=mid)
+                            bObj.update_time = dt
+                        else:
+                            bObj = SubColour()
+                            bObj.create_time = dt
+                        num = SubColour.objects.all().count() + 1
+                        bObj.sub_colour_name = done['sub_colour_name']
+                        bObj.active = done['active']
+                        bObj.colour_id = done['colour_id']
+                        if not mid:
+                            bObj.weight = num
+                        bObj.save()
+
+                except:
+                    msg = "参数校验不通过！"
+                    error_code = 10030
                     request = request.method + '  ' + request.get_full_path()
                     post_result = {
                         "error_code": error_code,
@@ -2766,36 +3458,21 @@ class sub_colourView(APIView):
                         "request": request,
                     }
                     return Response(post_result)
-                else:
-                    num = SubColour.objects.all().count() + 1
-                    bObj = SubColour()
-                    bObj.sub_colour_name = data['sub_colour_name']
-                    bObj.active = data['active']
-                    bObj.colour_id = data['colour_id']
-                    bObj.create_time = dt
-                    bObj.weight = num
-                    bObj.save()
-                    msg = "创建面料子颜色"
-                    error_code = 0
-                    request = request.method + '  ' + request.get_full_path()
-                    post_result = {
-                        "error_code": error_code,
-                        "message": msg,
-                        "request": request,
-                    }
-                    return Response(post_result)
-            except:
-                msg = "参数校验不通过！"
+            if d_flag == 0:
+                msg = "创建面料子颜色"
+                error_code = 0
+            else:
+                msg = l_msg
                 error_code = 10030
-                request = request.method + '  ' + request.get_full_path()
-                post_result = {
-                    "error_code": error_code,
-                    "message": msg,
-                    "request": request,
-                }
-                return Response(post_result)
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         else:
-            msg = valObj.errors
+            msg = l_msg
             error_code = 10030
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -2804,6 +3481,37 @@ class sub_colourView(APIView):
                 "request": request,
             }
             return Response(post_result)
+
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = SubColour.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "面辅料子颜色删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "面辅料子颜色不存在!"
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request
+            }
+            return Response(post_result)
+
 
 class sub_colourOneView(APIView):
     # 面辅料子颜色
@@ -3012,21 +3720,66 @@ class specsView(APIView):
             }
             return Response(post_result)
 
-    # 添加面辅料名称
+    # 面辅料规格
     @csrf_exempt
     def post(self, request):
-        data = request.query_params
-        valObj = specsOneSerializer(data=request.query_params)
+        # data = request.query_params
+        # valObj = specsOneSerializer(data=request.query_params)
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认api接口名称！"
+            samp['key_num'] = "api_name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = specsOneSerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
         dt = datetime.now()
-        if valObj.is_valid():
-            try:
-                specs = ClothSpecs.objects.filter(
-                    specs_name=data['specs_name'],
-                    delete_time=None
-                )
-                if specs.count()>0:
-                    msg = "面辅料规格已经存在"
-                    error_code = 400
+        if d_flag == 0:
+            for done in data:
+                try:
+                    specs = ClothSpecs.objects.filter(
+                        specs_name=done['specs_name'],
+                        delete_time=None
+                    )
+                    if specs.count()>0:
+                        d_flag = 1
+                        samp = {}
+                        samp['msg'] = "面辅料规格已经存在"
+                        samp['key_num'] = done['specs_name']
+                        l_msg.append(samp)
+                    else:
+                        mid = done["id"]
+                        if mid:
+                            bObj = ClothSpecs.objects.get(id=mid)
+                            bObj.update_time = dt
+                        else:
+                            bObj = ClothSpecs()
+                            bObj.create_time = dt
+                        num = ClothSpecs.objects.all().count() + 1
+                        bObj.specs_name = done['specs_name']
+                        bObj.specs_unit = done['specs_unit']
+                        bObj.active = done['active']
+                        if not mid:
+                            bObj.weight = num
+                        bObj.save()
+                except:
+                    msg = "参数校验不通过！"
+                    error_code = 10030
                     request = request.method + '  ' + request.get_full_path()
                     post_result = {
                         "error_code": error_code,
@@ -3034,36 +3787,21 @@ class specsView(APIView):
                         "request": request,
                     }
                     return Response(post_result)
-                else:
-                    num = ClothSpecs.objects.all().count() + 1
-                    bObj = ClothSpecs()
-                    bObj.specs_name = data['specs_name']
-                    bObj.specs_unit = data['specs_unit']
-                    bObj.active = data['active']
-                    bObj.create_time = dt
-                    bObj.weight = num
-                    bObj.save()
-                    msg = "创建面料规格"
-                    error_code = 0
-                    request = request.method + '  ' + request.get_full_path()
-                    post_result = {
-                        "error_code": error_code,
-                        "message": msg,
-                        "request": request,
-                    }
-                    return Response(post_result)
-            except:
-                msg = "参数校验不通过！"
+            if d_flag == 0:
+                msg = "创建面料规格"
+                error_code = 0
+            else:
+                msg = l_msg
                 error_code = 10030
-                request = request.method + '  ' + request.get_full_path()
-                post_result = {
-                    "error_code": error_code,
-                    "message": msg,
-                    "request": request,
-                }
-                return Response(post_result)
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         else:
-            msg = valObj.errors
+            msg = l_msg
             error_code = 10030
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -3072,6 +3810,37 @@ class specsView(APIView):
                 "request": request,
             }
             return Response(post_result)
+
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = ClothSpecs.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "面辅料规格删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "面辅料规格不存在!"
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request
+            }
+            return Response(post_result)
+
 
 class specsOneView(APIView):
     # 面辅料类别更新-active
@@ -3178,22 +3947,69 @@ class specsSortView(APIView):
 
 ############################ 面辅料子规格###############################################
 class sub_specsView(APIView):
-    # 添加面辅料成分
+    # 面辅料子规格
     @csrf_exempt
     def post(self, request):
-        data = request.query_params
-        valObj = subspecsSerializer(data=request.query_params)
+        # data = request.query_params
+        # valObj = subspecsSerializer(data=request.query_params)
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认api接口名称！"
+            samp['key_num'] = "api_name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = subspecsSerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
         dt = datetime.now()
-        if valObj.is_valid():
-            try:
-                sspecs = SubSpecs.objects.filter(
-                    sub_specs_name=data['sub_specs_name'],
-                    specs_id=data['specs_id'],
-                    delete_time=None
-                )
-                if sspecs.count()>0:
-                    msg = "子规格已存在"
-                    error_code = 400
+        if d_flag == 0:
+            for done in data:
+                try:
+                    sspecs = SubSpecs.objects.filter(
+                        sub_specs_name=done['sub_specs_name'],
+                        specs_id=done['specs_id'],
+                        delete_time=None
+                    )
+                    if sspecs.count()>0:
+                        d_flag = 1
+                        samp = {}
+                        samp['msg'] = "子规格已经存在"
+                        samp['key_num'] = done['sub_specs_name']
+                        l_msg.append(samp)
+                    else:
+                        mid = done["id"]
+                        if mid:
+                            bObj = SubSpecs.objects.get(id=mid)
+                            bObj.update_time = dt
+                        else:
+                            bObj = SubSpecs()
+                            bObj.create_time = dt
+                        num = SubSpecs.objects.all().count() + 1
+
+                        bObj.sub_specs_name = done['sub_specs_name']
+                        bObj.active = done['active']
+                        bObj.specs_id = done['specs_id']
+                        if not mid:
+                            bObj.weight = num
+                        bObj.save()
+
+                except:
+                    msg = "参数校验不通过！"
+                    error_code = 10030
                     request = request.method + '  ' + request.get_full_path()
                     post_result = {
                         "error_code": error_code,
@@ -3201,36 +4017,21 @@ class sub_specsView(APIView):
                         "request": request,
                     }
                     return Response(post_result)
-                else:
-                    num = SubSpecs.objects.all().count() + 1
-                    bObj = SubSpecs()
-                    bObj.sub_specs_name = data['sub_specs_name']
-                    bObj.active = data['active']
-                    bObj.specs_id = data['specs_id']
-                    bObj.create_time = dt
-                    bObj.weight = num
-                    bObj.save()
-                    msg = "创建面料子规格"
-                    error_code = 0
-                    request = request.method + '  ' + request.get_full_path()
-                    post_result = {
-                        "error_code": error_code,
-                        "message": msg,
-                        "request": request,
-                    }
-                    return Response(post_result)
-            except:
-                msg = "参数校验不通过！"
+            if d_flag == 0:
+                msg = "创建面料子规格"
+                error_code = 0
+            else:
+                msg = l_msg
                 error_code = 10030
-                request = request.method + '  ' + request.get_full_path()
-                post_result = {
-                    "error_code": error_code,
-                    "message": msg,
-                    "request": request,
-                }
-                return Response(post_result)
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         else:
-            msg = valObj.errors
+            msg = l_msg
             error_code = 10030
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -3239,6 +4040,38 @@ class sub_specsView(APIView):
                 "request": request,
             }
             return Response(post_result)
+
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = SubSpecs.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "面辅料子规格删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "面辅料子规格不存在!"
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request
+            }
+            return Response(post_result)
+
+
 
 class sub_specsOneView(APIView):
     # 面辅料子规格
@@ -3443,18 +4276,66 @@ class customerTypeView(APIView):
     # 添加客户类型
     @csrf_exempt
     def post(self, request):
-        data = request.query_params
-        valObj = customerOneSerializer(data=request.query_params)
+        # data = request.query_params
+        # valObj = customerOneSerializer(data=request.query_params)
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认api接口名称！"
+            samp['key_num'] = "api_name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = customerOneSerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
         dt = datetime.now()
-        if valObj.is_valid():
-            try:
-                customerT = CustomerType.objects.filter(
-                    customer_type=data['customer_type'],
-                    delete_time=None
-                )
-                if customerT.count()>0:
-                    msg = "客户类型已存在"
-                    error_code = 400
+        if d_flag == 0:
+            for done in data:
+                try:
+                    customerT = CustomerType.objects.filter(
+                        customer_type=done['customer_type'],
+                        delete_time=None
+                    )
+                    if customerT.count()>0:
+                        d_flag = 1
+                        samp = {}
+                        samp['msg'] = "客户类型已经存在"
+                        samp['key_num'] = done['customer_type']
+                        l_msg.append(samp)
+                    else:
+                        mid = done["id"]
+                        if mid:
+                            bObj = CustomerType.objects.get(id=mid)
+                            bObj.update_time = dt
+                        else:
+                            bObj = CustomerType()
+                            bObj.create_time = dt
+                        num = CustomerType.objects.all().count() + 1
+
+                        bObj.customer_type = done['customer_type']
+                        bObj.active = done['active']
+
+                        bObj.selected_single = 0
+                        bObj.selected_invoice = 0
+                        if not mid:
+                            bObj.weight = num
+                        bObj.save()
+                except:
+                    msg = "参数校验不通过！"
+                    error_code = 10030
                     request = request.method + '  ' + request.get_full_path()
                     post_result = {
                         "error_code": error_code,
@@ -3462,37 +4343,21 @@ class customerTypeView(APIView):
                         "request": request,
                     }
                     return Response(post_result)
-                else:
-                    num = CustomerType.objects.all().count() + 1
-                    bObj = CustomerType()
-                    bObj.customer_type = data['customer_type']
-                    bObj.active = data['active']
-                    bObj.create_time = dt
-                    bObj.selected_single = 0
-                    bObj.selected_invoice = 0
-                    bObj.weight = num
-                    bObj.save()
-                    msg = "创建客户类型"
-                    error_code = 0
-                    request = request.method + '  ' + request.get_full_path()
-                    post_result = {
-                        "error_code": error_code,
-                        "message": msg,
-                        "request": request,
-                    }
-                    return Response(post_result)
-            except:
-                msg = "参数校验不通过！"
+            if d_flag ==0:
+                msg = "创建客户类型"
+                error_code = 0
+            else:
+                msg = l_msg
                 error_code = 10030
-                request = request.method + '  ' + request.get_full_path()
-                post_result = {
-                    "error_code": error_code,
-                    "message": msg,
-                    "request": request,
-                }
-                return Response(post_result)
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         else:
-            msg = valObj.errors
+            msg = l_msg
             error_code = 10030
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -3501,6 +4366,37 @@ class customerTypeView(APIView):
                 "request": request,
             }
             return Response(post_result)
+
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = CustomerType.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "客户类型删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "客户类型不存在!"
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request
+            }
+            return Response(post_result)
+
 
 class customerTypeOneView(APIView):
     #客户类型更新-active
@@ -3659,19 +4555,64 @@ class customer_filesView(APIView):
     # 添加客户类型
     @csrf_exempt
     def post(self, request):
-        data = request.query_params
-        valObj = customer_filesOneSerializer(data=request.query_params)
+        # data = request.query_params
+        # valObj = customer_filesOneSerializer(data=request.query_params)
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认api接口名称！"
+            samp['key_num'] = "api_name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = customer_filesOneSerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
         dt = datetime.now()
-        if valObj.is_valid():
-            try:
-                customerT = CustomerFiles.objects.filter(
-                    type_id=data['type_id'],
-                    customer_full_name=data['customer_full_name'],
-                    delete_time=None
-                )
-                if customerT.count()>0:
-                    msg = "客户档案已存在"
-                    error_code = 400
+        if d_flag == 0:
+            for done in data:
+                try:
+                    customerT = CustomerFiles.objects.filter(
+                        type_id=done['type_id'],
+                        customer_full_name=done['customer_full_name'],
+                        delete_time=None
+                    )
+                    if customerT.count()>0:
+                        d_flag = 1
+                        samp = {}
+                        samp['msg'] = "客户档案已经存在"
+                        samp['key_num'] = done['customer_full_name']
+                        l_msg.append(samp)
+                    else:
+                        mid = done["id"]
+                        if mid:
+                            bObj = CustomerFiles.objects.get(id=mid)
+                            bObj.update_time = dt
+                        else:
+                            bObj = CustomerFiles()
+                            bObj.create_time = dt
+                        bObj.customer_full_name = done['customer_full_name']
+                        bObj.active = done['active']
+                        bObj.customer_simple_name =done['customer_simple_name']
+                        bObj.office_phone =done['office_phone']
+                        bObj.fax_number = done['fax_number']
+                        bObj.type_id = done['type_id']
+                        bObj.save()
+                except:
+                    msg = "参数校验不通过！"
+                    error_code = 10030
                     request = request.method + '  ' + request.get_full_path()
                     post_result = {
                         "error_code": error_code,
@@ -3679,37 +4620,21 @@ class customer_filesView(APIView):
                         "request": request,
                     }
                     return Response(post_result)
-                else:
-                    bObj = CustomerFiles()
-                    bObj.customer_full_name = data['customer_full_name']
-                    bObj.active = data['active']
-                    bObj.create_time = dt
-                    bObj.customer_simple_name =data['customer_simple_name']
-                    bObj.office_phone =data['office_phone']
-                    bObj.fax_number = data['fax_number']
-                    bObj.type_id = data['type_id']
-                    bObj.save()
-                    msg = "创建客户档案"
-                    error_code = 0
-                    request = request.method + '  ' + request.get_full_path()
-                    post_result = {
-                        "error_code": error_code,
-                        "message": msg,
-                        "request": request,
-                    }
-                    return Response(post_result)
-            except:
-                msg = "参数校验不通过！"
+            if d_flag == 0:
+                msg = "创建客户档案"
+                error_code = 0
+            else:
+                msg = l_msg
                 error_code = 10030
-                request = request.method + '  ' + request.get_full_path()
-                post_result = {
-                    "error_code": error_code,
-                    "message": msg,
-                    "request": request,
-                }
-                return Response(post_result)
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         else:
-            msg = valObj.errors
+            msg = l_msg
             error_code = 10030
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -3718,6 +4643,37 @@ class customer_filesView(APIView):
                 "request": request,
             }
             return Response(post_result)
+
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = CustomerFiles.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "客户档案删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "客户档案不存在!"
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request
+            }
+            return Response(post_result)
+
 
 class customer_filesOneView(APIView):
     #客户类型更新-active
@@ -3788,24 +4744,71 @@ class contactView(APIView):
     # 添加联系方式
     @csrf_exempt
     def post(self, request):
-        data = request.query_params
-        valObj = contactOneSerializer(data=request.query_params)
+        # data = request.query_params
+        # valObj = contactOneSerializer(data=request.query_params)
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认api接口名称！"
+            samp['key_num'] = "api_name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = contactOneSerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
         dt = datetime.now()
-        if valObj.is_valid():
-            try:
-                customerT = CustomerContact.objects.filter(
-                    customer_id=data['customer_id'],
-                    department_name=data['department_name'],
-                    post_name=data['post_name'],
-                    contact_name=data['contact_name'],
-                    phone=data['phone'],
-                    email=data['email'],
-                    remarks=data['remarks'],
-                    delete_time=None
-                )
-                if customerT.count()>0:
-                    msg = "联系方式已存在"
-                    error_code = 400
+        if d_flag == 0:
+            for done in data:
+                try:
+                    customerT = CustomerContact.objects.filter(
+                        customer_id=done['customer_id'],
+                        department_name=done['department_name'],
+                        post_name=done['post_name'],
+                        contact_name=done['contact_name'],
+                        phone=done['phone'],
+                        email=done['email'],
+                        remarks=done['remarks'],
+                        delete_time=None
+                    )
+                    if customerT.count()>0:
+                        d_flag = 1
+                        samp = {}
+                        samp['msg'] = "联系方式已经存在"
+                        samp['key_num'] = done['phone']
+                        l_msg.append(samp)
+                    else:
+                        mid = done["id"]
+                        if mid:
+                            bObj = CustomerContact.objects.get(id=mid)
+                            bObj.update_time = dt
+                        else:
+                            bObj = CustomerContact()
+                            bObj.create_time = dt
+                        bObj.customer_id = done['customer_id']
+                        bObj.active = done['active']
+                        bObj.department_name =done['department_name']
+                        bObj.post_name =done['post_name']
+                        bObj.contact_name = done['contact_name']
+                        bObj.phone = done['phone']
+                        bObj.email = done['email']
+                        bObj.remarks = done['remarks']
+                        bObj.save()
+                except:
+                    msg = "参数校验不通过！"
+                    error_code = 10030
                     request = request.method + '  ' + request.get_full_path()
                     post_result = {
                         "error_code": error_code,
@@ -3813,39 +4816,21 @@ class contactView(APIView):
                         "request": request,
                     }
                     return Response(post_result)
-                else:
-                    bObj = CustomerContact()
-                    bObj.customer_id = data['customer_id']
-                    bObj.active = data['active']
-                    bObj.create_time = dt
-                    bObj.department_name =data['department_name']
-                    bObj.post_name =data['post_name']
-                    bObj.contact_name = data['contact_name']
-                    bObj.phone = data['phone']
-                    bObj.email = data['email']
-                    bObj.remarks = data['remarks']
-                    bObj.save()
-                    msg = "创建联系方式"
-                    error_code = 0
-                    request = request.method + '  ' + request.get_full_path()
-                    post_result = {
-                        "error_code": error_code,
-                        "message": msg,
-                        "request": request,
-                    }
-                    return Response(post_result)
-            except:
-                msg = "参数校验不通过！"
+            if d_flag ==0:
+                msg = "创建联系方式"
+                error_code = 0
+            else:
+                msg = l_msg
                 error_code = 10030
-                request = request.method + '  ' + request.get_full_path()
-                post_result = {
-                    "error_code": error_code,
-                    "message": msg,
-                    "request": request,
-                }
-                return Response(post_result)
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         else:
-            msg = valObj.errors
+            msg = l_msg
             error_code = 10030
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -3854,6 +4839,37 @@ class contactView(APIView):
                 "request": request,
             }
             return Response(post_result)
+
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = CustomerContact.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "联系方式删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "联系方式不存在!"
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request
+            }
+            return Response(post_result)
+
 
 class contactOneView(APIView):
     # 联系方式
@@ -4023,21 +5039,66 @@ class namecardOneView(APIView):
     # 添加 公司名片
     @csrf_exempt
     def post(self, request, nid):
-        data = request.query_params
-        valObj = namecardOneSerializer(data=request.query_params)
+        # data = request.query_params
+        # valObj = namecardOneSerializer(data=request.query_params)
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认api接口名称！"
+            samp['key_num'] = "api_name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = namecardOneSerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
         cfObj = CustomerFiles.objects.filter(id=nid)
         if cfObj.count()>0:
             dt = datetime.now()
-            if valObj.is_valid():
-                try:
-                    customerT = CustomerCompany.objects.filter(
-                        company_name=data['company_name'],
-                        customer_file_id=nid,
-                        delete_time=None
-                    )
-                    if customerT.count() > 0:
-                        msg = "客户卡片已存在"
-                        error_code = 400
+            if d_flag == 0:
+                for done in data:
+                    try:
+                        customerT = CustomerCompany.objects.filter(
+                            company_name=done['company_name'],
+                            customer_file_id=nid,
+                            delete_time=None
+                        )
+                        if customerT.count() > 0:
+                            d_flag = 1
+                            samp = {}
+                            samp['msg'] = "客户名片已经存在"
+                            samp['key_num'] = done['company_name']
+                            l_msg.append(samp)
+                        else:
+                            mid = done["id"]
+                            if mid:
+                                bObj = CustomerCompany.objects.get(id=mid)
+                                bObj.update_time = dt
+                            else:
+                                bObj = CustomerCompany()
+                                bObj.create_time = dt
+                            bObj.customer_file_id =nid
+                            bObj.language = done['language']
+                            bObj.company_name = done['company_name']
+                            bObj.company_name_simple = done['company_name_simple']
+                            bObj.country = done['country']
+                            bObj.company_address = done['company_address']
+                            bObj.save()
+                    except:
+                        msg = "参数校验不通过！"
+                        error_code = 10030
                         request = request.method + '  ' + request.get_full_path()
                         post_result = {
                             "error_code": error_code,
@@ -4045,38 +5106,21 @@ class namecardOneView(APIView):
                             "request": request,
                         }
                         return Response(post_result)
-                    else:
-                        bObj = CustomerCompany()
-                        bObj.customer_file_id =nid
-                        bObj.language = data['language']
-                        bObj.create_time = dt
-                        bObj.company_name = data['company_name']
-                        bObj.company_name_simple = data['company_name_simple']
-                        bObj.country = data['country']
-                        bObj.company_address = data['company_address']
-
-                        bObj.save()
-                        msg = "创建联系方式"
-                        error_code = 0
-                        request = request.method + '  ' + request.get_full_path()
-                        post_result = {
-                            "error_code": error_code,
-                            "message": msg,
-                            "request": request,
-                        }
-                        return Response(post_result)
-                except:
-                    msg = "参数校验不通过！"
+                if d_flag==0:
+                    msg = "创建联系方式"
+                    error_code = 0
+                else:
+                    msg = l_msg
                     error_code = 10030
-                    request = request.method + '  ' + request.get_full_path()
-                    post_result = {
-                        "error_code": error_code,
-                        "message": msg,
-                        "request": request,
-                    }
-                    return Response(post_result)
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
             else:
-                msg = valObj.errors
+                msg = l_msg
                 error_code = 10030
                 request = request.method + '  ' + request.get_full_path()
                 post_result = {
@@ -4134,10 +5178,13 @@ class namecardOneView(APIView):
     @csrf_exempt
     def delete(self, request, nid):
         try:
-            bObj = CustomerCompany.objects.get(id=nid)
-            dt = datetime.now()
-            bObj.delete_time = dt
-            bObj.save()
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = CustomerCompany.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
             # 返回数据
             request = request.method + '  ' + request.get_full_path()
             error_code = 0
@@ -4158,7 +5205,7 @@ class namecardOneView(APIView):
             }
             return Response(post_result)
 
-############################  公司名片###############################################
+############################  唛头###############################################
 class marksOneView(APIView):
     #  唛头
     @csrf_exempt
@@ -4206,21 +5253,64 @@ class marksOneView(APIView):
     # 添加 唛头
     @csrf_exempt
     def post(self, request, nid):
-        data = request.query_params
-        valObj = marksOneSerializer(data=request.query_params)
+        # data = request.query_params
+        # valObj = marksOneSerializer(data=request.query_params)
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认api接口名称！"
+            samp['key_num'] = "api_name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = marksOneSerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
         cfObj = CustomerCompany.objects.filter(id=nid)
         if cfObj.count()>0:
             dt = datetime.now()
-            if valObj.is_valid():
-                try:
-                    customerT = Marks.objects.filter(
-                        namecard_id=data['namecard_id'],
-                        brand=data['brand'],
-                        delete_time=None
-                    )
-                    if customerT.count() > 0:
-                        msg = "唛头已存在"
-                        error_code = 400
+            if d_flag == 0:
+                for done in data:
+                    try:
+                        customerT = Marks.objects.filter(
+                            namecard_id=done['namecard_id'],
+                            brand=done['brand'],
+                            delete_time=None
+                        )
+                        if customerT.count() > 0:
+                            d_flag = 1
+                            samp = {}
+                            samp['msg'] = "唛头已经存在"
+                            samp['key_num'] = done['brand']
+                            l_msg.append(samp)
+                        else:
+                            mid = done["id"]
+                            if mid:
+                                bObj = Marks.objects.get(id=mid)
+                                bObj.update_time = dt
+                            else:
+                                bObj = Marks()
+                                bObj.create_time = dt
+                            bObj.namecard_id = done['namecard_id']
+                            bObj.brand = done['brand']
+                            bObj.brand_url = done['brand_url']
+                            bObj.active = done['active']
+                            bObj.save()
+                    except:
+                        msg = "参数校验不通过！"
+                        error_code = 10030
                         request = request.method + '  ' + request.get_full_path()
                         post_result = {
                             "error_code": error_code,
@@ -4228,35 +5318,21 @@ class marksOneView(APIView):
                             "request": request,
                         }
                         return Response(post_result)
-                    else:
-                        bObj = Marks()
-                        bObj.namecard_id = data['namecard_id']
-                        bObj.brand = data['brand']
-                        bObj.create_time = dt
-                        bObj.brand_url = data['brand_url']
-                        bObj.active = data['active']
-                        bObj.save()
-                        msg = "创建联系方式"
-                        error_code = 0
-                        request = request.method + '  ' + request.get_full_path()
-                        post_result = {
-                            "error_code": error_code,
-                            "message": msg,
-                            "request": request,
-                        }
-                        return Response(post_result)
-                except:
-                    msg = "参数校验不通过！"
+                if d_flag ==0:
+                    msg = "创建联系方式"
+                    error_code = 0
+                else:
+                    msg = l_msg
                     error_code = 10030
-                    request = request.method + '  ' + request.get_full_path()
-                    post_result = {
-                        "error_code": error_code,
-                        "message": msg,
-                        "request": request,
-                    }
-                    return Response(post_result)
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
             else:
-                msg = valObj.errors
+                msg = l_msg
                 error_code = 10030
                 request = request.method + '  ' + request.get_full_path()
                 post_result = {
@@ -4312,10 +5388,13 @@ class marksOneView(APIView):
     @csrf_exempt
     def delete(self, request, nid):
         try:
-            bObj = Marks.objects.get(id=nid)
-            dt = datetime.now()
-            bObj.delete_time = dt
-            bObj.save()
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = Marks.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
             # 返回数据
             request = request.method + '  ' + request.get_full_path()
             error_code = 0
@@ -4401,18 +5480,62 @@ class departmentView(APIView):
     # 添加部门岗位
     @csrf_exempt
     def post(self, request):
-        data = request.query_params
-        valObj = departmentOneSerializer(data=request.query_params)
+        # data = request.query_params
+        # valObj = departmentOneSerializer(data=request.query_params)
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认api接口名称！"
+            samp['key_num'] = "api_name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = departmentOneSerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
         dt = datetime.now()
-        if valObj.is_valid():
-            try:
-                depart = Department.objects.filter(
-                    department_name=data['department_name'],
-                    delete_time=None
-                )
-                if depart.count()>0:
-                    msg = "部门已经存在"
-                    error_code = 400
+        if d_flag == 0:
+            for done in data:
+                try:
+                    depart = Department.objects.filter(
+                        department_name=done['department_name'],
+                        delete_time=None
+                    )
+                    if depart.count()>0:
+                        d_flag = 1
+                        samp = {}
+                        samp['msg'] = "部门已经存在"
+                        samp['key_num'] = done['department_name']
+                        l_msg.append(samp)
+                    else:
+                        mid = done["id"]
+                        if mid:
+                            bObj = Department.objects.get(id=mid)
+                            bObj.update_time = dt
+                        else:
+                            bObj = Department()
+                            bObj.create_time = dt
+                        num = Department.objects.all().count() + 1
+                        bObj.department_name = done['department_name']
+                        bObj.active = done['active']
+                        if not mid:
+                            bObj.weight = num
+                        bObj.save()
+                except:
+                    msg = "参数校验不通过！"
+                    error_code = 10030
                     request = request.method + '  ' + request.get_full_path()
                     post_result = {
                         "error_code": error_code,
@@ -4420,35 +5543,21 @@ class departmentView(APIView):
                         "request": request,
                     }
                     return Response(post_result)
-                else:
-                    num = Department.objects.all().count() + 1
-                    bObj = Department()
-                    bObj.department_name = data['department_name']
-                    bObj.active = data['active']
-                    bObj.create_time = dt
-                    bObj.weight = num
-                    bObj.save()
-                    msg = "创建部门"
-                    error_code = 0
-                    request = request.method + '  ' + request.get_full_path()
-                    post_result = {
-                        "error_code": error_code,
-                        "message": msg,
-                        "request": request,
-                    }
-                    return Response(post_result)
-            except:
-                msg = "参数校验不通过！"
+            if d_flag==0:
+                msg = "创建部门"
+                error_code = 0
+            else:
+                msg = l_msg
                 error_code = 10030
-                request = request.method + '  ' + request.get_full_path()
-                post_result = {
-                    "error_code": error_code,
-                    "message": msg,
-                    "request": request,
-                }
-                return Response(post_result)
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         else:
-            msg = valObj.errors
+            msg = l_msg
             error_code = 10030
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -4457,6 +5566,37 @@ class departmentView(APIView):
                 "request": request,
             }
             return Response(post_result)
+
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = Department.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "部门岗位删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "部门岗位不存在!"
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request
+            }
+            return Response(post_result)
+
 
 class departmentOneView(APIView):
     #客户类型更新-active
@@ -4566,19 +5706,64 @@ class departmentPostView(APIView):
     # 添加部门岗位
     @csrf_exempt
     def post(self, request):
-        data = request.query_params
-        valObj = postOneSerializer(data=request.query_params)
+        # data = request.query_params
+        # valObj = postOneSerializer(data=request.query_params)
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认api接口名称！"
+            samp['key_num'] = "api_name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = postOneSerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
         dt = datetime.now()
-        if valObj.is_valid():
-            try:
-                post = Post.objects.filter(
-                    post_name=data['post_name'],
-                    department_id=data['department_id'],
-                    delete_time=None
-                )
-                if post.count()>0:
-                    msg = "岗位已存在"
-                    error_code = 400
+        if d_flag == 0:
+            for done in data:
+                try:
+                    post = Post.objects.filter(
+                        post_name=done['post_name'],
+                        department_id=done['department_id'],
+                        delete_time=None
+                    )
+                    if post.count()>0:
+                        d_flag = 1
+                        samp = {}
+                        samp['msg'] = "岗位已经存在"
+                        samp['key_num'] = done['department_name']
+                        l_msg.append(samp)
+                    else:
+                        mid = done["id"]
+                        if mid:
+                            bObj = Post.objects.get(id=mid)
+                            bObj.update_time = dt
+                        else:
+                            bObj = Post()
+                            bObj.create_time = dt
+                        num = Post.objects.all().count() + 1
+                        bObj.post_name = done['post_name']
+                        bObj.department_id = done['department_id']
+                        bObj.active = done['active']
+                        if not mid:
+                            bObj.weight = num
+                        bObj.save()
+                except:
+                    msg = "参数校验不通过！"
+                    error_code = 10030
                     request = request.method + '  ' + request.get_full_path()
                     post_result = {
                         "error_code": error_code,
@@ -4586,36 +5771,21 @@ class departmentPostView(APIView):
                         "request": request,
                     }
                     return Response(post_result)
-                else:
-                    num = Post.objects.all().count() + 1
-                    bObj = Post()
-                    bObj.post_name = data['post_name']
-                    bObj.department_id = data['department_id']
-                    bObj.active = data['active']
-                    bObj.create_time = dt
-                    bObj.weight = num
-                    bObj.save()
-                    msg = "创建部门岗位"
-                    error_code = 0
-                    request = request.method + '  ' + request.get_full_path()
-                    post_result = {
-                        "error_code": error_code,
-                        "message": msg,
-                        "request": request,
-                    }
-                    return Response(post_result)
-            except:
-                msg = "参数校验不通过！"
+            if d_flag ==0:
+                msg = "创建部门岗位"
+                error_code = 0
+            else:
+                msg = l_msg
                 error_code = 10030
-                request = request.method + '  ' + request.get_full_path()
-                post_result = {
-                    "error_code": error_code,
-                    "message": msg,
-                    "request": request,
-                }
-                return Response(post_result)
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         else:
-            msg = valObj.errors
+            msg = l_msg
             error_code = 10030
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -4624,6 +5794,37 @@ class departmentPostView(APIView):
                 "request": request,
             }
             return Response(post_result)
+
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = Post.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "岗位删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "岗位不存在!"
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request
+            }
+            return Response(post_result)
+
 
 class departmentPostOneView(APIView):
     # 部门岗位
@@ -4885,19 +6086,66 @@ class templateOneView(APIView):
     # 添加入职资料
     @csrf_exempt
     def post(self, request, nid):
-        data = request.query_params
-        valObj = templateOneSerializer(data=request.query_params)
+        # data = request.query_params
+        # valObj = templateOneSerializer(data=request.query_params)
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认api接口名称！"
+            samp['key_num'] = "api_name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = templateOneSerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
         dt = datetime.now()
-        if valObj.is_valid():
-            try:
-                datat = DataTemplate.objects.filter(
-                    name=data['name'],
-                    type_id=data['type_id'],
-                    delete_time=None
-                )
-                if datat.count() > 0:
-                    msg = "资料模版已存在"
-                    error_code = 400
+        if d_flag == 0:
+            for done in data:
+                try:
+                    datat = DataTemplate.objects.filter(
+                        name=done['name'],
+                        type_id=done['type_id'],
+                        delete_time=None
+                    )
+                    if datat.count() > 0:
+                        d_flag = 1
+                        samp = {}
+                        samp['msg'] = "资料模板已经存在"
+                        samp['key_num'] = done['name']
+                        l_msg.append(samp)
+                    else:
+                        mid = done["id"]
+                        if mid:
+                            bObj = DataTemplate.objects.get(id=mid)
+                            bObj.update_time = dt
+                        else:
+                            bObj = DataTemplate()
+                            bObj.create_time = dt
+                        num = DataTemplate.objects.all().count() + 1
+
+                        bObj.name = done['name']
+                        bObj.template_url = done['template_url']
+                        bObj.required = done['required']
+                        bObj.active = done['active']
+                        if not mid:
+                            bObj.weight = num
+                        bObj.save()
+                except:
+                    msg = "参数校验不通过！"
+                    error_code = 10030
                     request = request.method + '  ' + request.get_full_path()
                     post_result = {
                         "error_code": error_code,
@@ -4905,37 +6153,21 @@ class templateOneView(APIView):
                         "request": request,
                     }
                     return Response(post_result)
-                else:
-                    num = DataTemplate.objects.all().count() + 1
-                    bObj = DataTemplate()
-                    bObj.name = data['name']
-                    bObj.template_url = data['template_url']
-                    bObj.required = data['required']
-                    bObj.active = data['active']
-                    bObj.create_time = dt
-                    bObj.weight = num
-                    bObj.save()
-                    msg = "创建资料模版"
-                    error_code = 0
-                    request = request.method + '  ' + request.get_full_path()
-                    post_result = {
-                        "error_code": error_code,
-                        "message": msg,
-                        "request": request,
-                    }
-                    return Response(post_result)
-            except:
-                msg = "参数校验不通过！"
+            if d_flag==0:
+                msg = "创建资料模版"
+                error_code = 0
+            else:
+                msg = l_msg
                 error_code = 10030
-                request = request.method + '  ' + request.get_full_path()
-                post_result = {
-                    "error_code": error_code,
-                    "message": msg,
-                    "request": request,
-                }
-                return Response(post_result)
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         else:
-            msg = valObj.errors
+            msg = l_msg
             error_code = 10030
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -4982,10 +6214,13 @@ class templateOneView(APIView):
     @csrf_exempt
     def delete(self, request, nid):
         try:
-            bObj = DataTemplate.objects.get(id=nid)
-            dt = datetime.now()
-            bObj.delete_time = dt
-            bObj.save()
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = DataTemplate.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
             # 返回数据
             request = request.method + '  ' + request.get_full_path()
             error_code = 0
@@ -5119,18 +6354,71 @@ class archiveView(APIView):
     # 添加员工档案
     @csrf_exempt
     def post(self, request):
-        data = request.query_params
-        valObj = archivesOneSerializer(data=request.query_params)
+        # data = request.query_params
+        # valObj = archivesOneSerializer(data=request.query_params)
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认api接口名称！"
+            samp['key_num'] = "api_name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = archivesOneSerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
         dt = datetime.now()
-        if valObj.is_valid():
-            try:
-                archives = Archives.objects.filter(
-                    name=data['name'],
-                    delete_time=None
-                )
-                if archives.count() > 0:
-                    msg = "员工档案已存在"
-                    error_code = 400
+        if d_flag == 0:
+            for done in data:
+                try:
+                    archives = Archives.objects.filter(
+                        name=done['name'],
+                        delete_time=None
+                    )
+                    if archives.count() > 0:
+                        d_flag = 1
+                        samp = {}
+                        samp['msg'] = "员工档案已经存在"
+                        samp['key_num'] = done['name']
+                        l_msg.append(samp)
+                    else:
+                        mid = done["id"]
+                        if mid:
+                            bObj = Archives.objects.get(id=mid)
+                            bObj.update_time = dt
+                        else:
+                            bObj = Archives()
+                            bObj.create_time = dt
+                        bObj.job_number = get_member_N()
+                        bObj.name = done['name']
+                        bObj.gender = done['gender']
+                        bObj.birthday = done['birthday']
+                        bObj.department_id = done['department_id']
+                        bObj.post_id = done['post_id']
+                        bObj.phone = done['phone']
+                        bObj.emergency_contact = done['emergency_contact']
+                        bObj.emergency_phone = done['emergency_phone']
+                        bObj.due_to_time = done['due_to_time']
+                        bObj.enter_time = done['enter_time']
+                        bObj.leave_time = done['leave_time']
+                        bObj.status = 1
+                        bObj.save()
+
+                except:
+                    msg = "参数校验不通过！"
+                    error_code = 10030
                     request = request.method + '  ' + request.get_full_path()
                     post_result = {
                         "error_code": error_code,
@@ -5138,44 +6426,22 @@ class archiveView(APIView):
                         "request": request,
                     }
                     return Response(post_result)
-                else:
-                    bObj = Archives()
-                    bObj.job_number = get_member_N()
-                    bObj.name = data['name']
-                    bObj.gender = data['gender']
-                    bObj.birthday = data['birthday']
-                    bObj.department_id = data['department_id']
-                    bObj.post_id = data['post_id']
-                    bObj.phone = data['phone']
-                    bObj.emergency_contact = data['emergency_contact']
-                    bObj.emergency_phone = data['emergency_phone']
-                    bObj.due_to_time = data['due_to_time']
-                    bObj.create_time = dt
-                    bObj.enter_time = data['enter_time']
-                    bObj.leave_time = data['leave_time']
-                    bObj.status = 1
-                    bObj.save()
-                    msg = "创建员工档案"
-                    error_code = 0
-                    request = request.method + '  ' + request.get_full_path()
-                    post_result = {
-                        "error_code": error_code,
-                        "message": msg,
-                        "request": request,
-                    }
-                    return Response(post_result)
-            except:
-                msg = "参数校验不通过！"
+
+            if d_flag ==0:
+                msg = "创建员工档案"
+                error_code = 0
+            else:
+                msg = l_msg
                 error_code = 10030
-                request = request.method + '  ' + request.get_full_path()
-                post_result = {
-                    "error_code": error_code,
-                    "message": msg,
-                    "request": request,
-                }
-                return Response(post_result)
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         else:
-            msg = valObj.errors
+            msg = l_msg
             error_code = 10030
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -5184,6 +6450,37 @@ class archiveView(APIView):
                 "request": request,
             }
             return Response(post_result)
+
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = Archives.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "员工档案删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "员工档案不存在!"
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request
+            }
+            return Response(post_result)
+
 
 class archiveOneView(APIView):
     #员工档案更新-active
@@ -5325,19 +6622,64 @@ class categoryView(APIView):
     # 添加
     @csrf_exempt
     def post(self, request):
-        data = request.query_params
-        valObj = categoryOneSerializer(data=request.query_params)
+        # data = request.query_params
+        # valObj = categoryOneSerializer(data=request.query_params)
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认api接口名称！"
+            samp['key_num'] = "api_name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = categoryOneSerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
         dt = datetime.now()
-        if valObj.is_valid():
-            try:
-                ccat = ClothCategory.objects.filter(
-                    category_name=data['category_name'],
-                    cloth_id=data['cloth_id'],
-                    delete_time=None
-                )
-                if ccat.count()>0:
-                    msg = "注意事项类别已存在"
-                    error_code = 400
+        if d_flag == 0:
+            for done in data:
+                try:
+                    ccat = ClothCategory.objects.filter(
+                        category_name=done['category_name'],
+                        cloth_id=done['cloth_id'],
+                        delete_time=None
+                    )
+                    if ccat.count()>0:
+                        d_flag = 1
+                        samp = {}
+                        samp['msg'] = "注意事项类别已经存在"
+                        samp['key_num'] = done['category_name']
+                        l_msg.append(samp)
+                    else:
+                        mid = done["id"]
+                        if mid:
+                            bObj = ClothCategory.objects.get(id=mid)
+                            bObj.update_time = dt
+                        else:
+                            bObj = ClothCategory()
+                            bObj.create_time = dt
+                        num = ClothCategory.objects.all().count() + 1
+                        bObj.category_name = done['category_name']
+                        bObj.cloth_id = done['cloth_id']
+                        bObj.active = done['active']
+                        if not mid:
+                            bObj.weight = num
+                        bObj.save()
+                except:
+                    msg = "参数校验不通过！"
+                    error_code = 10030
                     request = request.method + '  ' + request.get_full_path()
                     post_result = {
                         "error_code": error_code,
@@ -5345,36 +6687,21 @@ class categoryView(APIView):
                         "request": request,
                     }
                     return Response(post_result)
-                else:
-                    num = ClothCategory.objects.all().count() + 1
-                    bObj = ClothCategory()
-                    bObj.category_name = data['category_name']
-                    bObj.cloth_id = data['cloth_id']
-                    bObj.active = data['active']
-                    bObj.create_time = dt
-                    bObj.weight = num
-                    bObj.save()
-                    msg = "创建注意事项类别"
-                    error_code = 0
-                    request = request.method + '  ' + request.get_full_path()
-                    post_result = {
-                        "error_code": error_code,
-                        "message": msg,
-                        "request": request,
-                    }
-                    return Response(post_result)
-            except:
-                msg = "参数校验不通过！"
+            if d_flag ==0:
+                msg = "创建注意事项类别"
+                error_code = 0
+            else:
+                msg =l_msg
                 error_code = 10030
-                request = request.method + '  ' + request.get_full_path()
-                post_result = {
-                    "error_code": error_code,
-                    "message": msg,
-                    "request": request,
-                }
-                return Response(post_result)
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         else:
-            msg = valObj.errors
+            msg = l_msg
             error_code = 10030
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -5383,6 +6710,38 @@ class categoryView(APIView):
                 "request": request,
             }
             return Response(post_result)
+
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = ClothCategory.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "类别设置删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "类别设置不存在!"
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request
+            }
+            return Response(post_result)
+
+
 
 class categoryOneView(APIView):
     #-active
@@ -5536,23 +6895,68 @@ class notesView(APIView):
             }
             return Response(post_result)
 
-
     # 添加
     @csrf_exempt
     def post(self, request):
-        data = request.query_params
-        valObj = notesOneSerializer(data=request.query_params)
+        # data = request.query_params
+        # valObj = notesOneSerializer(data=request.query_params)
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认api接口名称！"
+            samp['key_num'] = "api_name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = notesOneSerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
         dt = datetime.now()
-        if valObj.is_valid():
-            try:
-                ccat = ClothNotes.objects.filter(
-                    notes_name=data['notes_name'],
-                    category_id=data['category_id'],
-                    delete_time=None
-                )
-                if ccat.count()>0:
-                    msg = "注意事项内容已存在"
-                    error_code = 400
+        if d_flag == 0:
+            for done in data:
+                try:
+                    ccat = ClothNotes.objects.filter(
+                        notes_name=done['notes_name'],
+                        category_id=done['category_id'],
+                        delete_time=None
+                    )
+                    if ccat.count()>0:
+                        d_flag = 1
+                        samp = {}
+                        samp['msg'] = "注意事项内容已经存在"
+                        samp['key_num'] = done['notes_name']
+                        l_msg.append(samp)
+                    else:
+                        mid = done["id"]
+                        if mid:
+                            bObj = ClothNotes.objects.get(id=mid)
+                            bObj.update_time = dt
+                        else:
+                            bObj = ClothNotes()
+                            bObj.create_time = dt
+                        num = ClothNotes.objects.all().count() + 1
+                        bObj.notes_name = done['notes_name']
+                        bObj.category_id = done['category_id']
+                        bObj.active = done['active']
+                        if not mid:
+                            bObj.weight = num
+                        bObj.save()
+
+                except:
+                    msg = "参数校验不通过！"
+                    error_code = 10030
                     request = request.method + '  ' + request.get_full_path()
                     post_result = {
                         "error_code": error_code,
@@ -5560,36 +6964,21 @@ class notesView(APIView):
                         "request": request,
                     }
                     return Response(post_result)
-                else:
-                    num = ClothNotes.objects.all().count() + 1
-                    bObj = ClothNotes()
-                    bObj.notes_name = data['notes_name']
-                    bObj.category_id = data['category_id']
-                    bObj.active = data['active']
-                    bObj.create_time = dt
-                    bObj.weight = num
-                    bObj.save()
-                    msg = "创建注意事项"
-                    error_code = 0
-                    request = request.method + '  ' + request.get_full_path()
-                    post_result = {
-                        "error_code": error_code,
-                        "message": msg,
-                        "request": request,
-                    }
-                    return Response(post_result)
-            except:
-                msg = "参数校验不通过！"
+            if d_flag == 0:
+                msg = "创建注意事项"
+                error_code = 0
+            else:
+                msg = l_msg
                 error_code = 10030
-                request = request.method + '  ' + request.get_full_path()
-                post_result = {
-                    "error_code": error_code,
-                    "message": msg,
-                    "request": request,
-                }
-                return Response(post_result)
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         else:
-            msg = valObj.errors
+            msg =l_msg
             error_code = 10030
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -5598,6 +6987,37 @@ class notesView(APIView):
                 "request": request,
             }
             return Response(post_result)
+
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = ClothNotes.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "注意事项删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "注意事项不存在!"
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request
+            }
+            return Response(post_result)
+
 
 class notesOneView(APIView):
     #-active
@@ -5762,19 +7182,64 @@ class category_setView(APIView):
     # 添加
     @csrf_exempt
     def post(self, request):
-        data = request.query_params
-        valObj = ocategoryOneSerializer(data=request.query_params)
+        # data = request.query_params
+        # valObj = ocategoryOneSerializer(data=request.query_params)
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认api接口名称！"
+            samp['key_num'] = "api_name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = ocategoryOneSerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
         dt = datetime.now()
-        if valObj.is_valid():
-            try:
-                ccat = OtherCategorySetting.objects.filter(
-                    category_name=data['category_name'],
-                    sub_category_id=data['sub_category_id'],
-                    delete_time=None
-                )
-                if ccat.count()>0:
-                    msg = "其他注意类别已存在"
-                    error_code = 400
+        if d_flag == 0:
+            for done in data:
+                try:
+                    ccat = OtherCategorySetting.objects.filter(
+                        category_name=done['category_name'],
+                        sub_category_id=done['sub_category_id'],
+                        delete_time=None
+                    )
+                    if ccat.count()>0:
+                        d_flag = 1
+                        samp = {}
+                        samp['msg'] = "其他注意事项已经存在"
+                        samp['key_num'] = done['category_name']
+                        l_msg.append(samp)
+                    else:
+                        mid = done["id"]
+                        if mid:
+                            bObj = OtherCategorySetting.objects.get(id=mid)
+                            bObj.update_time = dt
+                        else:
+                            bObj = OtherCategorySetting()
+                            bObj.create_time = dt
+                        num = OtherCategorySetting.objects.all().count() + 1
+                        bObj.category_name = done['category_name']
+                        bObj.sub_category_id = done['sub_category_id']
+                        bObj.active = done['active']
+                        if not mid:
+                            bObj.weight = num
+                        bObj.save()
+                except:
+                    msg = "参数校验不通过！"
+                    error_code = 10030
                     request = request.method + '  ' + request.get_full_path()
                     post_result = {
                         "error_code": error_code,
@@ -5782,36 +7247,21 @@ class category_setView(APIView):
                         "request": request,
                     }
                     return Response(post_result)
-                else:
-                    num = OtherCategorySetting.objects.all().count() + 1
-                    bObj = OtherCategorySetting()
-                    bObj.category_name = data['category_name']
-                    bObj.sub_category_id = data['sub_category_id']
-                    bObj.active = data['active']
-                    bObj.create_time = dt
-                    bObj.weight = num
-                    bObj.save()
-                    msg = "创建其他注意事项类别"
-                    error_code = 0
-                    request = request.method + '  ' + request.get_full_path()
-                    post_result = {
-                        "error_code": error_code,
-                        "message": msg,
-                        "request": request,
-                    }
-                    return Response(post_result)
-            except:
-                msg = "参数校验不通过！"
+            if d_flag==0:
+                msg = "创建其他注意事项类别"
+                error_code = 0
+            else:
+                msg = l_msg
                 error_code = 10030
-                request = request.method + '  ' + request.get_full_path()
-                post_result = {
-                    "error_code": error_code,
-                    "message": msg,
-                    "request": request,
-                }
-                return Response(post_result)
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         else:
-            msg = valObj.errors
+            msg = l_msg
             error_code = 10030
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -5820,6 +7270,37 @@ class category_setView(APIView):
                 "request": request,
             }
             return Response(post_result)
+
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = OtherCategorySetting.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "其他注意事项类别删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "其他注意事项类别不存在!"
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request
+            }
+            return Response(post_result)
+
 
 class category_setOneView(APIView):
     #-active
@@ -5987,18 +7468,62 @@ class other_categoryView(APIView):
     # 添加
     @csrf_exempt
     def post(self, request):
-        data = request.query_params
-        valObj = othercategerOneSerializer(data=request.query_params)
+        # data = request.query_params
+        # valObj = othercategerOneSerializer(data=request.query_params)
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认api接口名称！"
+            samp['key_num'] = "api_name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = othercategerOneSerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
         dt = datetime.now()
-        if valObj.is_valid():
-            try:
-                ccat = OtherCategory.objects.filter(
-                    category_name=data['category_name'],
-                    delete_time=None
-                )
-                if ccat.count()>0:
-                    msg = "类别已经存在"
-                    error_code = 400
+        if d_flag == 0:
+            for done in data:
+                try:
+                    ccat = OtherCategory.objects.filter(
+                        category_name=done['category_name'],
+                        delete_time=None
+                    )
+                    if ccat.count()>0:
+                        d_flag = 1
+                        samp = {}
+                        samp['msg'] = "类别已经存在"
+                        samp['key_num'] = done['category_name']
+                        l_msg.append(samp)
+                    else:
+                        mid = done["id"]
+                        if mid:
+                            bObj = OtherCategory.objects.get(id=mid)
+                            bObj.update_time = dt
+                        else:
+                            bObj = OtherCategory()
+                            bObj.create_time = dt
+                        num = OtherCategory.objects.all().count() + 1
+                        bObj.category_name = done['category_name']
+                        bObj.active = done['active']
+                        if not mid:
+                            bObj.weight = num
+                        bObj.save()
+                except:
+                    msg = "参数校验不通过！"
+                    error_code = 10030
                     request = request.method + '  ' + request.get_full_path()
                     post_result = {
                         "error_code": error_code,
@@ -6006,35 +7531,21 @@ class other_categoryView(APIView):
                         "request": request,
                     }
                     return Response(post_result)
-                else:
-                    num = OtherCategory.objects.all().count() + 1
-                    bObj = OtherCategory()
-                    bObj.category_name = data['category_name']
-                    bObj.active = data['active']
-                    bObj.create_time = dt
-                    bObj.weight = num
-                    bObj.save()
-                    msg = "创建其他注意事项类别"
-                    error_code = 0
-                    request = request.method + '  ' + request.get_full_path()
-                    post_result = {
-                        "error_code": error_code,
-                        "message": msg,
-                        "request": request,
-                    }
-                    return Response(post_result)
-            except:
-                msg = "参数校验不通过！"
+            if d_flag==0:
+                msg = "创建其他注意事项类别"
+                error_code = 0
+            else:
+                msg = l_msg
                 error_code = 10030
-                request = request.method + '  ' + request.get_full_path()
-                post_result = {
-                    "error_code": error_code,
-                    "message": msg,
-                    "request": request,
-                }
-                return Response(post_result)
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         else:
-            msg = valObj.errors
+            msg = l_msg
             error_code = 10030
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -6043,6 +7554,37 @@ class other_categoryView(APIView):
                 "request": request,
             }
             return Response(post_result)
+
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = OtherCategory.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "其他注意事项类别删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "其他注意事项类别不存在!"
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request
+            }
+            return Response(post_result)
+
 
 class other_categoryOneView(APIView):
     #-active
@@ -6152,19 +7694,65 @@ class sub_categoryView(APIView):
     # 添加
     @csrf_exempt
     def post(self, request):
-        data = request.query_params
-        valObj = ocategorysubOneSerializer(data=request.query_params)
+        # data = request.query_params
+        # valObj = ocategorysubOneSerializer(data=request.query_params)
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认api接口名称！"
+            samp['key_num'] = "api_name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = ocategorysubOneSerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
         dt = datetime.now()
-        if valObj.is_valid():
-            try:
-                ccat = OtherCategory.objects.filter(
-                    sub_name=data['sub_name'],
-                    category_id=data['category_id'],
-                    delete_time=None
-                )
-                if ccat.count()>0:
-                    msg = "类别名称已存在"
-                    error_code = 400
+        if d_flag == 0:
+            for done in data:
+                try:
+                    ccat = OtherCategory.objects.filter(
+                        sub_name=done['sub_name'],
+                        category_id=done['category_id'],
+                        delete_time=None
+                    )
+                    if ccat.count()>0:
+                        d_flag = 1
+                        samp = {}
+                        samp['msg'] = "类别已经存在"
+                        samp['key_num'] = done['sub_name']
+                        l_msg.append(samp)
+                    else:
+                        mid = done["id"]
+                        if mid:
+                            bObj = OtherSubCategory.objects.get(id=mid)
+                            bObj.update_time = dt
+                        else:
+                            bObj = OtherSubCategory()
+                            bObj.create_time = dt
+                        num = OtherSubCategory.objects.all().count() + 1
+                        bObj.sub_name = done['sub_name']
+                        bObj.category_id = done['category_id']
+                        bObj.active = done['active']
+                        if not mid:
+                            bObj.weight = num
+                        bObj.save()
+
+                except:
+                    msg = "参数校验不通过！"
+                    error_code = 10030
                     request = request.method + '  ' + request.get_full_path()
                     post_result = {
                         "error_code": error_code,
@@ -6172,36 +7760,21 @@ class sub_categoryView(APIView):
                         "request": request,
                     }
                     return Response(post_result)
-                else:
-                    num = OtherSubCategory.objects.all().count() + 1
-                    bObj = OtherSubCategory()
-                    bObj.sub_name = data['sub_name']
-                    bObj.category_id = data['category_id']
-                    bObj.active = data['active']
-                    bObj.create_time = dt
-                    bObj.weight = num
-                    bObj.save()
-                    msg = "创建其他注意事项类别"
-                    error_code = 0
-                    request = request.method + '  ' + request.get_full_path()
-                    post_result = {
-                        "error_code": error_code,
-                        "message": msg,
-                        "request": request,
-                    }
-                    return Response(post_result)
-            except:
-                msg = "参数校验不通过！"
+            if d_flag == 0:
+                msg = "创建其他注意事项类别"
+                error_code = 0
+            else:
+                msg = l_msg
                 error_code = 10030
-                request = request.method + '  ' + request.get_full_path()
-                post_result = {
-                    "error_code": error_code,
-                    "message": msg,
-                    "request": request,
-                }
-                return Response(post_result)
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         else:
-            msg = valObj.errors
+            msg = l_msg
             error_code = 10030
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -6210,6 +7783,37 @@ class sub_categoryView(APIView):
                 "request": request,
             }
             return Response(post_result)
+
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = OtherSubCategory.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "其他注意事项类别删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "其他注意事项类别不存在!"
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request
+            }
+            return Response(post_result)
+
 
 class sub_categoryOneView(APIView):
     @csrf_exempt
@@ -6353,23 +7957,68 @@ class other_notesView(APIView):
             }
             return Response(post_result)
 
-
     # 添加
     @csrf_exempt
     def post(self, request):
-        data = request.query_params
-        valObj = otherNotesSerializer(data=request.query_params)
+        # data = request.query_params
+        # valObj = otherNotesSerializer(data=request.query_params)
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认api接口名称！"
+            samp['key_num'] = "api_name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = otherNotesSerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
         dt = datetime.now()
-        if valObj.is_valid():
-            try:
-                ccat = ClothNotes.objects.filter(
-                    notes_name=data['notes_name'],
-                    category_setting_id=data['category_setting_id'],
-                    delete_time=None
-                )
-                if ccat.count()>0:
-                    msg = "其他注意事项内容已存在"
-                    error_code = 400
+        if d_flag == 0:
+            for done in data:
+                try:
+                    ccat = ClothNotes.objects.filter(
+                        notes_name=done['notes_name'],
+                        category_setting_id=done['category_setting_id'],
+                        delete_time=None
+                    )
+                    if ccat.count()>0:
+                        d_flag = 1
+                        samp = {}
+                        samp['msg'] = "其他注意事项已经存在"
+                        samp['key_num'] = done['notes_name']
+                        l_msg.append(samp)
+                    else:
+                        mid = done["id"]
+                        if mid:
+                            bObj = OtherNotes.objects.get(id=mid)
+                            bObj.update_time = dt
+                        else:
+                            bObj = OtherNotes()
+                            bObj.create_time = dt
+                        num = OtherNotes.objects.all().count() + 1
+                        bObj.notes_name = done['notes_name']
+                        bObj.category_setting_id = done['category_setting_id']
+                        bObj.active = done['active']
+                        if not mid:
+                            bObj.weight = num
+                        bObj.save()
+
+                except:
+                    msg = "参数校验不通过！"
+                    error_code = 10030
                     request = request.method + '  ' + request.get_full_path()
                     post_result = {
                         "error_code": error_code,
@@ -6377,36 +8026,21 @@ class other_notesView(APIView):
                         "request": request,
                     }
                     return Response(post_result)
-                else:
-                    num = OtherNotes.objects.all().count() + 1
-                    bObj = OtherNotes()
-                    bObj.notes_name = data['notes_name']
-                    bObj.category_setting_id = data['category_setting_id']
-                    bObj.active = data['active']
-                    bObj.create_time = dt
-                    bObj.weight = num
-                    bObj.save()
-                    msg = "创建注意事项"
-                    error_code = 0
-                    request = request.method + '  ' + request.get_full_path()
-                    post_result = {
-                        "error_code": error_code,
-                        "message": msg,
-                        "request": request,
-                    }
-                    return Response(post_result)
-            except:
-                msg = "参数校验不通过！"
+            if d_flag == 0:
+                msg = "创建注意事项"
+                error_code = 0
+            else:
+                msg = l_msg
                 error_code = 10030
-                request = request.method + '  ' + request.get_full_path()
-                post_result = {
-                    "error_code": error_code,
-                    "message": msg,
-                    "request": request,
-                }
-                return Response(post_result)
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         else:
-            msg = valObj.errors
+            msg = l_msg
             error_code = 10030
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -6415,6 +8049,37 @@ class other_notesView(APIView):
                 "request": request,
             }
             return Response(post_result)
+
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = OtherNotes.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "注意事项内容删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "注意事项内容不存在!"
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request
+            }
+            return Response(post_result)
+
 
 class other_notesOneView(APIView):
     #-active
@@ -9438,7 +11103,7 @@ class orderDateSetView(APIView):
             }
             return Response(post_result)
 
-    # 添加用料单位
+    # 添加短溢装
     @csrf_exempt
     def post(self, request):
         data = request.data
@@ -9516,8 +11181,7 @@ class orderDateSetView(APIView):
                 "request": request,
             }
             return Response(post_result)
-        # 批量删除用料单位
-
+    # 批量删除短溢装
     @csrf_exempt
     def delete(self, request):
         try:
@@ -9549,7 +11213,7 @@ class orderDateSetView(APIView):
             return Response(post_result)
 
 class orderDateSetOneView(APIView):
-    #订单类型更新-active
+    #短溢装更新-active
     @csrf_exempt
     def put(self, request, nid):
         data = request.query_params
@@ -9583,7 +11247,7 @@ class orderDateSetOneView(APIView):
                 "request": request,
             }
             return Response(post_result)
-    #删除用料单位
+    #删除短溢装
     @csrf_exempt
     def delete(self, request, nid):
         try:
@@ -9612,7 +11276,7 @@ class orderDateSetOneView(APIView):
             return Response(post_result)
 
 class orderDateSetSortView(APIView):
-    #样品类型名称排序
+    #短溢装排序
     def put(self,request,bid):
         data = request.query_params
         valObj = BasicSortSerializer(data=request.query_params)
