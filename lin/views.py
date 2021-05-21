@@ -862,7 +862,7 @@ class sizeView(APIView):
                 subObj = []
                 subAll = Size.objects.filter(goods_size_id=one.id, delete_time=None)
                 for o in subAll:
-                    samp =  {}
+                    samp = { }
                     if o.active == 1:
                         temp['active'] = True
                     else:
