@@ -2334,30 +2334,33 @@ class cloth_classView(APIView):
         if d_flag == 0:
             for done in data:
                 try:
-                    clothClass = ClothClass.objects.filter(
-                        cloth_class_name=done['cloth_class_name'],
-                        delete_time=None
-                    )
-                    if clothClass.count()>0:
-                        d_flag = 1
-                        samp = {}
-                        samp['msg'] = "面辅料分类已经存在"
-                        samp['key_num'] = done['cloth_class_name']
-                        l_msg.append(samp)
+                    mid = done["id"]
+                    if mid:
+                        bObj = ClothClass.objects.get(id=mid)
+                        bObj.update_time = dt
+                        bObj.cloth_class_name = done['cloth_class_name']
+                        bObj.active = done['active']
+                        bObj.save()
                     else:
-                        mid = done["id"]
-                        if mid:
-                            bObj = ClothClass.objects.get(id=mid)
-                            bObj.update_time = dt
+                        clothClass = ClothClass.objects.filter(
+                            cloth_class_name=done['cloth_class_name'],
+                            delete_time=None
+                        )
+                        if clothClass.count() > 0:
+                            d_flag = 1
+                            samp = {}
+                            samp['msg'] = "面辅料分类已经存在"
+                            samp['key_num'] = done['cloth_class_name']
+                            l_msg.append(samp)
                         else:
                             bObj = ClothClass()
                             bObj.create_time = dt
-                        num = ClothClass.objects.all().count() + 1
-                        bObj.cloth_class_name = done['cloth_class_name']
-                        bObj.active = done['active']
-                        if not mid:
+                            num = ClothClass.objects.all().count() + 1
+                            bObj.cloth_class_name = done['cloth_class_name']
+                            bObj.active = done['active']
                             bObj.weight = num
-                        bObj.save()
+                            bObj.save()
+
                 except:
                     msg = "参数校验不通过！"
                     error_code = 10030
