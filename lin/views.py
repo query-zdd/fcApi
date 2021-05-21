@@ -645,36 +645,40 @@ class harbourView(APIView):
         if d_flag == 0:
             for done in data:
                 try:
-                    harbour = Harbour.objects.filter(
-                        harbour_zh=done['harbour_zh'],
-                        order_id=done['harbour_en'],
-                        harbour_type= done['harbour_type'],
-                        delete_time=None
-                    )
-                    if harbour.count()>0:
-                        d_flag = 1
-                        samp = {}
-                        samp['msg'] = "港口信息已经存在"
-                        samp['key_num'] = done['harbour_zh']
-                        l_msg.append(samp)
-                    else:
-                        mid = done["id"]
-                        if mid:
-                            bObj = Harbour.objects.get(id=mid)
-                            bObj.update_time = dt
-                        else:
-                            bObj = Harbour()
-                            bObj.create_time = dt
-                        num = Harbour.objects.all().count() + 1
+                    mid = done["id"]
+                    if mid:
+                        bObj = Harbour.objects.get(id=mid)
+                        bObj.update_time = dt
                         bObj.harbour_zh = done['harbour_zh']
                         bObj.harbour_en = done['harbour_en']
                         bObj.harbour_type = done['harbour_type']
                         bObj.active = done['active']
                         bObj.order_id = done['order_id']
-                        bObj.create_time = dt
-                        if not mid:
-                            bObj.weight = num
                         bObj.save()
+                    else:
+                        harbour = Harbour.objects.filter(
+                            harbour_zh=done['harbour_zh'],
+                            order_id=done['harbour_en'],
+                            harbour_type=done['harbour_type'],
+                            delete_time=None
+                        )
+                        if harbour.count() > 0:
+                            d_flag = 1
+                            samp = {}
+                            samp['msg'] = "港口信息已经存在"
+                            samp['key_num'] = done['harbour_zh']
+                            l_msg.append(samp)
+                        else:
+                            bObj = Harbour()
+                            bObj.create_time = dt
+                            num = Harbour.objects.all().count() + 1
+                            bObj.harbour_zh = done['harbour_zh']
+                            bObj.harbour_en = done['harbour_en']
+                            bObj.harbour_type = done['harbour_type']
+                            bObj.active = done['active']
+                            bObj.order_id = done['order_id']
+                            bObj.weight = num
+                            bObj.save()
                 except:
                     msg = "参数校验不通过！"
                     error_code = 10030
@@ -919,30 +923,32 @@ class sizeView(APIView):
         if d_flag == 0:
             for done in data:
                 try:
-                    goods_size = GoodsSize.objects.filter(
-                        goods_size=done['goods_size'],
-                        delete_time=None
-                    )
-                    if goods_size.count()>0:
-                        d_flag = 1
-                        samp = {}
-                        samp['msg'] = "商品尺码已经存在"
-                        samp['key_num'] = done['goods_size']
-                        l_msg.append(samp)
+                    mid = done["id"]
+                    if mid:
+                        bObj = GoodsSize.objects.get(id=mid)
+                        bObj.update_time = dt
+                        bObj.goods_size = done['goods_size']
+                        bObj.active = done['active']
+                        bObj.save()
                     else:
-                        mid = done["id"]
-                        if mid:
-                            bObj = GoodsSize.objects.get(id=mid)
-                            bObj.update_time = dt
+                        goods_size = GoodsSize.objects.filter(
+                            goods_size=done['goods_size'],
+                            delete_time=None
+                        )
+                        if goods_size.count() > 0:
+                            d_flag = 1
+                            samp = {}
+                            samp['msg'] = "商品尺码已经存在"
+                            samp['key_num'] = done['goods_size']
+                            l_msg.append(samp)
                         else:
                             bObj = GoodsSize()
                             bObj.create_time = dt
-                        num = GoodsSize.objects.all().count() + 1
-                        bObj.goods_size = done['goods_size']
-                        bObj.active = done['active']
-                        if not mid:
+                            num = GoodsSize.objects.all().count() + 1
+                            bObj.goods_size = done['goods_size']
+                            bObj.active = done['active']
                             bObj.weight = num
-                        bObj.save()
+                            bObj.save()
                 except:
                     msg = "参数校验不通过！"
                     error_code = 10030
@@ -1145,32 +1151,35 @@ class subsizeView(APIView):
         if d_flag == 0:
             for done in data:
                 try:
-                    size = Size.objects.filter(
-                        goods_size_id=done['goods_size_id'],
-                        size=done['size'],
-                        delete_time=None
-                    )
-                    if size.count()>0:
-                        d_flag = 1
-                        samp = {}
-                        samp['msg'] = "商品子尺码已经存在"
-                        samp['key_num'] = done['size']
-                        l_msg.append(samp)
-                    else:
-                        mid = done["id"]
-                        if mid:
-                            bObj = Size.objects.get(id=mid)
-                            bObj.update_time = dt
-                        else:
-                            bObj = Size()
-                            bObj.create_time = dt
-                        num = Size.objects.all().count() + 1
+                    mid = done["id"]
+                    if mid:
+                        bObj = Size.objects.get(id=mid)
+                        bObj.update_time = dt
                         bObj.size = done['size']
                         bObj.goods_size_id = done['goods_size_id']
                         bObj.active = done['active']
-                        if not mid:
-                            bObj.weight = num
                         bObj.save()
+                    else:
+                        size = Size.objects.filter(
+                            goods_size_id=done['goods_size_id'],
+                            size=done['size'],
+                            delete_time=None
+                        )
+                        if size.count() > 0:
+                            d_flag = 1
+                            samp = {}
+                            samp['msg'] = "商品子尺码已经存在"
+                            samp['key_num'] = done['size']
+                            l_msg.append(samp)
+                        else:
+                            bObj = Size()
+                            bObj.create_time = dt
+                            num = Size.objects.all().count() + 1
+                            bObj.size = done['size']
+                            bObj.goods_size_id = done['goods_size_id']
+                            bObj.active = done['active']
+                            bObj.weight = num
+                            bObj.save()
                 except:
                     msg = "参数校验不通过！"
                     error_code = 10030
@@ -1447,32 +1456,33 @@ class receivingView(APIView):
         if d_flag == 0:
             for done in data:
                 try:
-                    receiObj = ReceivingGoodsMethod.objects.filter(
-                        method_name=done['method_name'],
-                        delete_time=None
-                    )
-                    if receiObj.count()>0:
-                        d_flag = 1
-                        samp = {}
-                        samp['msg'] = "收货已经存在"
-                        samp['key_num'] = done['method_name']
-                        l_msg.append(samp)
+                    mid = done["id"]
+                    if mid:
+                        bObj = ReceivingGoodsMethod.objects.get(id=mid)
+                        bObj.update_time = dt
+                        bObj.method_name = done['method_name']
+                        bObj.active = done['active']
+                        bObj.save()
                     else:
-                        mid = done["id"]
-                        if mid:
-                            bObj = ReceivingGoodsMethod.objects.get(id=mid)
-                            bObj.update_time = dt
+                        receiObj = ReceivingGoodsMethod.objects.filter(
+                            method_name=done['method_name'],
+                            delete_time=None
+                        )
+                        if receiObj.count() > 0:
+                            d_flag = 1
+                            samp = {}
+                            samp['msg'] = "收货已经存在"
+                            samp['key_num'] = done['method_name']
+                            l_msg.append(samp)
                         else:
                             bObj = ReceivingGoodsMethod()
                             bObj.create_time = dt
-                        num = ReceivingGoodsMethod.objects.all().count() + 1
-
-                        bObj.method_name = done['method_name']
-                        bObj.active = done['active']
-                        bObj.create_time = dt
-                        if not mid:
+                            num = ReceivingGoodsMethod.objects.all().count() + 1
+                            bObj.method_name = done['method_name']
+                            bObj.active = done['active']
                             bObj.weight = num
-                        bObj.save()
+                            bObj.save()
+
 
                 except:
                     msg = "参数校验不通过！"
@@ -1675,33 +1685,35 @@ class warehouseView(APIView):
         if d_flag == 0:
             for done in data:
                 try:
-                    whouse = WarehouseClassification.objects.filter(
-                        warehouse_name=done['warehouse_name'],
-                        method_id=done['method_id'],
-                        delete_time=None
-                    )
-                    if whouse.count()>0:
-                        d_flag = 1
-                        samp = {}
-                        samp['msg'] = "子仓库已经存在"
-                        samp['key_num'] = done['warehouse_name']
-                        l_msg.append(samp)
-                    else:
-                        mid = done["id"]
-                        if mid:
-                            bObj = WarehouseClassification.objects.get(id=mid)
-                            bObj.update_time = dt
-                        else:
-                            bObj = WarehouseClassification()
-                            bObj.create_time = dt
-                        num = WarehouseClassification.objects.all().count() + 1
+                    mid = done["id"]
+                    if mid:
+                        bObj = WarehouseClassification.objects.get(id=mid)
+                        bObj.update_time = dt
                         bObj.warehouse_name = done['warehouse_name']
                         bObj.method_id = done['method_id']
                         bObj.active = done['active']
-                        if not mid:
-                            bObj.weight = num
                         bObj.save()
-
+                    else:
+                        whouse = WarehouseClassification.objects.filter(
+                            warehouse_name=done['warehouse_name'],
+                            method_id=done['method_id'],
+                            delete_time=None
+                        )
+                        if whouse.count() > 0:
+                            d_flag = 1
+                            samp = {}
+                            samp['msg'] = "子仓库已经存在"
+                            samp['key_num'] = done['warehouse_name']
+                            l_msg.append(samp)
+                        else:
+                            bObj = WarehouseClassification()
+                            bObj.create_time = dt
+                            num = WarehouseClassification.objects.all().count() + 1
+                            bObj.warehouse_name = done['warehouse_name']
+                            bObj.method_id = done['method_id']
+                            bObj.active = done['active']
+                            bObj.weight = num
+                            bObj.save()
                 except:
                     msg = "参数校验不通过！"
                     error_code = 10030
@@ -2908,33 +2920,37 @@ class clothView(APIView):
         if d_flag == 0:
             for done in data:
                 try:
-                    cloth = Cloth.objects.filter(
-                        cloth=done['cloth'],
-                        class_id=done['class_id'],
-                        delete_time=None
-                    )
-                    if cloth.count()>0:
-                        d_flag = 1
-                        samp = {}
-                        samp['msg'] = "面料名称已经存在"
-                        samp['key_num'] = done['cloth']
-                        l_msg.append(samp)
-                    else:
-                        mid = done["id"]
-                        if mid:
-                            bObj = Cloth.objects.get(id=mid)
-                            bObj.update_time = dt
-                        else:
-                            bObj = Cloth()
-                            bObj.create_time = dt
-                        num = Cloth.objects.all().count() + 1
+                    mid = done["id"]
+                    if mid:
+                        bObj = Cloth.objects.get(id=mid)
+                        bObj.update_time = dt
                         bObj.cloth = done['cloth']
                         bObj.active = done['active']
                         bObj.checked = done['checked']
                         bObj.class_id = done['class_id']
-                        if not mid:
-                            bObj.weight = num
                         bObj.save()
+                    else:
+                        cloth = Cloth.objects.filter(
+                            cloth=done['cloth'],
+                            class_id=done['class_id'],
+                            delete_time=None
+                        )
+                        if cloth.count() > 0:
+                            d_flag = 1
+                            samp = {}
+                            samp['msg'] = "面料名称已经存在"
+                            samp['key_num'] = done['cloth']
+                            l_msg.append(samp)
+                        else:
+                            bObj = Cloth()
+                            bObj.create_time = dt
+                            num = Cloth.objects.all().count() + 1
+                            bObj.cloth = done['cloth']
+                            bObj.active = done['active']
+                            bObj.checked = done['checked']
+                            bObj.class_id = done['class_id']
+                            bObj.weight = num
+                            bObj.save()
 
                 except:
                     msg = "参数校验不通过！"
@@ -3199,30 +3215,33 @@ class colourView(APIView):
         if d_flag == 0:
             for done in data:
                 try:
-                    colour = ClothColour.objects.filter(
-                        colour_name=done['colour_name'],
-                        delete_time=None
-                    )
-                    if colour.count()>0:
-                        d_flag = 1
-                        samp = {}
-                        samp['msg'] = "面料颜色已经存在"
-                        samp['key_num'] = done['colour_name']
-                        l_msg.append(samp)
+                    mid = done["id"]
+                    if mid:
+                        bObj = ClothColour.objects.get(id=mid)
+                        bObj.update_time = dt
+                        bObj.colour_name = done['colour_name']
+                        bObj.active = done['active']
+                        bObj.save()
                     else:
-                        mid = done["id"]
-                        if mid:
-                            bObj = ClothColour.objects.get(id=mid)
-                            bObj.update_time = dt
+                        colour = ClothColour.objects.filter(
+                            colour_name=done['colour_name'],
+                            delete_time=None
+                        )
+                        if colour.count() > 0:
+                            d_flag = 1
+                            samp = {}
+                            samp['msg'] = "面料颜色已经存在"
+                            samp['key_num'] = done['colour_name']
+                            l_msg.append(samp)
                         else:
                             bObj = ClothColour()
                             bObj.create_time = dt
-                        num = ClothColour.objects.all().count() + 1
-                        bObj.colour_name = done['colour_name']
-                        bObj.active = done['active']
-                        if not mid:
+                            num = ClothColour.objects.all().count() + 1
+                            bObj.colour_name = done['colour_name']
+                            bObj.active = done['active']
                             bObj.weight = num
-                        bObj.save()
+                            bObj.save()
+
                 except:
                     msg = "参数校验不通过！"
                     error_code = 10030
@@ -3424,32 +3443,39 @@ class sub_colourView(APIView):
         if d_flag == 0:
             for done in data:
                 try:
-                    scol = SubColour.objects.filter(
-                        sub_colour_name=done['sub_colour_name'],
-                        colour_id=done['colour_id'],
-                        delete_time=None
-                    )
-                    if scol.count()>0:
-                        d_flag = 1
-                        samp = {}
-                        samp['msg'] = "子颜色已经存在"
-                        samp['key_num'] = done['sub_colour_name']
-                        l_msg.append(samp)
-                    else:
-                        mid = done["id"]
-                        if mid:
-                            bObj = SubColour.objects.get(id=mid)
-                            bObj.update_time = dt
-                        else:
-                            bObj = SubColour()
-                            bObj.create_time = dt
-                        num = SubColour.objects.all().count() + 1
+                    mid = done["id"]
+                    if mid:
+                        bObj = SubColour.objects.get(id=mid)
+                        bObj.update_time = dt
+
                         bObj.sub_colour_name = done['sub_colour_name']
                         bObj.active = done['active']
                         bObj.colour_id = done['colour_id']
-                        if not mid:
-                            bObj.weight = num
+
                         bObj.save()
+                    else:
+                        scol = SubColour.objects.filter(
+                            sub_colour_name=done['sub_colour_name'],
+                            colour_id=done['colour_id'],
+                            delete_time=None
+                        )
+                        if scol.count() > 0:
+                            d_flag = 1
+                            samp = {}
+                            samp['msg'] = "子颜色已经存在"
+                            samp['key_num'] = done['sub_colour_name']
+                            l_msg.append(samp)
+                        else:
+                            bObj = SubColour()
+                            bObj.create_time = dt
+                            num = SubColour.objects.all().count() + 1
+                            bObj.sub_colour_name = done['sub_colour_name']
+                            bObj.active = done['active']
+                            bObj.colour_id = done['colour_id']
+                            if not mid:
+                                bObj.weight = num
+                            bObj.save()
+
 
                 except:
                     msg = "参数校验不通过！"
@@ -3755,31 +3781,39 @@ class specsView(APIView):
         if d_flag == 0:
             for done in data:
                 try:
-                    specs = ClothSpecs.objects.filter(
-                        specs_name=done['specs_name'],
-                        delete_time=None
-                    )
-                    if specs.count()>0:
-                        d_flag = 1
-                        samp = {}
-                        samp['msg'] = "面辅料规格已经存在"
-                        samp['key_num'] = done['specs_name']
-                        l_msg.append(samp)
-                    else:
-                        mid = done["id"]
-                        if mid:
-                            bObj = ClothSpecs.objects.get(id=mid)
-                            bObj.update_time = dt
-                        else:
-                            bObj = ClothSpecs()
-                            bObj.create_time = dt
-                        num = ClothSpecs.objects.all().count() + 1
+
+                    mid = done["id"]
+                    if mid:
+                        bObj = ClothSpecs.objects.get(id=mid)
+                        bObj.update_time = dt
+
                         bObj.specs_name = done['specs_name']
                         bObj.specs_unit = done['specs_unit']
                         bObj.active = done['active']
-                        if not mid:
-                            bObj.weight = num
+
                         bObj.save()
+                    else:
+                        specs = ClothSpecs.objects.filter(
+                            specs_name=done['specs_name'],
+                            delete_time=None
+                        )
+                        if specs.count() > 0:
+                            d_flag = 1
+                            samp = {}
+                            samp['msg'] = "面辅料规格已经存在"
+                            samp['key_num'] = done['specs_name']
+                            l_msg.append(samp)
+                        else:
+                            bObj = ClothSpecs()
+                            bObj.create_time = dt
+                            num = ClothSpecs.objects.all().count() + 1
+                            bObj.specs_name = done['specs_name']
+                            bObj.specs_unit = done['specs_unit']
+                            bObj.active = done['active']
+
+                            bObj.weight = num
+                            bObj.save()
+
                 except:
                     msg = "参数校验不通过！"
                     error_code = 10030
@@ -3982,34 +4016,36 @@ class sub_specsView(APIView):
         if d_flag == 0:
             for done in data:
                 try:
-                    sspecs = SubSpecs.objects.filter(
-                        sub_specs_name=done['sub_specs_name'],
-                        specs_id=done['specs_id'],
-                        delete_time=None
-                    )
-                    if sspecs.count()>0:
-                        d_flag = 1
-                        samp = {}
-                        samp['msg'] = "子规格已经存在"
-                        samp['key_num'] = done['sub_specs_name']
-                        l_msg.append(samp)
-                    else:
-                        mid = done["id"]
-                        if mid:
-                            bObj = SubSpecs.objects.get(id=mid)
-                            bObj.update_time = dt
-                        else:
-                            bObj = SubSpecs()
-                            bObj.create_time = dt
-                        num = SubSpecs.objects.all().count() + 1
-
+                    mid = done["id"]
+                    if mid:
+                        bObj = SubSpecs.objects.get(id=mid)
+                        bObj.update_time = dt
                         bObj.sub_specs_name = done['sub_specs_name']
                         bObj.active = done['active']
                         bObj.specs_id = done['specs_id']
-                        if not mid:
-                            bObj.weight = num
                         bObj.save()
 
+                    else:
+                        sspecs = SubSpecs.objects.filter(
+                            sub_specs_name=done['sub_specs_name'],
+                            specs_id=done['specs_id'],
+                            delete_time=None
+                        )
+                        if sspecs.count() > 0:
+                            d_flag = 1
+                            samp = {}
+                            samp['msg'] = "子规格已经存在"
+                            samp['key_num'] = done['sub_specs_name']
+                            l_msg.append(samp)
+                        else:
+                            bObj = SubSpecs()
+                            bObj.create_time = dt
+                            num = SubSpecs.objects.all().count() + 1
+                            bObj.sub_specs_name = done['sub_specs_name']
+                            bObj.active = done['active']
+                            bObj.specs_id = done['specs_id']
+                            bObj.weight = num
+                            bObj.save()
                 except:
                     msg = "参数校验不通过！"
                     error_code = 10030
@@ -4308,34 +4344,36 @@ class customerTypeView(APIView):
         if d_flag == 0:
             for done in data:
                 try:
-                    customerT = CustomerType.objects.filter(
-                        customer_type=done['customer_type'],
-                        delete_time=None
-                    )
-                    if customerT.count()>0:
-                        d_flag = 1
-                        samp = {}
-                        samp['msg'] = "客户类型已经存在"
-                        samp['key_num'] = done['customer_type']
-                        l_msg.append(samp)
+                    mid = done["id"]
+                    if mid:
+                        bObj = CustomerType.objects.get(id=mid)
+                        bObj.update_time = dt
+                        bObj.customer_type = done['customer_type']
+                        bObj.active = done['active']
+                        bObj.selected_single = 0
+                        bObj.selected_invoice = 0
+                        bObj.save()
                     else:
-                        mid = done["id"]
-                        if mid:
-                            bObj = CustomerType.objects.get(id=mid)
-                            bObj.update_time = dt
+                        customerT = CustomerType.objects.filter(
+                            customer_type=done['customer_type'],
+                            delete_time=None
+                        )
+                        if customerT.count() > 0:
+                            d_flag = 1
+                            samp = {}
+                            samp['msg'] = "客户类型已经存在"
+                            samp['key_num'] = done['customer_type']
+                            l_msg.append(samp)
                         else:
                             bObj = CustomerType()
                             bObj.create_time = dt
-                        num = CustomerType.objects.all().count() + 1
-
-                        bObj.customer_type = done['customer_type']
-                        bObj.active = done['active']
-
-                        bObj.selected_single = 0
-                        bObj.selected_invoice = 0
-                        if not mid:
+                            num = CustomerType.objects.all().count() + 1
+                            bObj.customer_type = done['customer_type']
+                            bObj.active = done['active']
+                            bObj.selected_single = 0
+                            bObj.selected_invoice = 0
                             bObj.weight = num
-                        bObj.save()
+                            bObj.save()
                 except:
                     msg = "参数校验不通过！"
                     error_code = 10030
@@ -4587,32 +4625,39 @@ class customer_filesView(APIView):
         if d_flag == 0:
             for done in data:
                 try:
-                    customerT = CustomerFiles.objects.filter(
-                        type_id=done['type_id'],
-                        customer_full_name=done['customer_full_name'],
-                        delete_time=None
-                    )
-                    if customerT.count()>0:
-                        d_flag = 1
-                        samp = {}
-                        samp['msg'] = "客户档案已经存在"
-                        samp['key_num'] = done['customer_full_name']
-                        l_msg.append(samp)
-                    else:
-                        mid = done["id"]
-                        if mid:
-                            bObj = CustomerFiles.objects.get(id=mid)
-                            bObj.update_time = dt
-                        else:
-                            bObj = CustomerFiles()
-                            bObj.create_time = dt
+                    mid = done["id"]
+                    if mid:
+                        bObj = CustomerFiles.objects.get(id=mid)
+                        bObj.update_time = dt
                         bObj.customer_full_name = done['customer_full_name']
                         bObj.active = done['active']
-                        bObj.customer_simple_name =done['customer_simple_name']
-                        bObj.office_phone =done['office_phone']
+                        bObj.customer_simple_name = done['customer_simple_name']
+                        bObj.office_phone = done['office_phone']
                         bObj.fax_number = done['fax_number']
                         bObj.type_id = done['type_id']
                         bObj.save()
+                    else:
+                        customerT = CustomerFiles.objects.filter(
+                            type_id=done['type_id'],
+                            customer_full_name=done['customer_full_name'],
+                            delete_time=None
+                        )
+                        if customerT.count() > 0:
+                            d_flag = 1
+                            samp = {}
+                            samp['msg'] = "客户档案已经存在"
+                            samp['key_num'] = done['customer_full_name']
+                            l_msg.append(samp)
+                        else:
+                            bObj = CustomerFiles()
+                            bObj.create_time = dt
+                            bObj.customer_full_name = done['customer_full_name']
+                            bObj.active = done['active']
+                            bObj.customer_simple_name = done['customer_simple_name']
+                            bObj.office_phone = done['office_phone']
+                            bObj.fax_number = done['fax_number']
+                            bObj.type_id = done['type_id']
+                            bObj.save()
                 except:
                     msg = "参数校验不通过！"
                     error_code = 10030
@@ -4776,39 +4821,49 @@ class contactView(APIView):
         if d_flag == 0:
             for done in data:
                 try:
-                    customerT = CustomerContact.objects.filter(
-                        customer_id=done['customer_id'],
-                        department_name=done['department_name'],
-                        post_name=done['post_name'],
-                        contact_name=done['contact_name'],
-                        phone=done['phone'],
-                        email=done['email'],
-                        remarks=done['remarks'],
-                        delete_time=None
-                    )
-                    if customerT.count()>0:
-                        d_flag = 1
-                        samp = {}
-                        samp['msg'] = "联系方式已经存在"
-                        samp['key_num'] = done['phone']
-                        l_msg.append(samp)
-                    else:
-                        mid = done["id"]
-                        if mid:
-                            bObj = CustomerContact.objects.get(id=mid)
-                            bObj.update_time = dt
-                        else:
-                            bObj = CustomerContact()
-                            bObj.create_time = dt
+                    mid = done["id"]
+                    if mid:
+                        bObj = CustomerContact.objects.get(id=mid)
+                        bObj.update_time = dt
                         bObj.customer_id = done['customer_id']
                         bObj.active = done['active']
-                        bObj.department_name =done['department_name']
-                        bObj.post_name =done['post_name']
+                        bObj.department_name = done['department_name']
+                        bObj.post_name = done['post_name']
                         bObj.contact_name = done['contact_name']
                         bObj.phone = done['phone']
                         bObj.email = done['email']
                         bObj.remarks = done['remarks']
                         bObj.save()
+                    else:
+                        customerT = CustomerContact.objects.filter(
+                            customer_id=done['customer_id'],
+                            department_name=done['department_name'],
+                            post_name=done['post_name'],
+                            contact_name=done['contact_name'],
+                            phone=done['phone'],
+                            email=done['email'],
+                            remarks=done['remarks'],
+                            delete_time=None
+                        )
+                        if customerT.count() > 0:
+                            d_flag = 1
+                            samp = {}
+                            samp['msg'] = "联系方式已经存在"
+                            samp['key_num'] = done['phone']
+                            l_msg.append(samp)
+                        else:
+                            bObj = CustomerContact()
+                            bObj.create_time = dt
+                            bObj.customer_id = done['customer_id']
+                            bObj.active = done['active']
+                            bObj.department_name = done['department_name']
+                            bObj.post_name = done['post_name']
+                            bObj.contact_name = done['contact_name']
+                            bObj.phone = done['phone']
+                            bObj.email = done['email']
+                            bObj.remarks = done['remarks']
+                            bObj.save()
+
                 except:
                     msg = "参数校验不通过！"
                     error_code = 10030
@@ -5073,32 +5128,39 @@ class namecardOneView(APIView):
             if d_flag == 0:
                 for done in data:
                     try:
-                        customerT = CustomerCompany.objects.filter(
-                            company_name=done['company_name'],
-                            customer_file_id=nid,
-                            delete_time=None
-                        )
-                        if customerT.count() > 0:
-                            d_flag = 1
-                            samp = {}
-                            samp['msg'] = "客户名片已经存在"
-                            samp['key_num'] = done['company_name']
-                            l_msg.append(samp)
-                        else:
-                            mid = done["id"]
-                            if mid:
-                                bObj = CustomerCompany.objects.get(id=mid)
-                                bObj.update_time = dt
-                            else:
-                                bObj = CustomerCompany()
-                                bObj.create_time = dt
-                            bObj.customer_file_id =nid
+                        mid = done["id"]
+                        if mid:
+                            bObj = CustomerCompany.objects.get(id=mid)
+                            bObj.update_time = dt
+                            bObj.customer_file_id = nid
                             bObj.language = done['language']
                             bObj.company_name = done['company_name']
                             bObj.company_name_simple = done['company_name_simple']
                             bObj.country = done['country']
                             bObj.company_address = done['company_address']
                             bObj.save()
+                        else:
+                            customerT = CustomerCompany.objects.filter(
+                                company_name=done['company_name'],
+                                customer_file_id=nid,
+                                delete_time=None
+                            )
+                            if customerT.count() > 0:
+                                d_flag = 1
+                                samp = {}
+                                samp['msg'] = "客户名片已经存在"
+                                samp['key_num'] = done['company_name']
+                                l_msg.append(samp)
+                            else:
+                                bObj = CustomerCompany()
+                                bObj.create_time = dt
+                                bObj.customer_file_id = nid
+                                bObj.language = done['language']
+                                bObj.company_name = done['company_name']
+                                bObj.company_name_simple = done['company_name_simple']
+                                bObj.country = done['country']
+                                bObj.company_address = done['company_address']
+                                bObj.save()
                     except:
                         msg = "参数校验不通过！"
                         error_code = 10030
@@ -5287,30 +5349,35 @@ class marksOneView(APIView):
             if d_flag == 0:
                 for done in data:
                     try:
-                        customerT = Marks.objects.filter(
-                            namecard_id=done['namecard_id'],
-                            brand=done['brand'],
-                            delete_time=None
-                        )
-                        if customerT.count() > 0:
-                            d_flag = 1
-                            samp = {}
-                            samp['msg'] = "唛头已经存在"
-                            samp['key_num'] = done['brand']
-                            l_msg.append(samp)
-                        else:
-                            mid = done["id"]
-                            if mid:
-                                bObj = Marks.objects.get(id=mid)
-                                bObj.update_time = dt
-                            else:
-                                bObj = Marks()
-                                bObj.create_time = dt
+                        mid = done["id"]
+                        if mid:
+                            bObj = Marks.objects.get(id=mid)
+                            bObj.update_time = dt
                             bObj.namecard_id = done['namecard_id']
                             bObj.brand = done['brand']
                             bObj.brand_url = done['brand_url']
                             bObj.active = done['active']
                             bObj.save()
+                        else:
+                            customerT = Marks.objects.filter(
+                                namecard_id=done['namecard_id'],
+                                brand=done['brand'],
+                                delete_time=None
+                            )
+                            if customerT.count() > 0:
+                                d_flag = 1
+                                samp = {}
+                                samp['msg'] = "唛头已经存在"
+                                samp['key_num'] = done['brand']
+                                l_msg.append(samp)
+                            else:
+                                bObj = Marks()
+                                bObj.create_time = dt
+                                bObj.namecard_id = done['namecard_id']
+                                bObj.brand = done['brand']
+                                bObj.brand_url = done['brand_url']
+                                bObj.active = done['active']
+                                bObj.save()
                     except:
                         msg = "参数校验不通过！"
                         error_code = 10030
@@ -5512,30 +5579,32 @@ class departmentView(APIView):
         if d_flag == 0:
             for done in data:
                 try:
-                    depart = Department.objects.filter(
-                        department_name=done['department_name'],
-                        delete_time=None
-                    )
-                    if depart.count()>0:
-                        d_flag = 1
-                        samp = {}
-                        samp['msg'] = "部门已经存在"
-                        samp['key_num'] = done['department_name']
-                        l_msg.append(samp)
+                    mid = done["id"]
+                    if mid:
+                        bObj = Department.objects.get(id=mid)
+                        bObj.update_time = dt
+                        bObj.department_name = done['department_name']
+                        bObj.active = done['active']
+                        bObj.save()
                     else:
-                        mid = done["id"]
-                        if mid:
-                            bObj = Department.objects.get(id=mid)
-                            bObj.update_time = dt
+                        depart = Department.objects.filter(
+                            department_name=done['department_name'],
+                            delete_time=None
+                        )
+                        if depart.count() > 0:
+                            d_flag = 1
+                            samp = {}
+                            samp['msg'] = "部门已经存在"
+                            samp['key_num'] = done['department_name']
+                            l_msg.append(samp)
                         else:
                             bObj = Department()
                             bObj.create_time = dt
-                        num = Department.objects.all().count() + 1
-                        bObj.department_name = done['department_name']
-                        bObj.active = done['active']
-                        if not mid:
+                            num = Department.objects.all().count() + 1
+                            bObj.department_name = done['department_name']
+                            bObj.active = done['active']
                             bObj.weight = num
-                        bObj.save()
+                            bObj.save()
                 except:
                     msg = "参数校验不通过！"
                     error_code = 10030
@@ -5738,32 +5807,36 @@ class departmentPostView(APIView):
         if d_flag == 0:
             for done in data:
                 try:
-                    post = Post.objects.filter(
-                        post_name=done['post_name'],
-                        department_id=done['department_id'],
-                        delete_time=None
-                    )
-                    if post.count()>0:
-                        d_flag = 1
-                        samp = {}
-                        samp['msg'] = "岗位已经存在"
-                        samp['key_num'] = done['department_name']
-                        l_msg.append(samp)
-                    else:
-                        mid = done["id"]
-                        if mid:
-                            bObj = Post.objects.get(id=mid)
-                            bObj.update_time = dt
-                        else:
-                            bObj = Post()
-                            bObj.create_time = dt
-                        num = Post.objects.all().count() + 1
+                    mid = done["id"]
+                    if mid:
+                        bObj = Post.objects.get(id=mid)
+                        bObj.update_time = dt
                         bObj.post_name = done['post_name']
                         bObj.department_id = done['department_id']
                         bObj.active = done['active']
-                        if not mid:
-                            bObj.weight = num
                         bObj.save()
+                    else:
+                        post = Post.objects.filter(
+                            post_name=done['post_name'],
+                            department_id=done['department_id'],
+                            delete_time=None
+                        )
+                        if post.count() > 0:
+                            d_flag = 1
+                            samp = {}
+                            samp['msg'] = "岗位已经存在"
+                            samp['key_num'] = done['department_name']
+                            l_msg.append(samp)
+                        else:
+                            bObj = Post()
+                            bObj.create_time = dt
+                            num = Post.objects.all().count() + 1
+                            bObj.post_name = done['post_name']
+                            bObj.department_id = done['department_id']
+                            bObj.active = done['active']
+                            if not mid:
+                                bObj.weight = num
+                            bObj.save()
                 except:
                     msg = "参数校验不通过！"
                     error_code = 10030
@@ -6118,25 +6191,10 @@ class templateOneView(APIView):
         if d_flag == 0:
             for done in data:
                 try:
-                    datat = DataTemplate.objects.filter(
-                        name=done['name'],
-                        type_id=done['type_id'],
-                        delete_time=None
-                    )
-                    if datat.count() > 0:
-                        d_flag = 1
-                        samp = {}
-                        samp['msg'] = "资料模板已经存在"
-                        samp['key_num'] = done['name']
-                        l_msg.append(samp)
-                    else:
-                        mid = done["id"]
-                        if mid:
-                            bObj = DataTemplate.objects.get(id=mid)
-                            bObj.update_time = dt
-                        else:
-                            bObj = DataTemplate()
-                            bObj.create_time = dt
+                    mid = done["id"]
+                    if mid:
+                        bObj = DataTemplate.objects.get(id=mid)
+                        bObj.update_time = dt
                         num = DataTemplate.objects.all().count() + 1
 
                         bObj.name = done['name']
@@ -6146,6 +6204,30 @@ class templateOneView(APIView):
                         if not mid:
                             bObj.weight = num
                         bObj.save()
+                    else:
+                        datat = DataTemplate.objects.filter(
+                            name=done['name'],
+                            type_id=done['type_id'],
+                            delete_time=None
+                        )
+                        if datat.count() > 0:
+                            d_flag = 1
+                            samp = {}
+                            samp['msg'] = "资料模板已经存在"
+                            samp['key_num'] = done['name']
+                            l_msg.append(samp)
+                        else:
+                            bObj = DataTemplate()
+                            bObj.create_time = dt
+                            num = DataTemplate.objects.all().count() + 1
+
+                            bObj.name = done['name']
+                            bObj.template_url = done['template_url']
+                            bObj.required = done['required']
+                            bObj.active = done['active']
+                            if not mid:
+                                bObj.weight = num
+                            bObj.save()
                 except:
                     msg = "参数校验不通过！"
                     error_code = 10030
@@ -6386,24 +6468,10 @@ class archiveView(APIView):
         if d_flag == 0:
             for done in data:
                 try:
-                    archives = Archives.objects.filter(
-                        name=done['name'],
-                        delete_time=None
-                    )
-                    if archives.count() > 0:
-                        d_flag = 1
-                        samp = {}
-                        samp['msg'] = "员工档案已经存在"
-                        samp['key_num'] = done['name']
-                        l_msg.append(samp)
-                    else:
-                        mid = done["id"]
-                        if mid:
-                            bObj = Archives.objects.get(id=mid)
-                            bObj.update_time = dt
-                        else:
-                            bObj = Archives()
-                            bObj.create_time = dt
+                    mid = done["id"]
+                    if mid:
+                        bObj = Archives.objects.get(id=mid)
+                        bObj.update_time = dt
                         bObj.job_number = get_member_N()
                         bObj.name = done['name']
                         bObj.gender = done['gender']
@@ -6418,7 +6486,34 @@ class archiveView(APIView):
                         bObj.leave_time = done['leave_time']
                         bObj.status = 1
                         bObj.save()
-
+                    else:
+                        archives = Archives.objects.filter(
+                            name=done['name'],
+                            delete_time=None
+                        )
+                        if archives.count() > 0:
+                            d_flag = 1
+                            samp = {}
+                            samp['msg'] = "员工档案已经存在"
+                            samp['key_num'] = done['name']
+                            l_msg.append(samp)
+                        else:
+                            bObj = Archives()
+                            bObj.create_time = dt
+                            bObj.job_number = get_member_N()
+                            bObj.name = done['name']
+                            bObj.gender = done['gender']
+                            bObj.birthday = done['birthday']
+                            bObj.department_id = done['department_id']
+                            bObj.post_id = done['post_id']
+                            bObj.phone = done['phone']
+                            bObj.emergency_contact = done['emergency_contact']
+                            bObj.emergency_phone = done['emergency_phone']
+                            bObj.due_to_time = done['due_to_time']
+                            bObj.enter_time = done['enter_time']
+                            bObj.leave_time = done['leave_time']
+                            bObj.status = 1
+                            bObj.save()
                 except:
                     msg = "参数校验不通过！"
                     error_code = 10030
@@ -6429,7 +6524,6 @@ class archiveView(APIView):
                         "request": request,
                     }
                     return Response(post_result)
-
             if d_flag ==0:
                 msg = "创建员工档案"
                 error_code = 0
@@ -6654,32 +6748,35 @@ class categoryView(APIView):
         if d_flag == 0:
             for done in data:
                 try:
-                    ccat = ClothCategory.objects.filter(
-                        category_name=done['category_name'],
-                        cloth_id=done['cloth_id'],
-                        delete_time=None
-                    )
-                    if ccat.count()>0:
-                        d_flag = 1
-                        samp = {}
-                        samp['msg'] = "注意事项类别已经存在"
-                        samp['key_num'] = done['category_name']
-                        l_msg.append(samp)
-                    else:
-                        mid = done["id"]
-                        if mid:
-                            bObj = ClothCategory.objects.get(id=mid)
-                            bObj.update_time = dt
-                        else:
-                            bObj = ClothCategory()
-                            bObj.create_time = dt
-                        num = ClothCategory.objects.all().count() + 1
+                    mid = done["id"]
+                    if mid:
+                        bObj = ClothCategory.objects.get(id=mid)
+                        bObj.update_time = dt
                         bObj.category_name = done['category_name']
                         bObj.cloth_id = done['cloth_id']
                         bObj.active = done['active']
-                        if not mid:
-                            bObj.weight = num
                         bObj.save()
+                    else:
+                        ccat = ClothCategory.objects.filter(
+                            category_name=done['category_name'],
+                            cloth_id=done['cloth_id'],
+                            delete_time=None
+                        )
+                        if ccat.count() > 0:
+                            d_flag = 1
+                            samp = {}
+                            samp['msg'] = "注意事项类别已经存在"
+                            samp['key_num'] = done['category_name']
+                            l_msg.append(samp)
+                        else:
+                            bObj = ClothCategory()
+                            bObj.create_time = dt
+                            num = ClothCategory.objects.all().count() + 1
+                            bObj.category_name = done['category_name']
+                            bObj.cloth_id = done['cloth_id']
+                            bObj.active = done['active']
+                            bObj.weight = num
+                            bObj.save()
                 except:
                     msg = "参数校验不通过！"
                     error_code = 10030
@@ -6930,33 +7027,35 @@ class notesView(APIView):
         if d_flag == 0:
             for done in data:
                 try:
-                    ccat = ClothNotes.objects.filter(
-                        notes_name=done['notes_name'],
-                        category_id=done['category_id'],
-                        delete_time=None
-                    )
-                    if ccat.count()>0:
-                        d_flag = 1
-                        samp = {}
-                        samp['msg'] = "注意事项内容已经存在"
-                        samp['key_num'] = done['notes_name']
-                        l_msg.append(samp)
-                    else:
-                        mid = done["id"]
-                        if mid:
-                            bObj = ClothNotes.objects.get(id=mid)
-                            bObj.update_time = dt
-                        else:
-                            bObj = ClothNotes()
-                            bObj.create_time = dt
-                        num = ClothNotes.objects.all().count() + 1
+                    mid = done["id"]
+                    if mid:
+                        bObj = ClothNotes.objects.get(id=mid)
+                        bObj.update_time = dt
                         bObj.notes_name = done['notes_name']
                         bObj.category_id = done['category_id']
                         bObj.active = done['active']
-                        if not mid:
-                            bObj.weight = num
                         bObj.save()
-
+                    else:
+                        ccat = ClothNotes.objects.filter(
+                            notes_name=done['notes_name'],
+                            category_id=done['category_id'],
+                            delete_time=None
+                        )
+                        if ccat.count() > 0:
+                            d_flag = 1
+                            samp = {}
+                            samp['msg'] = "注意事项内容已经存在"
+                            samp['key_num'] = done['notes_name']
+                            l_msg.append(samp)
+                        else:
+                            bObj = ClothNotes()
+                            bObj.create_time = dt
+                            num = ClothNotes.objects.all().count() + 1
+                            bObj.notes_name = done['notes_name']
+                            bObj.category_id = done['category_id']
+                            bObj.active = done['active']
+                            bObj.weight = num
+                            bObj.save()
                 except:
                     msg = "参数校验不通过！"
                     error_code = 10030
@@ -7214,32 +7313,35 @@ class category_setView(APIView):
         if d_flag == 0:
             for done in data:
                 try:
-                    ccat = OtherCategorySetting.objects.filter(
-                        category_name=done['category_name'],
-                        sub_category_id=done['sub_category_id'],
-                        delete_time=None
-                    )
-                    if ccat.count()>0:
-                        d_flag = 1
-                        samp = {}
-                        samp['msg'] = "其他注意事项已经存在"
-                        samp['key_num'] = done['category_name']
-                        l_msg.append(samp)
-                    else:
-                        mid = done["id"]
-                        if mid:
-                            bObj = OtherCategorySetting.objects.get(id=mid)
-                            bObj.update_time = dt
-                        else:
-                            bObj = OtherCategorySetting()
-                            bObj.create_time = dt
-                        num = OtherCategorySetting.objects.all().count() + 1
+                    mid = done["id"]
+                    if mid:
+                        bObj = OtherCategorySetting.objects.get(id=mid)
+                        bObj.update_time = dt
                         bObj.category_name = done['category_name']
                         bObj.sub_category_id = done['sub_category_id']
                         bObj.active = done['active']
-                        if not mid:
-                            bObj.weight = num
                         bObj.save()
+                    else:
+                        ccat = OtherCategorySetting.objects.filter(
+                            category_name=done['category_name'],
+                            sub_category_id=done['sub_category_id'],
+                            delete_time=None
+                        )
+                        if ccat.count() > 0:
+                            d_flag = 1
+                            samp = {}
+                            samp['msg'] = "其他注意事项已经存在"
+                            samp['key_num'] = done['category_name']
+                            l_msg.append(samp)
+                        else:
+                            bObj = OtherCategorySetting()
+                            bObj.create_time = dt
+                            num = OtherCategorySetting.objects.all().count() + 1
+                            bObj.category_name = done['category_name']
+                            bObj.sub_category_id = done['sub_category_id']
+                            bObj.active = done['active']
+                            bObj.weight = num
+                            bObj.save()
                 except:
                     msg = "参数校验不通过！"
                     error_code = 10030
@@ -7500,30 +7602,33 @@ class other_categoryView(APIView):
         if d_flag == 0:
             for done in data:
                 try:
-                    ccat = OtherCategory.objects.filter(
-                        category_name=done['category_name'],
-                        delete_time=None
-                    )
-                    if ccat.count()>0:
-                        d_flag = 1
-                        samp = {}
-                        samp['msg'] = "类别已经存在"
-                        samp['key_num'] = done['category_name']
-                        l_msg.append(samp)
+                    mid = done["id"]
+                    if mid:
+                        bObj = OtherCategory.objects.get(id=mid)
+                        bObj.update_time = dt
+                        bObj.category_name = done['category_name']
+                        bObj.active = done['active']
+                        bObj.save()
                     else:
-                        mid = done["id"]
-                        if mid:
-                            bObj = OtherCategory.objects.get(id=mid)
-                            bObj.update_time = dt
+                        ccat = OtherCategory.objects.filter(
+                            category_name=done['category_name'],
+                            delete_time=None
+                        )
+                        if ccat.count() > 0:
+                            d_flag = 1
+                            samp = {}
+                            samp['msg'] = "类别已经存在"
+                            samp['key_num'] = done['category_name']
+                            l_msg.append(samp)
                         else:
                             bObj = OtherCategory()
                             bObj.create_time = dt
-                        num = OtherCategory.objects.all().count() + 1
-                        bObj.category_name = done['category_name']
-                        bObj.active = done['active']
-                        if not mid:
+                            num = OtherCategory.objects.all().count() + 1
+                            bObj.category_name = done['category_name']
+                            bObj.active = done['active']
                             bObj.weight = num
-                        bObj.save()
+                            bObj.save()
+
                 except:
                     msg = "参数校验不通过！"
                     error_code = 10030
@@ -7726,32 +7831,35 @@ class sub_categoryView(APIView):
         if d_flag == 0:
             for done in data:
                 try:
-                    ccat = OtherCategory.objects.filter(
-                        sub_name=done['sub_name'],
-                        category_id=done['category_id'],
-                        delete_time=None
-                    )
-                    if ccat.count()>0:
-                        d_flag = 1
-                        samp = {}
-                        samp['msg'] = "类别已经存在"
-                        samp['key_num'] = done['sub_name']
-                        l_msg.append(samp)
-                    else:
-                        mid = done["id"]
-                        if mid:
-                            bObj = OtherSubCategory.objects.get(id=mid)
-                            bObj.update_time = dt
-                        else:
-                            bObj = OtherSubCategory()
-                            bObj.create_time = dt
-                        num = OtherSubCategory.objects.all().count() + 1
+                    mid = done["id"]
+                    if mid:
+                        bObj = OtherSubCategory.objects.get(id=mid)
+                        bObj.update_time = dt
                         bObj.sub_name = done['sub_name']
                         bObj.category_id = done['category_id']
                         bObj.active = done['active']
-                        if not mid:
-                            bObj.weight = num
                         bObj.save()
+                    else:
+                        ccat = OtherCategory.objects.filter(
+                            sub_name=done['sub_name'],
+                            category_id=done['category_id'],
+                            delete_time=None
+                        )
+                        if ccat.count() > 0:
+                            d_flag = 1
+                            samp = {}
+                            samp['msg'] = "类别已经存在"
+                            samp['key_num'] = done['sub_name']
+                            l_msg.append(samp)
+                        else:
+                            bObj = OtherSubCategory()
+                            bObj.create_time = dt
+                            num = OtherSubCategory.objects.all().count() + 1
+                            bObj.sub_name = done['sub_name']
+                            bObj.category_id = done['category_id']
+                            bObj.active = done['active']
+                            bObj.weight = num
+                            bObj.save()
 
                 except:
                     msg = "参数校验不通过！"
@@ -7992,33 +8100,35 @@ class other_notesView(APIView):
         if d_flag == 0:
             for done in data:
                 try:
-                    ccat = ClothNotes.objects.filter(
-                        notes_name=done['notes_name'],
-                        category_setting_id=done['category_setting_id'],
-                        delete_time=None
-                    )
-                    if ccat.count()>0:
-                        d_flag = 1
-                        samp = {}
-                        samp['msg'] = "其他注意事项已经存在"
-                        samp['key_num'] = done['notes_name']
-                        l_msg.append(samp)
-                    else:
-                        mid = done["id"]
-                        if mid:
-                            bObj = OtherNotes.objects.get(id=mid)
-                            bObj.update_time = dt
-                        else:
-                            bObj = OtherNotes()
-                            bObj.create_time = dt
-                        num = OtherNotes.objects.all().count() + 1
+                    mid = done["id"]
+                    if mid:
+                        bObj = OtherNotes.objects.get(id=mid)
+                        bObj.update_time = dt
                         bObj.notes_name = done['notes_name']
                         bObj.category_setting_id = done['category_setting_id']
                         bObj.active = done['active']
-                        if not mid:
-                            bObj.weight = num
                         bObj.save()
-
+                    else:
+                        ccat = ClothNotes.objects.filter(
+                            notes_name=done['notes_name'],
+                            category_setting_id=done['category_setting_id'],
+                            delete_time=None
+                        )
+                        if ccat.count() > 0:
+                            d_flag = 1
+                            samp = {}
+                            samp['msg'] = "其他注意事项已经存在"
+                            samp['key_num'] = done['notes_name']
+                            l_msg.append(samp)
+                        else:
+                            bObj = OtherNotes()
+                            bObj.create_time = dt
+                            num = OtherNotes.objects.all().count() + 1
+                            bObj.notes_name = done['notes_name']
+                            bObj.category_setting_id = done['category_setting_id']
+                            bObj.active = done['active']
+                            bObj.weight = num
+                            bObj.save()
                 except:
                     msg = "参数校验不通过！"
                     error_code = 10030
