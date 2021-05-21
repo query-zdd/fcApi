@@ -1401,9 +1401,9 @@ class receivingView(APIView):
                 for o in subAll:
                     samp =  {}
                     if o.active == 1:
-                        temp['active'] = True
+                        samp['active'] = True
                     else:
-                        temp['active'] = False
+                        samp['active'] = False
                     samp['method_id'] = o.method_id
                     samp['id'] = o.id
                     samp['warehouse_name'] = o.warehouse_name
@@ -1482,8 +1482,6 @@ class receivingView(APIView):
                             bObj.active = done['active']
                             bObj.weight = num
                             bObj.save()
-
-
                 except:
                     msg = "参数校验不通过！"
                     error_code = 10030
