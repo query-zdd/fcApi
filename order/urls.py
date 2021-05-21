@@ -40,6 +40,18 @@ urlpatterns = [
 
     url('^shipmentInStock$', views.shipmentInStockView.as_view()),
     url('^shipmentInStock/(?P<nid>\d+)', views.shipmentInStockOneView.as_view()),
+    #生产准备
+    url('^productReady$', views.productReadyView.as_view()),
+    url('^makeinReady$', views.makeinReadyView.as_view()),
+
+    url('^submission$', views.submissionView.as_view()),
+    url('^submission/(?P<nid>\d+)', views.submissionOneView.as_view()),
+
+    url('^submissionInfo$', views.submissionInfoView.as_view()),
+    url('^submissionInfo/(?P<nid>\d+)', views.submissionInfoOneView.as_view()),
+
+    url('^indicateDate$', views.indicateDateView.as_view()),
+
 
 
 

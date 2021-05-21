@@ -369,8 +369,8 @@ class planOrderSerializer(serializers.Serializer):
     dhkhao = serializers.CharField(default="")
     page_size = serializers.IntegerField(default=10)
     page = serializers.IntegerField(default=1)
-    status = serializers.IntegerField(default=0)
-    brand_id = serializers.IntegerField(default=1)
+    # status = serializers.IntegerField(default=0)
+    brand_id = serializers.IntegerField(default=0)
     customer_name_id = serializers.IntegerField(default=0)
     is_pushprogram = serializers.IntegerField(default=999)
     is_workprogram = serializers.IntegerField(default=999)
@@ -712,4 +712,58 @@ class orderDateSetOneSerializer(serializers.Serializer):
     takeover_num = serializers.CharField(error_messages={'required': '必须传入提货日提前天数'})
     active = serializers.IntegerField(error_messages={'required': '数据参数不可为空！'})
 
+class productReadySerializer(serializers.Serializer):
+    factory_make_id = serializers.IntegerField(error_messages={'required': '必须传入加工工厂id'})
+    # order_id = serializers.CharField(error_messages={'required': '必须传入订单的id'})
+    plan_start_date = serializers.CharField(error_messages={'required': '必须传入计划上手日期'})
 
+
+class productReadyoneSerializer(serializers.Serializer):
+    brand = serializers.CharField(default="")
+    price_code = serializers.CharField(default="")
+    dhkhao = serializers.CharField(default="")
+    page_size = serializers.IntegerField(default=10)
+    page = serializers.IntegerField(default=1)
+    make_factory = serializers.CharField(default="")
+
+class subMissionSerializer(serializers.Serializer):
+    kuan_hao = serializers.CharField(error_messages={'required': '必须传入款号'})
+    order_id = serializers.IntegerField(error_messages={'required': '必须传入订单的id'})
+    custom = serializers.CharField(error_messages={'required': '必须传入客户'})
+    order_line_id = serializers.IntegerField(error_messages={'required': '必须传入订单项id'})
+    submis_people = serializers.CharField(error_messages={'required': '必须传入负责人'})
+    start_num = serializers.CharField(error_messages={'required': '必须传入箱号（前）'})
+    end_num = serializers.CharField(error_messages={'required': '必须传入箱号（后）'})
+    box_num = serializers.IntegerField(error_messages={'required': '必须传入箱数'})
+    color = serializers.CharField(error_messages={'required': '必须传入颜色'})
+    size1 = serializers.CharField(error_messages={'required': '必须传入尺码X'})
+    size2 = serializers.CharField(error_messages={'required': '必须传入尺码F'})
+    size3 = serializers.CharField(error_messages={'required': '必须传入尺码Z'})
+    number = serializers.IntegerField(error_messages={'required': '必须传入数量'})
+    total = serializers.IntegerField(error_messages={'required': '必须传入小结'})
+    gross_weight = serializers.IntegerField(error_messages={'required': '必须传入毛重量'})
+    net_weight = serializers.IntegerField(error_messages={'required': '必须传入净重量'})
+    volume = serializers.CharField(error_messages={'required': '必须传入体积'})
+    id = serializers.IntegerField(default=0)
+
+class submisInfoSerializer(serializers.Serializer):
+    info = serializers.CharField(error_messages={'required': '必须传入附件路径'})
+    order_line_id = serializers.IntegerField(error_messages={'required': '必须传入订单项的id'})
+    factory_name = serializers.CharField(error_messages={'required': '必须传入工厂名称'})
+
+
+class indicateDateoneSerializer(serializers.Serializer):
+    indicate_time = serializers.CharField(error_messages={'required': '必须传入指示发货日期！'})
+    order_id = serializers.IntegerField(error_messages={'required': '必须传入订单id'})
+    order_line_id = serializers.IntegerField(error_messages={'required': '必须传入订单项id'})
+    delivery_way = serializers.CharField(error_messages={'required': '必须传入提货承运人'})
+    transportation = serializers.CharField(error_messages={'required': '必须传入出口运输方式'})
+    exporter_way = serializers.CharField(error_messages={'required': '必须传入出口承运方'})
+
+class indicateDateSerializer(serializers.Serializer):
+    order_custom = serializers.CharField(default="")
+    price_code = serializers.CharField(default="")
+    dhkhao = serializers.CharField(default="")
+    page_size = serializers.IntegerField(default=10)
+    page = serializers.IntegerField(default=1)
+    order_type = serializers.IntegerField(default=0)

@@ -354,6 +354,8 @@ class FactoryMake(models.Model):
     inspect_company = models.CharField(max_length=255, blank=True, null=True)
     order_admin = models.CharField(max_length=255, blank=True, null=True)
     ticketing_custom = models.CharField(max_length=255, blank=True, null=True)
+    plan_start_date = models.DateTimeField(blank=True, null=True)
+    real_start_date = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -439,6 +441,17 @@ class Image(models.Model):
     class Meta:
         managed = False
         db_table = 'image'
+
+
+class IndicateTime(models.Model):
+    create_time = models.DateTimeField(blank=True, null=True)
+    update_time = models.DateTimeField(blank=True, null=True)
+    delete_time = models.DateTimeField(blank=True, null=True)
+    indicate_time = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'indicate_time'
 
 
 class InvoiceSetting(models.Model):
@@ -586,9 +599,9 @@ class OrderDateSet(models.Model):
     takeover_num = models.IntegerField(blank=True, null=True)
     in_num = models.IntegerField(blank=True, null=True)
     send_num = models.IntegerField(blank=True, null=True)
-    port_type = models.CharField(max_length=255)
-    defalut = models.SmallIntegerField()
-    active = models.SmallIntegerField()
+    port_type = models.CharField(max_length=255, blank=True, null=True)
+    defalut = models.SmallIntegerField(blank=True, null=True)
+    active = models.SmallIntegerField(blank=True, null=True)
     weight = models.IntegerField(blank=True, null=True)
 
     class Meta:
@@ -948,6 +961,7 @@ class PlanOrderLine(models.Model):
     is_pushprogram = models.IntegerField(blank=True, null=True)
     is_buyprogram = models.IntegerField(blank=True, null=True)
     order_num = models.IntegerField(blank=True, null=True)
+    indicate_time = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1088,6 +1102,21 @@ class ReceivingGoodsMethod(models.Model):
         db_table = 'receiving_goods_method'
 
 
+class ReightSpace(models.Model):
+    create_time = models.DateTimeField(blank=True, null=True)
+    update_time = models.DateTimeField(blank=True, null=True)
+    delete_time = models.DateTimeField(blank=True, null=True)
+    exporter_way = models.CharField(max_length=255, blank=True, null=True)
+    shou_huo_term_id = models.IntegerField(blank=True, null=True)
+    space_name = models.IntegerField(blank=True, null=True)
+    reight_s_time = models.DateTimeField(blank=True, null=True)
+    info_url = models.CharField(max_length=255, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'reight_space'
+
+
 class Role(models.Model):
     create_time = models.DateTimeField(blank=True, null=True)
     update_time = models.DateTimeField(blank=True, null=True)
@@ -1215,6 +1244,46 @@ class SubSpecs(models.Model):
     class Meta:
         managed = False
         db_table = 'sub_specs'
+
+
+class Submission(models.Model):
+    create_time = models.DateTimeField(blank=True, null=True)
+    update_time = models.DateTimeField(blank=True, null=True)
+    delete_time = models.DateTimeField(blank=True, null=True)
+    order_line_id = models.IntegerField(blank=True, null=True)
+    order_id = models.IntegerField(blank=True, null=True)
+    kuan_hao = models.CharField(max_length=255, blank=True, null=True)
+    custom = models.CharField(max_length=255, blank=True, null=True)
+    start_num = models.CharField(max_length=255, blank=True, null=True)
+    end_num = models.CharField(max_length=255, blank=True, null=True)
+    box_num = models.IntegerField(blank=True, null=True)
+    color = models.CharField(max_length=255, blank=True, null=True)
+    size1 = models.CharField(max_length=255, blank=True, null=True)
+    size2 = models.CharField(max_length=255, blank=True, null=True)
+    size3 = models.CharField(max_length=255, blank=True, null=True)
+    number = models.IntegerField(blank=True, null=True)
+    total = models.IntegerField(blank=True, null=True)
+    gross_weight = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    net_weight = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    volume = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    submis_people = models.CharField(max_length=255, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'submission'
+
+
+class SubmissionInfo(models.Model):
+    create_time = models.DateTimeField(blank=True, null=True)
+    update_time = models.DateTimeField(blank=True, null=True)
+    delete_time = models.DateTimeField(blank=True, null=True)
+    order_line_id = models.IntegerField(blank=True, null=True)
+    info = models.CharField(max_length=255, blank=True, null=True)
+    factory_name = models.CharField(max_length=255, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'submission_info'
 
 
 class WarehouseClassification(models.Model):
