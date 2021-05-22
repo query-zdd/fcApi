@@ -592,6 +592,16 @@ class OrderClothShip(models.Model):
         db_table = 'order_cloth_ship'
 
 
+class OrderColorSizeInfo(models.Model):
+    order_id = models.IntegerField(blank=True, null=True)
+    order_color_size_info = models.TextField(blank=True, null=True)
+    order_line_id = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'order_color_size_info'
+
+
 class OrderDateSet(models.Model):
     create_time = models.DateTimeField(blank=True, null=True)
     update_time = models.DateTimeField(blank=True, null=True)

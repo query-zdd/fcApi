@@ -3327,3 +3327,72 @@ class indicateDateView(APIView):
                 "request": request,
             }
             return Response(post_result)
+
+
+############################颜色规格信息############################################
+
+class colorSizeDataView(APIView):
+    # 添加/编辑 颜色规格信息
+    @csrf_exempt
+    def post(self, request):
+        data = request.data
+        valObj = colorSizeDataSerializer(data=request.data)
+        if valObj.is_valid():
+            result = []
+            dt = datetime.now()
+            ##############录入订单信息#############################
+            bObj = OrderColorSizeInfo.objects.filter(order_id=data['order_id'])
+            if bObj.count()>0:
+                bObj = bObj[0]
+            else:
+                bObj = OrderColorSizeInfo()
+            bObj.order_id = data['order_id']
+            bObj.order_color_size_info = data['order_color_size_info']
+            bObj.save()
+            msg = "录入订单的颜色规格信息"
+            error_code = 0
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+class colorSizeDataOneView(APIView):
+    # 获取订单 颜色规格信息
+    @csrf_exempt
+    def get(self, request, nid):
+        try:
+            subinfo = OrderColorSizeInfo.objects.filter(order_id=nid)
+            temp = {}
+            if subinfo.count()>0:
+                temp["color_size"] = subinfo[0].order_color_size_info
+            else:
+                temp["color_size"] = ""
+            temp['error_code'] = 0
+            temp['message'] = "成功"
+            temp['request'] = request.method + '  ' + request.get_full_path()
+            return Response(temp)
+        except:
+            msg = "未找到对应的颜色规格信息"
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+

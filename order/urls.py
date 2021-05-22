@@ -52,6 +52,9 @@ urlpatterns = [
 
     url('^indicateDate$', views.indicateDateView.as_view()),
 
+    url('^colorSizeData$', views.colorSizeDataView.as_view()),
+    url('^colorSizeData/(?P<nid>\d+)', views.colorSizeDataOneView.as_view()),
+
 
 
 

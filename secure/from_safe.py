@@ -767,3 +767,7 @@ class indicateDateSerializer(serializers.Serializer):
     page_size = serializers.IntegerField(default=10)
     page = serializers.IntegerField(default=1)
     order_type = serializers.IntegerField(default=0)
+
+class colorSizeDataSerializer(serializers.Serializer):
+    order_color_size_info = serializers.CharField(error_messages={'required': '必须传入订单颜色规格信息！'})
+    order_id = serializers.IntegerField(error_messages={'required': '必须传入订单id'})
