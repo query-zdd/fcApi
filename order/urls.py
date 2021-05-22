@@ -55,6 +55,9 @@ urlpatterns = [
     url('^colorSizeData$', views.colorSizeDataView.as_view()),
     url('^colorSizeData/(?P<nid>\d+)', views.colorSizeDataOneView.as_view()),
 
+    url('^reightSpace$', views.reightSpaceView.as_view()),
+    url('^reightSpace/(?P<nid>\d+)', views.reightSpaceOneView.as_view()),
+
 
 
 

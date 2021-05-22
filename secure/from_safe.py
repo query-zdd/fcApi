@@ -771,3 +771,26 @@ class indicateDateSerializer(serializers.Serializer):
 class colorSizeDataSerializer(serializers.Serializer):
     order_color_size_info = serializers.CharField(error_messages={'required': '必须传入订单颜色规格信息！'})
     order_id = serializers.IntegerField(error_messages={'required': '必须传入订单id'})
+
+class reightSpaceSerializer(serializers.Serializer):
+    indicate_time = serializers.CharField(error_messages={'required': '必须传入指示发货日期！'})
+    order_line_ids = serializers.CharField(error_messages={'required': '必须传入订单项id'})
+    shou_huo_term_name = serializers.CharField(default="")
+    shou_huo_term_id = serializers.IntegerField(default=0)
+    space_name = serializers.CharField(default="")
+    pol = serializers.CharField(error_messages={'required': '必须传入起运港'})
+    pod = serializers.CharField(error_messages={'required': '必须传入目的港'})
+    transportation = serializers.CharField(error_messages={'required': '必须传入出口运输方式'})
+    exporter_way = serializers.CharField(error_messages={'required': '必须传入出口承运方'})
+    id = serializers.IntegerField(default=0)
+
+class reightSpaceLineSerializer(serializers.Serializer):
+    order_type = serializers.IntegerField(default=0)
+    order_custom = serializers.CharField(default="")
+    price_code = serializers.CharField(default="")
+    dhkhao = serializers.CharField(default="")
+    page_size = serializers.IntegerField(default=10)
+    page = serializers.IntegerField(default=1)
+
+class reightSpaceOneSerializer(serializers.Serializer):
+    info_url = serializers.CharField(error_messages={'required': '必须传入确认仓位信息'})

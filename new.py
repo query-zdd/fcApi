@@ -972,6 +972,7 @@ class PlanOrderLine(models.Model):
     is_buyprogram = models.IntegerField(blank=True, null=True)
     order_num = models.IntegerField(blank=True, null=True)
     indicate_time = models.DateTimeField(blank=True, null=True)
+    reight_space_id = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1117,10 +1118,17 @@ class ReightSpace(models.Model):
     update_time = models.DateTimeField(blank=True, null=True)
     delete_time = models.DateTimeField(blank=True, null=True)
     exporter_way = models.CharField(max_length=255, blank=True, null=True)
+    shou_huo_term_name = models.CharField(max_length=255, blank=True, null=True)
     shou_huo_term_id = models.IntegerField(blank=True, null=True)
-    space_name = models.IntegerField(blank=True, null=True)
+    space_name = models.CharField(max_length=255, blank=True, null=True)
     reight_s_time = models.DateTimeField(blank=True, null=True)
     info_url = models.CharField(max_length=255, blank=True, null=True)
+    pol = models.CharField(max_length=255, blank=True, null=True)
+    pod = models.CharField(max_length=255, blank=True, null=True)
+    transportation = models.CharField(max_length=255, blank=True, null=True)
+    order_line_ids = models.CharField(max_length=255, blank=True, null=True)
+    indicate_time = models.DateTimeField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
