@@ -353,7 +353,7 @@ class sampleTypeView(APIView):
             }
             return Response(post_result)
 
-    # 添加用料单位
+    # 添加样品类型
     @csrf_exempt
     def post(self, request):
         # data = request.query_params
@@ -412,7 +412,7 @@ class sampleTypeView(APIView):
                         "request": request,
                     }
                     return Response(post_result)
-            msg = "创建样品分类成功"
+            msg = "创建样品类型成功"
             error_code = 0
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -463,7 +463,7 @@ class sampleTypeView(APIView):
             return Response(post_result)
 
 class sampleOneView(APIView):
-    #订单类型更新-active
+    #样品类型更新-active
     @csrf_exempt
     def put(self, request, nid):
         data = request.query_params
@@ -482,7 +482,7 @@ class sampleOneView(APIView):
             error_code = 0
             post_result = {
                 "error_code": error_code,
-                "message": "更新样品分类成功!",
+                "message": "更新样品类型成功!",
                 "request": request,
             }
             return Response(post_result)
@@ -496,7 +496,7 @@ class sampleOneView(APIView):
                 "request": request,
             }
             return Response(post_result)
-    #删除用料单位
+    #删除样品类型
     @csrf_exempt
     def delete(self, request, nid):
         try:
@@ -509,12 +509,12 @@ class sampleOneView(APIView):
             error_code = 0
             post_result = {
                 "error_code": error_code,
-                "message": "样品分类删除成功!",
+                "message": "样品类型删除成功!",
                 "request": request,
             }
             return Response(post_result)
         except:
-            msg = "样品分类不存在!",
+            msg = "样品类型不存在!",
             error_code = 10020
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -568,7 +568,7 @@ class sampleSortView(APIView):
 
 ############################起运港###############################################
 class harbourView(APIView):
-    # 样品类型名称
+    # 起运港/目的港
     @csrf_exempt
     def get(self, request):
         data = request.query_params
@@ -578,20 +578,29 @@ class harbourView(APIView):
             result = []
             try:
                 rObj = Harbour.objects.filter(harbour_type=data["harbour_type"],delete_time=None).order_by('weight')
-                for one in rObj:
-                    bObj = Basic.objects.get(id=one.order_id)
-                    temp = {}
-                    if one.active == 1:
-                        temp['active'] = True
-                    else:
-                        temp['active'] = False
-                    temp["harbour_en"] = one.harbour_en
-                    temp["harbour_zh"] = one.harbour_zh
-                    temp['harbour_id'] = one.id
-                    temp['basic_value_zh'] = bObj.basic_value_zh
-                    temp['weight'] = one.weight
-                    result.append(temp)
-                return Response(result)
+                if rObj.count()>0:
+                    for one in rObj:
+                        bObj = Basic.objects.get(id=one.order_id)
+                        temp = {}
+                        if one.active == 1:
+                            temp['active'] = True
+                        else:
+                            temp['active'] = False
+                        temp["harbour_en"] = one.harbour_en
+                        temp["harbour_zh"] = one.harbour_zh
+                        temp['harbour_id'] = one.id
+                        temp['basic_value_zh'] = bObj.basic_value_zh
+                        temp['weight'] = one.weight
+                        result.append(temp)
+                    return Response(result)
+                else:
+                    request = request.method + '  ' + request.get_full_path()
+                    post_result = {
+                        "error_code": 1,
+                        "data": [],
+                        "request": request
+                    }
+                    return Response(post_result)
             except:
                 msg = "未找到对应的起运港"
                 error_code = 10030
@@ -613,7 +622,7 @@ class harbourView(APIView):
             }
             return Response(post_result)
 
-    # 添加用料单位
+    # 添加起运港/目的港
     @csrf_exempt
     def post(self, request):
         # data = request.query_params
@@ -744,7 +753,7 @@ class harbourView(APIView):
             return Response(post_result)
 
 class houbourOneView(APIView):
-    #订单类型更新-active
+    #起运港-active
     @csrf_exempt
     def put(self, request, nid):
         data = request.query_params
@@ -778,7 +787,7 @@ class houbourOneView(APIView):
                 "request": request,
             }
             return Response(post_result)
-    #删除用料单位
+    #删除起运港
     @csrf_exempt
     def delete(self, request, nid):
         try:
@@ -807,7 +816,7 @@ class houbourOneView(APIView):
             return Response(post_result)
 
 class harbourSortView(APIView):
-    #样品类型名称排序
+    #起运港排序
     def put(self,request,bid):
         data = request.query_params
         valObj = BasicSortSerializer(data=request.query_params)
@@ -853,7 +862,10 @@ class sizeView(APIView):
     @csrf_exempt
     def get(self, request):
         result = []
-        try:
+        data = request.query_params
+        valObj = goodsSizeSerializer(data=request.query_params)
+        result = []
+        if valObj.is_valid():
             rObj = GoodsSize.objects.filter(delete_time=None).order_by('weight')
             for one in rObj:
                 temp = {}
@@ -880,7 +892,7 @@ class sizeView(APIView):
                 temp['weight'] = one.weight
                 result.append(temp)
             return Response(result)
-        except:
+        else:
             msg = "未找到商品尺码名称"
             error_code = 10030
             request = request.method + '  ' + request.get_full_path()
@@ -891,7 +903,7 @@ class sizeView(APIView):
             }
             return Response(post_result)
 
-    # 添加用料单位
+    # 添加商品尺码
     @csrf_exempt
     def post(self, request):
         # data = request.query_params
@@ -1998,7 +2010,7 @@ class singlesetView(APIView):
                         cObj = CustomerType.objects.filter(id=done['customer_type_id'])
                         if cObj.count()>0:
                             cObj[0].seleted_single = 1
-                            cObj[0].seleted_invoice = 1
+                            cObj[0].seleted_invoice = 0
                             cObj[0].update_time = dt
                             cObj[0].save()
                         bObj.type_id = btObj[0].id
@@ -2136,9 +2148,9 @@ class singlesetOneView(APIView):
             }
             return Response(post_result)
 
-############################ 合同号设置###############################################
+############################  发票号设置###############################################
 class invoiceView(APIView):
-    # 查询订单号
+    # 查询 发票号
     @csrf_exempt
     def get(self, request):
         result = []
@@ -2163,7 +2175,7 @@ class invoiceView(APIView):
             }
             return Response(post_result)
 
-    # 添加 订单号设置
+    # 添加  发票号
     @csrf_exempt
     def post(self, request):
         data = request.query_params
@@ -2220,7 +2232,7 @@ class invoiceView(APIView):
             return Response(post_result)
 
 class invoiceOneView(APIView):
-    #订单号更新-active
+    # 发票号更新-active
     @csrf_exempt
     def put(self, request, nid):
         data = request.query_params
@@ -4541,7 +4553,7 @@ class customerTypeSortView(APIView):
 
 ############################客户档案设置###############################################
 class customer_filesView(APIView):
-    # 客户类型名称
+    # 客户档案
     @csrf_exempt
     def get(self, request):
         data = request.query_params
@@ -4549,10 +4561,25 @@ class customer_filesView(APIView):
         if valObj.is_valid():
             result = []
             try:
-                if data['type_id'] !='0':
-                    rObj = CustomerFiles.objects.filter(type_id=data['type_id'], delete_time=None)
+                customer_simple_name = valObj.data['customer_simple_name'] if valObj.data['customer_simple_name'] is not None else ""
+                order_type = valObj.data['order_type'] if valObj.data['order_type'] is not None else 0
+                brand = valObj.data['brand'] if valObj.data['brand'] is not None else ""
+                active = valObj.data['active'] if valObj.data['active'] is not None else 2
+                if order_type==1:
+                    rObj = CustomerFiles.objects.filter(delete_time=None).order_by("type_id")
+                elif order_type==2:
+                    rObj = CustomerFiles.objects.filter(delete_time=None).order_by("create_time")
                 else:
                     rObj = CustomerFiles.objects.filter(delete_time=None)
+
+                if data['type_id'] !='0':
+                    rObj = CustomerFiles.filter(type_id=data['type_id'])
+
+                if customer_simple_name:
+                    rObj = rObj.filter(customer_simple_name__contain=customer_simple_name)
+                if active!=2:
+                    rObj = rObj.filter(active=active)
+
                 for one in rObj:
                     temp = {}
                     if one.active == 1:
@@ -4591,7 +4618,7 @@ class customer_filesView(APIView):
             }
             return Response(post_result)
 
-    # 添加客户类型
+    # 添加客户档案
     @csrf_exempt
     def post(self, request):
         # data = request.query_params
@@ -6652,7 +6679,7 @@ class archiveOneView(APIView):
 #*******************************注意事项****************************************************
 ############################类别设置###############################################
 class categoryView(APIView):
-    # 部门岗位
+    # 类别设置
     @csrf_exempt
     def get(self, request):
         data = request.query_params
@@ -6949,49 +6976,63 @@ class notesView(APIView):
     @csrf_exempt
     def get(self, request):
         data = request.query_params
-        result = []
-        try:
-            rObj = ClothCategory.objects.filter(delete_time=None).order_by('weight')
-            for one in rObj:
-                cobj = Cloth.objects.filter(id=one.cloth_id, delete_time=None)
-                if cobj.count()>0:
-                    ccobj = ClothClass.objects.filter(id=cobj[0].class_id, delete_time=None)
-                    if ccobj.count() > 0:
-                        temp = {}
-                        temp["cloth_class_name"] = ccobj[0].cloth_class_name
-                        temp["cloth_class_id"] = ccobj[0].id
-                        temp["category_name"] = one.category_name
-                        temp['category_id'] = one.id
-                        temp["cloth_name"] = cobj[0].cloth
-                        temp['cloth_id'] = cobj[0].id
-                        subnotes = ClothNotes.objects.filter(category_id=one.id,delete_time=None).order_by('weight')
-                        samp = []
-                        for o in subnotes:
-                            sampd = {}
-                            if o.active == 1:
-                                sampd['active'] = True
-                            else:
-                                sampd['active'] = False
-                            sampd['category_name'] = one.category_name
-                            sampd['category_id'] = o.category_id
-                            sampd['notes_id'] = o.id
-                            sampd['notes_name'] = o.notes_name
-                            sampd['delete_time'] = o.delete_time
-                            sampd['weight'] = o.weight
-                            samp.append(sampd)
-                        temp['notes'] = samp
-                        result.append(temp)
-            return Response(result)
-        except:
-            msg = "未找到对应的注意事项"
-            error_code = 10030
-            request = request.method + '  ' + request.get_full_path()
-            post_result = {
-                "error_code": error_code,
-                "message": msg,
-                "request": request,
-            }
-            return Response(post_result)
+        valObj = categoryNoteGetSerializer(data=request.query_params)
+        if valObj.is_valid():
+            result = []
+            try:
+                rObj = ClothCategory.objects.filter(delete_time=None).order_by('weight')
+                cloth_class_id = valObj.data['cloth_class_id'] if valObj.data['cloth_class_id'] is not None else 0
+                cloth_id = valObj.data['cloth_id'] if valObj.data['cloth_id'] is not None else 0
+                cloth_category_id = valObj.data['cloth_category_id'] if valObj.data['cloth_category_id'] is not None else 0
+                if cloth_class_id:
+                    clothObj = Cloth.objects.filter(class_id = cloth_class_id)
+                    if clothObj.count()>0:
+                        ids = [one.id for one in clothObj]
+                        rObj = rObj.filter(cloth_id__in=ids)
+                if cloth_id:
+                    rObj = rObj.filter(cloth_id=cloth_id)
+                if cloth_category_id:
+                    rObj = rObj.filter(id=cloth_category_id)
+                for one in rObj:
+                    cobj = Cloth.objects.filter(id=one.cloth_id, delete_time=None)
+                    if cobj.count()>0:
+                        ccobj = ClothClass.objects.filter(id=cobj[0].class_id, delete_time=None)
+                        if ccobj.count() > 0:
+                            temp = {}
+                            temp["cloth_class_name"] = ccobj[0].cloth_class_name
+                            temp["cloth_class_id"] = ccobj[0].id
+                            temp["category_name"] = one.category_name
+                            temp['category_id'] = one.id
+                            temp["cloth_name"] = cobj[0].cloth
+                            temp['cloth_id'] = cobj[0].id
+                            subnotes = ClothNotes.objects.filter(category_id=one.id,delete_time=None).order_by('weight')
+                            samp = []
+                            for o in subnotes:
+                                sampd = {}
+                                if o.active == 1:
+                                    sampd['active'] = True
+                                else:
+                                    sampd['active'] = False
+                                sampd['category_name'] = one.category_name
+                                sampd['category_id'] = o.category_id
+                                sampd['notes_id'] = o.id
+                                sampd['notes_name'] = o.notes_name
+                                sampd['delete_time'] = o.delete_time
+                                sampd['weight'] = o.weight
+                                samp.append(sampd)
+                            temp['notes'] = samp
+                            result.append(temp)
+                return Response(result)
+            except:
+                msg = "未找到对应的注意事项"
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
 
     # 添加
     @csrf_exempt
@@ -7227,11 +7268,17 @@ class category_setView(APIView):
     @csrf_exempt
     def get(self, request):
         data = request.query_params
-        valObj = ocategorySerializer(data=request.query_params)
+        valObj = categorySerializer(data=request.query_params)
         if valObj.is_valid():
             result = []
             try:
                 rObj = OtherSubCategory.objects.filter(delete_time=None).order_by('weight')
+                category_id = valObj.data['category_id'] if valObj.data['category_id'] is not None else 0
+                sub_category_id = valObj.data['sub_category_id'] if valObj.data['sub_category_id'] is not None else 0
+                if category_id:
+                    rObj = rObj.filter(category_id=category_id)
+                if sub_category_id:
+                    rObj = rObj.filter(id=sub_category_id)
                 for one in rObj:
                     pobj = OtherCategory.objects.filter(id=one.category_id, delete_time=None)
                     if pobj.count() > 0:
@@ -8022,49 +8069,63 @@ class other_notesView(APIView):
     @csrf_exempt
     def get(self, request):
         data = request.query_params
-        result = []
-        try:
-            rObj = OtherCategorySetting.objects.filter(delete_time=None).order_by('weight')
-            for one in rObj:
-                cobj = OtherSubCategory.objects.filter(id=one.sub_category_id, delete_time=None)
-                if cobj.count()>0:
-                    ccobj = OtherCategory.objects.filter(id=cobj[0].category_id, delete_time=None)
-                    if ccobj.count() > 0:
-                        temp = {}
-                        temp["category_name"] = ccobj[0].category_name
-                        temp["category_id"] = ccobj[0].id
-                        temp["category_setting_name"] = one.category_name
-                        temp['category_setting_id'] = one.id
-                        temp["sub_name"] = cobj[0].sub_name
-                        temp['sub_category_id'] = cobj[0].id
-                        subnotes = OtherNotes.objects.filter(category_setting_id=one.id,delete_time=None).order_by('weight')
-                        samp = []
-                        for o in subnotes:
-                            sampd = {}
-                            if o.active == 1:
-                                sampd['active'] = True
-                            else:
-                                sampd['active'] = False
-                            sampd['category_setting_name'] = one.category_name
-                            sampd['category_setting_id'] = o.category_setting_id
-                            sampd['notes_id'] = o.id
-                            sampd['notes_name'] = o.notes_name
-                            sampd['delete_time'] = o.delete_time
-                            sampd['weight'] = o.weight
-                            samp.append(sampd)
-                        temp['notes'] = samp
-                        result.append(temp)
-            return Response(result)
-        except:
-            msg = "未找到对应的注意事项"
-            error_code = 10030
-            request = request.method + '  ' + request.get_full_path()
-            post_result = {
-                "error_code": error_code,
-                "message": msg,
-                "request": request,
-            }
-            return Response(post_result)
+        valObj = categoryNoteGetSerializer(data=request.query_params)
+        if valObj.is_valid():
+            result = []
+            try:
+                rObj = OtherCategorySetting.objects.filter(delete_time=None).order_by('weight')
+                category_id = valObj.data['category_id'] if valObj.data['category_id'] is not None else 0
+                sub_category_id = valObj.data['sub_category_id'] if valObj.data['sub_category_id'] is not None else 0
+                otehr_cat_set_id = valObj.data['otehr_cat_set_id'] if valObj.data['otehr_cat_set_id'] is not None else 0
+                if category_id:
+                    clothObj = OtherSubCategory.objects.filter(category_id=category_id)
+                    if clothObj.count() > 0:
+                        ids = [one.id for one in clothObj]
+                        rObj = rObj.filter(sub_category_id__in=ids)
+                if sub_category_id:
+                    rObj = rObj.filter(sub_category_id=sub_category_id)
+                if otehr_cat_set_id:
+                    rObj = rObj.filter(id=otehr_cat_set_id)
+                for one in rObj:
+                    cobj = OtherSubCategory.objects.filter(id=one.sub_category_id, delete_time=None)
+                    if cobj.count()>0:
+                        ccobj = OtherCategory.objects.filter(id=cobj[0].category_id, delete_time=None)
+                        if ccobj.count() > 0:
+                            temp = {}
+                            temp["category_name"] = ccobj[0].category_name
+                            temp["category_id"] = ccobj[0].id
+                            temp["category_setting_name"] = one.category_name
+                            temp['category_setting_id'] = one.id
+                            temp["sub_name"] = cobj[0].sub_name
+                            temp['sub_category_id'] = cobj[0].id
+                            subnotes = OtherNotes.objects.filter(category_setting_id=one.id,delete_time=None).order_by('weight')
+                            samp = []
+                            for o in subnotes:
+                                sampd = {}
+                                if o.active == 1:
+                                    sampd['active'] = True
+                                else:
+                                    sampd['active'] = False
+                                sampd['category_setting_name'] = one.category_name
+                                sampd['category_setting_id'] = o.category_setting_id
+                                sampd['notes_id'] = o.id
+                                sampd['notes_name'] = o.notes_name
+                                sampd['delete_time'] = o.delete_time
+                                sampd['weight'] = o.weight
+                                samp.append(sampd)
+                            temp['notes'] = samp
+                            result.append(temp)
+                return Response(result)
+            except:
+                msg = "未找到对应的注意事项"
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
 
     # 添加
     @csrf_exempt

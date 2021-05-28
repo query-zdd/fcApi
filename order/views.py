@@ -511,6 +511,12 @@ class machiningView(APIView):
                     orderline = PlanOrderLine.objects.get(id=data['order_line_id'])
                     orderline.is_work_progrem =1
                     orderline.save()
+                    # 更新order
+                    order = PlanOrder.objects.get(id=data['order_id'])
+                    order.is_work_progrem = 1
+                    pg_num = PlanOrderLine.objects.filter(order_id=data['order_id'], is_work_progrem=1).count()
+                    order.is_work_progrem = pg_num
+                    order.save()
                 except:
                     pass
                 msg = "创建/编辑出货方案成功"

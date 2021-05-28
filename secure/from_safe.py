@@ -32,7 +32,11 @@ class SampleInsertSerializer(serializers.Serializer):
 
 #港口类型
 class harborSerializer(serializers.Serializer):
-    harbour_type = serializers.CharField(error_messages={'required':'港口类型不能为空'})
+    harbour_type = serializers.CharField(default="")
+
+#商品尺码
+class goodsSizeSerializer(serializers.Serializer):
+    goods_size = serializers.CharField(error_messages={'required':'港口类型不能为空'})
 
 class harborOneSerializer(serializers.Serializer):
     harbour_zh = serializers.CharField(error_messages={'required':'必须传入港口名称(中文)'})
@@ -86,6 +90,10 @@ class invoiceSerializer(serializers.Serializer):
 
 class customer_filesSerializer(serializers.Serializer):
     type_id = serializers.CharField(error_messages={'required': '类型不能为空'})
+    customer_simple_name = serializers.CharField(default="")
+    order_type = serializers.CharField(default=0)
+    brand = serializers.CharField(default="")
+    active = serializers.CharField(default=2)
 
 class customer_filesOneSerializer(serializers.Serializer):
     type_id = serializers.CharField(error_messages={'required': '类型不能为空'})
@@ -233,6 +241,16 @@ class categorySerializer(serializers.Serializer):
     cloth_class_id = serializers.IntegerField(default=0)
     cloth_id = serializers.IntegerField(default=0)
 
+class categoryNoteGetSerializer(serializers.Serializer):
+    cloth_class_id = serializers.IntegerField(default=0)
+    cloth_id = serializers.IntegerField(default=0)
+    cloth_category_id = serializers.IntegerField(default=0)
+
+class othercategoryNoteGetSerializer(serializers.Serializer):
+    category_id = serializers.IntegerField(default=0)
+    sub_category_id = serializers.IntegerField(default=0)
+    otehr_cat_set_id = serializers.IntegerField(default=0)
+
 class categoryOneSerializer(serializers.Serializer):
     category_name = serializers.CharField(error_messages={'required': '必须传入注意事项类别'})
     active = serializers.ChoiceField(default=0,choices=[(0,'inactive'),(1,'active')])
@@ -250,6 +268,10 @@ class notesOneSerializer(serializers.Serializer):
 class notesUOneSerializer(serializers.Serializer):
     notes_name = serializers.CharField(error_messages={'required': '必须传入注意事项内容'})
     active = serializers.ChoiceField(default=0,choices=[(0,'inactive'),(1,'active')])
+
+class othercategorySerializer(serializers.Serializer):
+    category_id = serializers.IntegerField(default=0)
+    sub_category_id = serializers.IntegerField(default=0)
 
 class ocategorySerializer(serializers.Serializer):
     category_id = serializers.IntegerField(default=0)
