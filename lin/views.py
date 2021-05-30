@@ -4573,11 +4573,11 @@ class customer_filesView(APIView):
                     rObj = CustomerFiles.objects.filter(delete_time=None)
 
                 if data['type_id'] !='0':
-                    rObj = CustomerFiles.filter(type_id=data['type_id'])
+                    rObj = rObj.filter(type_id=data['type_id'])
 
                 if customer_simple_name:
                     rObj = rObj.filter(customer_simple_name__contain=customer_simple_name)
-                if active!=2:
+                if active != '2':
                     rObj = rObj.filter(active=active)
 
                 for one in rObj:
