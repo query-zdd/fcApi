@@ -4965,7 +4965,7 @@ class contactOneView(APIView):
                 rObj = CustomerContact.objects.filter(customer_id=nid, delete_time=None)
                 for one in rObj:
                     temp = {}
-                    temp["contact_id"] = one.id
+                    temp["id"] = one.id
                     temp["contact_name"] = one.contact_name
                     temp["customer_id"] = one.customer_id
                     temp["department_name"] = one.department_name
