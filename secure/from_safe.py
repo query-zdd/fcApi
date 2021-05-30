@@ -36,7 +36,7 @@ class harborSerializer(serializers.Serializer):
 
 #商品尺码
 class goodsSizeSerializer(serializers.Serializer):
-    goods_size = serializers.CharField(error_messages={'required':'港口类型不能为空'})
+    goods_size = serializers.CharField(default="")
 
 class harborOneSerializer(serializers.Serializer):
     harbour_zh = serializers.CharField(error_messages={'required':'必须传入港口名称(中文)'})
