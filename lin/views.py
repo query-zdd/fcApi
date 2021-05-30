@@ -6250,6 +6250,7 @@ class templateOneView(APIView):
                             bObj.template_url = done['template_url']
                             bObj.required = done['required']
                             bObj.active = done['active']
+                            bObj.type_id = done['type_id']
                             if not mid:
                                 bObj.weight = num
                             bObj.save()
