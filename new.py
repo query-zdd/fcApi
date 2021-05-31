@@ -687,6 +687,7 @@ class OtherCategory(models.Model):
     category_name = models.CharField(max_length=25)
     active = models.SmallIntegerField()
     weight = models.IntegerField()
+    category_id = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False

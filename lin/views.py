@@ -7886,7 +7886,7 @@ class sub_categoryView(APIView):
                         bObj.active = done['active']
                         bObj.save()
                     else:
-                        ccat = OtherCategory.objects.filter(
+                        ccat = OtherSubCategory.objects.filter(
                             sub_name=done['sub_name'],
                             category_id=done['category_id'],
                             delete_time=None
