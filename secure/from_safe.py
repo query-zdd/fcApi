@@ -294,9 +294,9 @@ class othercategerOneSerializer(serializers.Serializer):
     active = serializers.ChoiceField(default=0, choices=[(0, 'inactive'), (1, 'active')])
 
 class ocategorysubOneSerializer(serializers.Serializer):
-    sub_name = serializers.IntegerField(error_messages={'required': '必须传入类别名称'})
+    sub_name = serializers.CharField(error_messages={'required': '必须传入类别名称'})
     active = serializers.ChoiceField(default=0, choices=[(0, 'inactive'), (1, 'active')])
-    category_id = serializers.CharField(error_messages={'required': '类别分类不能为空'})
+    category_id = serializers.IntegerField(error_messages={'required': '类别分类不能为空'})
 
 class ocategorysubUOneSerializer(serializers.Serializer):
     sub_name = serializers.IntegerField(error_messages={'required': '必须传入类别名称'})
