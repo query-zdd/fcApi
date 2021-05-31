@@ -290,7 +290,7 @@ class othercategerSerializer(serializers.Serializer):
     category_name = serializers.CharField(default="")
 
 class othercategerOneSerializer(serializers.Serializer):
-    category_name = serializers.IntegerField(error_messages={'required': '必须传入类别分类'})
+    category_name = serializers.CharField(error_messages={'required': '必须传入类别分类'})
     active = serializers.ChoiceField(default=0, choices=[(0, 'inactive'), (1, 'active')])
 
 class ocategorysubOneSerializer(serializers.Serializer):
