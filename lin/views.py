@@ -6155,7 +6155,7 @@ class templateOneView(APIView):
     def get(self, request, nid):
         result = []
         try:
-            rObj = DataTemplate.objects.filter(id=nid, delete_time=None).order_by('weight')
+            rObj = DataTemplate.objects.filter(type_id=nid, delete_time=None).order_by('weight')
             for one in rObj:
                 temp = {}
                 if one.active == 1:
