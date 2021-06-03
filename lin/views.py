@@ -6677,6 +6677,233 @@ class archiveOneView(APIView):
             }
             return Response(post_result)
 
+
+############################入离职资料上传设置###############################################
+class archiveInFile(APIView):
+    @csrf_exempt
+    def get(self, request):
+        data = request.query_params
+        valObj = archivesFileOneSerializer(data=request.query_params)
+        if valObj.is_valid():
+            result = []
+            try:
+                rObj = DataTemplate.objects.filter(delete_time=None,type_id=data['type_id'])
+                for one in rObj:
+                    samp = {}
+                    dtaObj = DataTemplateArchives.objects.filter(type_id=data['type_id'],
+                                                                 archives_id=data['archives_id'],template_id=one.id)
+                    if dtaObj.count()>0:
+                        samp['name'] = dtaObj[0].name
+                        samp['type_id'] = dtaObj[0].type_id
+                        samp['template_url'] = dtaObj[0].template_url
+                        samp['template_id'] = dtaObj[0].template_id
+                        samp['id'] = dtaObj[0].id
+                        samp['required'] = one.required
+                        samp['status'] = 1
+                        result.append(samp)
+                    else:
+                        samp['name'] = one.name
+                        samp['type_id'] = one.type_id
+                        samp['template_url'] = ""
+                        samp['template_id'] = one.id
+                        samp['required'] = one.required
+                        samp['id'] = 0
+                        samp['status'] = 0
+                        result.append(samp)
+
+                temp = {}
+                temp["data"] = result
+                temp['error_code'] = 0
+                temp['message'] = "获取成功"
+                return Response(temp)
+            except:
+                msg = "未找到对应的工号"
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+    # 添加员工档案
+    @csrf_exempt
+    def post(self, request):
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认api接口名称！"
+            samp['key_num'] = "api_name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = archivesFileSerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
+        dt = datetime.now()
+        if d_flag == 0:
+            for done in data:
+                try:
+                    mid = done["id"]
+                    if mid:
+                        bObj = DataTemplateArchives.objects.get(id=mid)
+                        bObj.update_time = dt
+                        bObj.template_url = done['template_url']
+                        bObj.name = done['name']
+                        bObj.type_id = done['type_id']
+                        bObj.archives_id = done['archives_id']
+                        bObj.template_id = done['template_id']
+                        bObj.save()
+                    else:
+                        archives = DataTemplateArchives.objects.filter(
+                            name=done['name'],
+                            type_id = done['type_id'],
+                            delete_time=None
+                        )
+                        if archives.count() > 0:
+                            d_flag = 1
+                            samp = {}
+                            samp['msg'] = "员工档案资料已经存在"
+                            samp['key_num'] = done['name']
+                            l_msg.append(samp)
+                        else:
+                            bObj = DataTemplateArchives()
+                            bObj.create_time = dt
+                            bObj.template_url = done['template_url']
+                            bObj.name = done['name']
+                            bObj.type_id = done['type_id']
+                            bObj.archives_id = done['archives_id']
+                            bObj.template_id = done['template_id']
+                            bObj.save()
+                except:
+                    msg = "参数校验不通过！"
+                    error_code = 10030
+                    request = request.method + '  ' + request.get_full_path()
+                    post_result = {
+                        "error_code": error_code,
+                        "message": msg,
+                        "request": request,
+                    }
+                    return Response(post_result)
+            if d_flag ==0:
+                msg = "录入员工档案资料"
+                error_code = 0
+            else:
+                msg = l_msg
+                error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+        else:
+            msg = l_msg
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = Archives.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "员工档案删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "员工档案不存在!"
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request
+            }
+            return Response(post_result)
+
+
+class archiveInFileOneView(APIView):
+    #员工档案更新-active
+    @csrf_exempt
+    def post(self, request, nid):
+        data = request.query_params
+        valObj = archivesOneEditSerializer(data=request.query_params)
+        if valObj.is_valid():
+            type_id = valObj.data['type_id'] if valObj.data['type_id'] is not None else 0
+            birthday_mouth = valObj.data['birthday_mouth'] if valObj.data['birthday_mouth'] is not None else 0
+            birthday_day = valObj.data['birthday_day'] if valObj.data['birthday_day'] is not None else 0
+            leave_time = valObj.data['leave_time'] if valObj.data['leave_time'] is not None else ""
+            dt = datetime.now()
+            bObj = Archives.objects.get(id=nid)
+            if type_id==1:
+                bObj.birthday_mouth = birthday_mouth
+                bObj.birthday_day = birthday_day
+                bObj.update_time = dt
+                bObj.save()
+            else:
+                bObj.leave_time = leave_time
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "更新入离职资料成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
 #*******************************注意事项****************************************************
 ############################类别设置###############################################
 class categoryView(APIView):
@@ -9698,9 +9925,9 @@ class planOrderView(APIView):
             order.order_type = data['order_type']
             order.plan_id = data['plan_id']
             planObj = Plan.objects.get(id=data['plan_id'])
-            cusObj = CustomerCompany.objects.get(id=planObj.customer_name_id)
+            cusObj = CustomerFiles.objects.get(id=planObj.customer_name_id)
             bobj = Marks.objects.get(id=planObj.brand_id)
-            order.custom = cusObj.company_name_simple
+            order.custom = cusObj.customer_simple_name
             order.price_code = planObj.price_code
             order.is_pushprogram = 0
             order.is_workprogram = 0

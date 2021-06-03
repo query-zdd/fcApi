@@ -115,6 +115,10 @@ urlpatterns = [
     url('^archive$', views.archiveView.as_view()),
     url('^archive/(?P<nid>\d+)', views.archiveOneView.as_view()),
 
+    #入离职档案设置
+    url('^archiveInFile$', views.archiveInFile.as_view()),
+    url('^archiveInFile/(?P<nid>\d+)', views.archiveInFileOneView.as_view()),
+
     #注意事项-类别设置
     url('^category$', views.categoryView.as_view()),
     url('^category/(?P<nid>\d+)', views.categoryOneView.as_view()),

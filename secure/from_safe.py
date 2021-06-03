@@ -223,6 +223,24 @@ class archivesSerializer(serializers.Serializer):
     post_id = serializers.IntegerField(default=0)
     name = serializers.CharField(default="")
 
+class archivesFileOneSerializer(serializers.Serializer):
+    type_id = serializers.IntegerField(error_messages={'required': '必须传入入离职信息id'})
+    archives_id = serializers.IntegerField(error_messages={'required': '必须传入员工id'})
+
+class archivesOneEditSerializer(serializers.Serializer):
+    leave_time = serializers.CharField(default="")
+    birthday_day = serializers.IntegerField(default=0)
+    birthday_mouth = serializers.IntegerField(default=0)
+    type_id = serializers.IntegerField(default=0)
+
+
+class archivesFileSerializer(serializers.Serializer):
+    name = serializers.CharField(error_messages={'required': '必须传入资料模版名称'})
+    template_url = serializers.CharField(error_messages={'required': '必须传入模版资源路径'})
+    type_id = serializers.IntegerField(error_messages={'required': '必须传入模版类型'})
+    archives_id = serializers.IntegerField(error_messages={'required': '必须传入员工的id'})
+    template_id = serializers.IntegerField(error_messages={'required': '必须传入员工资料模板的id'})
+
 class archivesOneSerializer(serializers.Serializer):
     name = serializers.CharField(error_messages={'required': '必须传入姓名'})
     gender = serializers.ChoiceField(default=0,choices=[(0,'male'),(1,'female')])
@@ -235,7 +253,6 @@ class archivesOneSerializer(serializers.Serializer):
     due_to_time = serializers.CharField(error_messages={'required': '必须传入到期时间'})
     enter_time = serializers.CharField(error_messages={'required': '必须传入入职时间'})
     leave_time = serializers.CharField(error_messages={'required': '必须传入离职时间'})
-
 
 class categorySerializer(serializers.Serializer):
     cloth_class_id = serializers.IntegerField(default=0)

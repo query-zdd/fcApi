@@ -25,6 +25,8 @@ class Archives(models.Model):
     status = models.SmallIntegerField(blank=True, null=True)
     enter_time = models.DateTimeField(blank=True, null=True)
     leave_time = models.DateTimeField(blank=True, null=True)
+    birthday_mouth = models.SmallIntegerField(blank=True, null=True)
+    birthday_day = models.SmallIntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -326,6 +328,23 @@ class DataTemplate(models.Model):
     class Meta:
         managed = False
         db_table = 'data_template'
+
+
+class DataTemplateArchives(models.Model):
+    create_time = models.DateTimeField(blank=True, null=True)
+    update_time = models.DateTimeField(blank=True, null=True)
+    delete_time = models.DateTimeField(blank=True, null=True)
+    type_id = models.SmallIntegerField(blank=True, null=True)
+    name = models.CharField(max_length=100, blank=True, null=True)
+    template_url = models.CharField(max_length=255, blank=True, null=True)
+    required = models.SmallIntegerField(blank=True, null=True)
+    active = models.SmallIntegerField(blank=True, null=True)
+    archives_id = models.IntegerField(blank=True, null=True)
+    template_id = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'data_template_archives'
 
 
 class Department(models.Model):
