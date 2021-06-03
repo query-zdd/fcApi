@@ -967,7 +967,7 @@ class PlanOrderLine(models.Model):
     delete_time = models.DateTimeField(blank=True, null=True)
     custom_type = models.CharField(max_length=255, blank=True, null=True)
     order_custom = models.CharField(max_length=255, blank=True, null=True)
-    order_type = models.CharField(max_length=255, blank=True, null=True)
+    order_type = models.IntegerField(blank=True, null=True)
     contract_num = models.IntegerField(blank=True, null=True)
     short_overflow = models.IntegerField(blank=True, null=True)
     short_overflow_direct = models.IntegerField(blank=True, null=True)
