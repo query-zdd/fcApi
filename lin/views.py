@@ -7496,7 +7496,7 @@ class category_setView(APIView):
     @csrf_exempt
     def get(self, request):
         data = request.query_params
-        valObj = categorySerializer(data=request.query_params)
+        valObj = othercategorySerializer(data=request.query_params)
         if valObj.is_valid():
             result = []
             try:
@@ -8297,55 +8297,61 @@ class other_notesView(APIView):
     @csrf_exempt
     def get(self, request):
         data = request.query_params
-        valObj = categoryNoteGetSerializer(data=request.query_params)
+        valObj = othercategoryNoteGetSerializer(data=request.query_params)
         if valObj.is_valid():
             result = []
             try:
-                rObj = OtherCategorySetting.objects.filter(delete_time=None).order_by('weight')
+                rObj = OtherSubCategory.objects.filter(delete_time=None).order_by('weight')
                 category_id = valObj.data['category_id'] if valObj.data['category_id'] is not None else 0
                 sub_category_id = valObj.data['sub_category_id'] if valObj.data['sub_category_id'] is not None else 0
                 otehr_cat_set_id = valObj.data['otehr_cat_set_id'] if valObj.data['otehr_cat_set_id'] is not None else 0
                 if category_id:
-                    clothObj = OtherSubCategory.objects.filter(category_id=category_id)
-                    if clothObj.count() > 0:
-                        ids = [one.id for one in clothObj]
-                        rObj = rObj.filter(sub_category_id__in=ids)
+                    rObj = rObj.filter(category_id=category_id)
                 if sub_category_id:
-                    rObj = rObj.filter(sub_category_id=sub_category_id)
+                    rObj = rObj.filter(id=sub_category_id)
                 if otehr_cat_set_id:
-                    rObj = rObj.filter(id=otehr_cat_set_id)
+                    setObj = OtherCategorySetting.objects.get(id=otehr_cat_set_id)
+                    rObj = rObj.filter(id=setObj.sub_category_id)
                 for one in rObj:
-                    cobj = OtherSubCategory.objects.filter(id=one.sub_category_id, delete_time=None)
-                    if cobj.count()>0:
-                        ccobj = OtherCategory.objects.filter(id=cobj[0].category_id, delete_time=None)
-                        if ccobj.count() > 0:
-                            temp = {}
-                            temp["category_name"] = ccobj[0].category_name
-                            temp["category_id"] = ccobj[0].id
-                            temp["category_setting_name"] = one.category_name
-                            temp['category_setting_id'] = one.id
-                            temp["sub_name"] = cobj[0].sub_name
-                            temp['sub_category_id'] = cobj[0].id
-                            subnotes = OtherNotes.objects.filter(category_setting_id=one.id,delete_time=None).order_by('weight')
-                            samp = []
-                            for o in subnotes:
-                                sampd = {}
-                                if o.active == 1:
-                                    sampd['active'] = True
+                    pobj = OtherCategory.objects.filter(id=one.category_id, delete_time=None)
+                    if pobj.count() > 0:
+                        temp = {}
+                        temp["category_id"] = pobj[0].id
+                        temp["category_name"] = pobj[0].category_name
+                        temp["sub_name"] = one.sub_name
+                        temp['sub_category_id'] = one.id
+                        subcat = OtherCategorySetting.objects.filter(sub_category_id=one.id, delete_time=None)
+                        samp = []
+                        for o in subcat:
+                            sampd = {}
+                            if o.active == 1:
+                                sampd['active'] = True
+                            else:
+                                sampd['active'] = False
+                            ssubcat = OtherNotes.objects.filter(category_setting_id=o.id)
+                            ssamp=[]
+                            for subone in ssubcat:
+                                ssampd ={}
+                                ssampd['notes_name'] = subone.notes_name
+                                ssampd['weight'] = subone.weight
+                                if subone.active == 1:
+                                    ssampd['active'] = True
                                 else:
-                                    sampd['active'] = False
-                                sampd['category_setting_name'] = one.category_name
-                                sampd['category_setting_id'] = o.category_setting_id
-                                sampd['notes_id'] = o.id
-                                sampd['notes_name'] = o.notes_name
-                                sampd['delete_time'] = o.delete_time
-                                sampd['weight'] = o.weight
-                                samp.append(sampd)
-                            temp['notes'] = samp
-                            result.append(temp)
+                                    ssampd['active'] = False
+                                ssamp.append(ssampd)
+                            sampd['notes'] = ssamp
+                            sampd['category_name'] = o.category_name
+                            sampd['category_setting_id'] = o.id
+                            sampd['sub_category_id'] = o.sub_category_id
+                            sampd['sub_name'] = one.sub_name
+                            sampd['delete_time'] = o.delete_time
+                            sampd['weight'] = o.weight
+                            samp.append(sampd)
+                        temp['sub_category'] = samp
+                        result.append(temp)
                 return Response(result)
             except:
-                msg = "未找到对应的注意事项"
+                msg = "未找到对应的类别设置"
                 error_code = 10030
                 request = request.method + '  ' + request.get_full_path()
                 post_result = {
@@ -8354,6 +8360,17 @@ class other_notesView(APIView):
                     "request": request,
                 }
                 return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
 
     # 添加
     @csrf_exempt
