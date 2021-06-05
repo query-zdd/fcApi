@@ -315,6 +315,12 @@ class factoryMakeView(APIView):
                         bObj.order_admin = order_admin
                         bObj.ticketing_custom = ticketing_custom
                         bObj.save()
+                        if mid:
+                            factory_make_id = mid
+
+                        else:
+                            fmObj = FactoryMake.objects.latest('id')
+                            factory_make_id = fmObj.id
                     except:
                         msg = "参数错误"
                         error_code = 10030
@@ -334,6 +340,7 @@ class factoryMakeView(APIView):
                     order.save()
                 except:
                     pass
+                factory_make_id =factory_make_id
                 msg = "创建/编辑工厂方案成功"
                 error_code = 0
                 request = request.method + '  ' + request.get_full_path()
@@ -341,6 +348,7 @@ class factoryMakeView(APIView):
                     "error_code": error_code,
                     "message": msg,
                     "request": request,
+                    "factory_make_id":factory_make_id,
                 }
                 return Response(post_result)
             else:
