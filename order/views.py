@@ -286,6 +286,14 @@ class factoryMakeView(APIView):
             ##############保存出货方案#############################
             if d_flag == 0:
                 for done in dataone:
+                    valObjline = factoryMakeLineSerializer(data=done)
+                    flag = valObjline.is_valid()
+                    make_time = valObjline.data['make_time'] if valObjline.data['make_time'] is not None else ""
+                    make_factory = valObjline.data['make_factory'] if valObjline.data['make_factory'] is not None else ""
+                    coop_mode = valObjline.data['coop_mode'] if valObjline.data['coop_mode'] is not None else ""
+                    inspect_company = valObjline.data['inspect_company'] if valObjline.data['inspect_company'] is not None else ""
+                    order_admin = valObjline.data['order_admin'] if valObjline.data['order_admin'] is not None else ""
+                    ticketing_custom = valObjline.data['ticketing_custom'] if valObjline.data['ticketing_custom'] is not None else ""
                     try:
                         try:
                             mid = done["id"]
@@ -299,11 +307,13 @@ class factoryMakeView(APIView):
                             bObj = FactoryMake()
                             bObj.create_time = dt
                         bObj.order_id = data['order_id']
-                        bObj.make_time = done['make_time']
-                        bObj.make_factory = done['make_factory']
-                        bObj.inspect_company = done['inspect_company']
-                        bObj.order_admin = done['order_admin']
-                        bObj.ticketing_custom = done['ticketing_custom']
+                        if make_time:
+                            bObj.make_time = make_time
+                        bObj.make_factory = make_factory
+                        bObj.coop_mode = coop_mode
+                        bObj.inspect_company = inspect_company
+                        bObj.order_admin = order_admin
+                        bObj.ticketing_custom = ticketing_custom
                         bObj.save()
                     except:
                         msg = "参数错误"

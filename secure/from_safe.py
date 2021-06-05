@@ -568,12 +568,12 @@ class factoryMakeSerializer(serializers.Serializer):
     dhkhao = serializers.CharField(default='')
 
 class factoryMakeLineSerializer(serializers.Serializer):
-    make_time = serializers.CharField(error_messages={'required': '必须传入加工日期'})
-    make_factory = serializers.CharField(error_messages={'required': '必须传入加工工厂'})
-    coop_mode = serializers.CharField(error_messages={'required': '必须传入合作模式'})
-    inspect_company = serializers.CharField(error_messages={'required': '必须传入检品公司'})
-    order_admin = serializers.CharField(error_messages={'required': '必须传入跟单负责人'})
-    ticketing_custom = serializers.CharField(error_messages={'required': '必须传入成衣出票客户'})
+    make_time = serializers.CharField(default='')
+    make_factory = serializers.CharField(default='')
+    coop_mode = serializers.CharField(default='')
+    inspect_company = serializers.CharField(default='')
+    order_admin = serializers.CharField(default='')
+    ticketing_custom = serializers.CharField(default='')
     id = serializers.IntegerField(default=0)
 
 ######################面辅料采购###################################
