@@ -1418,6 +1418,7 @@ class shipmentOneView(APIView):
                     samp['buy_all_num'] = one.buy_all_num
                     samp['loss_lv'] = one.loss_lv
                     samp['supplier'] = one.supplier
+                    samp['all_amount'] = one.all_amount
                     samp['id'] = one.id
                     rObj = OrderClothLineShip.objects.filter(delete_time=None, order_cloth_id=nid,order_cloth_ship_id=one.id).order_by('color', 'specs')
                     samp['sub_data'] = rObj.values()
