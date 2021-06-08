@@ -743,11 +743,31 @@ class orderClothView(APIView):
                                 sbObj.color = sub['color']
                                 sbObj.color_num = sub['color_num']
                                 sbObj.specs = sub['specs']
+                                outStackObj = OutStock.objects.filter(order_id=data['order_id'],color=sub['color'],
+                                                                      color_num=sub['color_num'],specs=sub['specs'])
+                                order_num=0
+                                for one in outStackObj:
+                                    order_num +=one.order_num
+                                sbObj.order_num =order_num
                             if done['cloth_type'] ==3:
                                 sbObj.specs = sub['specs']
+                                outStackObj = OutStock.objects.filter(order_id=data['order_id'], specs=sub['specs'])
+                                order_num = 0
+                                for one in outStackObj:
+                                    order_num += one.order_num
+                                sbObj.order_num = order_num
                             if done['cloth_type'] ==2:
                                 sbObj.color = sub['color']
                                 sbObj.color_num = sub['color_num']
+                                outStackObj = OutStock.objects.filter(order_id=data['order_id'], color=sub['color'],
+                                                                      color_num=sub['color_num'])
+                                order_num = 0
+                                for one in outStackObj:
+                                    order_num += one.order_num
+                                sbObj.order_num = order_num
+                            if done['cloth_type'] ==1:
+                                orderOne = PlanOrder.objects.get(id=data['order_id'])
+                                sbObj.order_num = orderOne.order_num
                             sbObj.guige = sub['guige']
                             sbObj.buy_num = sub['buy_num']
                             sbObj.save()
@@ -1419,7 +1439,7 @@ class shipmentOneView(APIView):
                     samp['loss_lv'] = one.loss_lv
                     samp['supplier'] = one.supplier
                     samp['all_amount'] = one.all_amount
-                    
+
                     samp['id'] = one.id
                     rObj = OrderClothLineShip.objects.filter(delete_time=None, order_cloth_id=nid,order_cloth_ship_id=one.id).order_by('color', 'specs')
                     samp['sub_data'] = rObj.values()
