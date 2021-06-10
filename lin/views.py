@@ -10007,7 +10007,7 @@ class planOrderView(APIView):
                         bObj.custom_type = done['custom_type']
                         bObj.order_custom = done['order_custom']
                         bObj.order_type = done['order_type']
-                        if done['order_type'] == 2:
+                        if done['order_type'] in [2,4]:
                             bObj.price_terms = done['price_terms']
                             bObj.transportation = done['transportation']
                             bObj.pol = done['pol']
