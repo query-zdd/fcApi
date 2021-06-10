@@ -1294,8 +1294,6 @@ class shipmentView(APIView):
                         bObj.cloth_type = done['cloth_type']
                         bObj.cloth_cat = done['cloth_cat']
                         bObj.cloth_name = done['cloth_name']
-                        bObj.delivery_type = done['delivery_type']
-                        bObj.delivery_name = done['delivery_name']
                         bObj.supplier = done['supplier']
                         # bObj.buy_all_num = done['buy_all_num']
                         bObj.all_amount = done['all_amount']
@@ -1335,6 +1333,9 @@ class shipmentView(APIView):
                             sbObj.buy_num = sub['buy_num']
                             sbObj.price = sub['price']
                             sbObj.amount = sub['amount']
+                            sbObj.delivery_type = sub['delivery_type']
+                            sbObj.delivery_name = sub['delivery_name']
+                            sbObj.provide_num = sub['provide_num']
                             sbObj.provide_time = sub['provide_time']
                             sbObj.order_cloth_ship_id = order_cloth_ship_id
                             sbObj.save()
@@ -1439,7 +1440,6 @@ class shipmentOneView(APIView):
                     samp['loss_lv'] = one.loss_lv
                     samp['supplier'] = one.supplier
                     samp['all_amount'] = one.all_amount
-
                     samp['id'] = one.id
                     rObj = OrderClothLineShip.objects.filter(delete_time=None, order_cloth_id=nid,order_cloth_ship_id=one.id).order_by('color', 'specs')
                     samp['sub_data'] = rObj.values()
