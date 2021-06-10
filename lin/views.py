@@ -8341,7 +8341,7 @@ class other_notesView(APIView):
                                 ssamp.append(ssampd)
                             sampd['notes'] = ssamp
                             sampd['category_name'] = o.category_name
-                            sampd['category_setting_id'] = o.id
+                            sampd['category_set_id'] = o.id
                             sampd['sub_category_id'] = o.sub_category_id
                             sampd['sub_name'] = one.sub_name
                             sampd['delete_time'] = o.delete_time
