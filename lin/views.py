@@ -7512,7 +7512,7 @@ class category_setView(APIView):
                     if pobj.count() > 0:
                         temp = {}
                         temp["category_id"] = pobj[0].id
-                        temp["category_name"] = pobj[0].category_name
+                        temp["cat_name"] = pobj[0].category_name
                         temp["sub_name"] = one.sub_name
                         temp['sub_category_id'] = one.id
                         subcat = OtherCategorySetting.objects.filter(sub_category_id=one.id,delete_time=None)
