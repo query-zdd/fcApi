@@ -1433,8 +1433,8 @@ class shipmentOneView(APIView):
                     samp['cloth_type'] = one.cloth_type
                     samp['cloth_cat'] = one.cloth_cat
                     samp['cloth_name'] = one.cloth_name
-                    samp['delivery_type'] = one.delivery_type
-                    samp['delivery_name'] = one.delivery_name
+                    # samp['delivery_type'] = one.delivery_type
+                    # samp['delivery_name'] = one.delivery_name
                     samp['is_inspect'] = one.is_inspect
                     samp['buy_all_num'] = one.buy_all_num
                     samp['loss_lv'] = one.loss_lv
