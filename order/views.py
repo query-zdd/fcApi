@@ -223,6 +223,7 @@ class showOutStockOneView(APIView):
                         samp={}
                         samp['order_custom'] = one.order_custom
                         samp['order_type'] = one.order_type
+                        samp['contract_num'] = one.contract_num
                         samp['order_line_id'] = one.id
                         rObj = OutStock.objects.filter(delete_time=None, order_line_id=one.id).order_by('color', 'specs')
                         samp['out_stock'] = rObj.values()
