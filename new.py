@@ -721,7 +721,7 @@ class OtherCategorySetting(models.Model):
     update_time = models.DateTimeField(blank=True, null=True)
     delete_time = models.DateTimeField(blank=True, null=True)
     sub_category_id = models.IntegerField()
-    category_name = models.CharField(max_length=100)
+    category_set_name = models.CharField(max_length=100)
     active = models.SmallIntegerField()
     weight = models.IntegerField(blank=True, null=True)
 

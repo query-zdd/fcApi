@@ -295,12 +295,12 @@ class ocategorySerializer(serializers.Serializer):
     sub_category_id = serializers.IntegerField(default=0)
 
 class ocategoryOneSerializer(serializers.Serializer):
-    category_setting_name = serializers.IntegerField(error_messages={'required': '必须传入其他注意事项类别'})
+    category_set_name = serializers.CharField(error_messages={'required': '必须传入其他注意事项类别'})
     active = serializers.ChoiceField(default=0, choices=[(0, 'inactive'), (1, 'active')])
     sub_category_id = serializers.CharField(error_messages={'required': '必须传入类别名称ID'})
 
 class ocategoryUOneSerializer(serializers.Serializer):
-    category_setting_name = serializers.IntegerField(error_messages={'required': '必须传入其他注意事项类别'})
+    category_set_name = serializers.IntegerField(error_messages={'required': '必须传入其他注意事项类别'})
     active = serializers.ChoiceField(default=0, choices=[(0, 'inactive'), (1, 'active')])
 
 class othercategerSerializer(serializers.Serializer):
@@ -320,7 +320,7 @@ class ocategorysubUOneSerializer(serializers.Serializer):
     active = serializers.ChoiceField(default=0, choices=[(0, 'inactive'), (1, 'active')])
 
 class otherNotesSerializer(serializers.Serializer):
-    notes_name = serializers.IntegerField(error_messages={'required': '必须传入其他注意事项内容'})
+    notes_name = serializers.CharField(error_messages={'required': '必须传入其他注意事项内容'})
     active = serializers.ChoiceField(default=0, choices=[(0, 'inactive'), (1, 'active')])
     category_setting_id = serializers.CharField(error_messages={'required': '必须传入其他注意事项类别ID'})
 

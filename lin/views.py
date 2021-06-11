@@ -7523,7 +7523,7 @@ class category_setView(APIView):
                                 sampd['active'] = True
                             else:
                                 sampd['active'] = False
-                            sampd['category_name'] = o.category_name
+                            sampd['category_set_name'] = o.category_set_name
                             sampd['category_setting_id'] = o.id
                             sampd['sub_category_id'] = o.sub_category_id
                             sampd['sub_name'] = one.sub_name
@@ -7590,13 +7590,13 @@ class category_setView(APIView):
                     if mid:
                         bObj = OtherCategorySetting.objects.get(id=mid)
                         bObj.update_time = dt
-                        bObj.category_name = done['category_name']
+                        bObj.category_set_name = done['category_set_name']
                         bObj.sub_category_id = done['sub_category_id']
                         bObj.active = done['active']
                         bObj.save()
                     else:
                         ccat = OtherCategorySetting.objects.filter(
-                            category_name=done['category_name'],
+                            category_set_name=done['category_set_name'],
                             sub_category_id=done['sub_category_id'],
                             delete_time=None
                         )
@@ -7610,7 +7610,7 @@ class category_setView(APIView):
                             bObj = OtherCategorySetting()
                             bObj.create_time = dt
                             num = OtherCategorySetting.objects.all().count() + 1
-                            bObj.category_name = done['category_name']
+                            bObj.category_set_name = done['category_set_name']
                             bObj.sub_category_id = done['sub_category_id']
                             bObj.active = done['active']
                             bObj.weight = num
@@ -8340,7 +8340,7 @@ class other_notesView(APIView):
                                     ssampd['active'] = False
                                 ssamp.append(ssampd)
                             sampd['notes'] = ssamp
-                            sampd['category_name'] = o.category_name
+                            sampd['category_set_name'] = o.category_set_name
                             sampd['cat_set_id'] = o.id
                             sampd['sub_category_id'] = o.sub_category_id
                             sampd['sub_name'] = one.sub_name
@@ -8413,7 +8413,7 @@ class other_notesView(APIView):
                         bObj.active = done['active']
                         bObj.save()
                     else:
-                        ccat = ClothNotes.objects.filter(
+                        ccat = OtherNotes.objects.filter(
                             notes_name=done['notes_name'],
                             category_setting_id=done['category_setting_id'],
                             delete_time=None
