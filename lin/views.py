@@ -9076,14 +9076,16 @@ class planPlanerView(APIView):
                     bObj.m_sample = done['m_sample']
                     bObj.complayer = done['complayer']
                     bObj.plan_id = plan_id
-                    ppobj = Plan.objects.filter(id=plan_id)
-                    if ppobj.count()>0:
-                        bObj.edition =ppobj[0].edition + 1
+                    ppobj = Plan.objects.get(id=plan_id)
+                    if ppobj:
+                        bObj.edition =ppobj.edition + 1
                     else:
                         bObj.flag = 1
-
                     bObj.create_time = dt
                     bObj.save()
+                    #更改企划的状态
+                    ppobj.status = 1
+                    ppobj.save()
                 except:
                     msg = l_msg
                     error_code = 10030
@@ -9230,12 +9232,15 @@ class planMaterialView(APIView):
                     bObj.price = done['price']
                     bObj.total = done['total']
                     bObj.plan_id = plan_id
-                    ppobj = Plan.objects.filter(id=plan_id)
-                    if ppobj.count() > 0:
-                        bObj.edition = ppobj[0].edition + 1
+                    ppobj = Plan.objects.get(id=plan_id)
+                    if ppobj:
+                        bObj.edition = ppobj.edition + 1
                     else:
                         bObj.flag = 1
                     bObj.save()
+                    #更改企划状态
+                    ppobj.status = 2
+                    ppobj.save()
                 except:
                     msg = l_msg
                     error_code = 10030
@@ -9480,6 +9485,7 @@ class planPriceView(APIView):
                     c_l_one = PlanPriceSubCopy()
                     copyTable(one, c_l_one)
                 planOne.edition = planOne.edition +1
+                planOne.status = 0
                 planOne.save()
                 msg = "创建在建企划"
                 error_code = 0
@@ -9550,6 +9556,7 @@ class planPriceOneView(APIView):
                 c_l_one = PlanPriceSubCopy()
                 copyTable(one, c_l_one)
             planOne.edition = planOne.edition + 1
+            planOne.status = 0
             planOne.save()
             # 返回数据
             request = request.method + '  ' + request.get_full_path()
@@ -9807,7 +9814,7 @@ class planOrderView(APIView):
                         temp['request'] = request.method + '  ' + request.get_full_path()
                         return Response(temp)
                 if status==0:
-                    rObj = Plan.objects.filter(status=5)
+                    rObj = Plan.objects.filter(status=4)
                     customer_name_id = valObj.data['customer_name_id'] if valObj.data[
                                                                               'customer_name_id'] is not None else 0
                     brand_id = valObj.data['brand_id'] if valObj.data['brand_id'] is not None else 0
@@ -9869,6 +9876,9 @@ class planOrderView(APIView):
                             if one.status == 3:
                                 samp['contenter'] = pObj2.name
                                 samp['contenting'] = "企划完成"
+                            if one.status == 4:
+                                samp['contenter'] = pObj1.name
+                                samp['contenting'] = "企划关闭"
                             result.append(samp)
                         temp = {}
                         temp["data"] = result
@@ -10008,7 +10018,7 @@ class planOrderView(APIView):
                         bObj.custom_type = done['custom_type']
                         bObj.order_custom = done['order_custom']
                         bObj.order_type = done['order_type']
-                        if done['order_type'] in [2,4]:
+                        if done['order_type'] in [1,3]:
                             bObj.price_terms = done['price_terms']
                             bObj.transportation = done['transportation']
                             bObj.pol = done['pol']
@@ -10074,6 +10084,7 @@ class planOrderView(APIView):
                 "request": request,
             }
             return Response(post_result)
+
     #订单批量删除
     @csrf_exempt
     def delete(self, request):
@@ -10126,7 +10137,7 @@ class planOrderOneView(APIView):
             error_code = 0
             post_result = {
                 "error_code": error_code,
-                "message": "在建企划订单删除成功!",
+                "message": "在建企划订单项删除成功!",
                 "request": request,
             }
             return Response(post_result)
@@ -10172,7 +10183,7 @@ class planOrderOneView(APIView):
                     samp['order_line_num'] = one.order_line_num
                     samp['contract_num'] = one.contract_num
                     samp['order_num'] = one.order_num
-                    sub =PlanOrderLine.objects.filter(order_id=nid).values()
+                    sub =PlanOrderLine.objects.filter(order_id=nid,delete_time=None).values()
                     samp['data'] = sub
                     temp = {}
                     temp["data"] = samp

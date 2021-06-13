@@ -440,7 +440,7 @@ class planOrderLineOneSerializer(serializers.Serializer):
     send_time = serializers.CharField(error_messages={'required': '必须传入发货时间'})
     inspect_time = serializers.CharField(error_messages={'required': '必须传入质检时间'})
     delivery_time = serializers.CharField(error_messages={'required': '必须传入提货时间'})
-    warehouse_time = serializers.CharField(error_messages={'required': '必须传入进仓时间'})
+    # warehouse_time = serializers.CharField(error_messages={'required': '必须传入进仓时间'})
     # order_sn = serializers.CharField(error_messages={'required': '必须传入订单编号'})
     # comments = serializers.CharField(error_messages={'required': '必须传入备注信息'})
     id = serializers.CharField(default=0)
