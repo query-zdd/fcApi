@@ -24,7 +24,7 @@ class showOutStockView(APIView):
         data = request.data
         valObj = orderOutstockSerializer(data=request.data)
         if valObj.is_valid():
-            dhkhao = valObj.data['dhkhao'] if valObj.data['dhkhao'] is not None else 0
+            dhkhao = valObj.data['dhkhao'] if valObj.data['dhkhao'] is not None else ''
             #################校验数据################################
             d_flag = 0
             d_num = 0
@@ -226,7 +226,14 @@ class showOutStockOneView(APIView):
                         samp['contract_num'] = one.contract_num
                         samp['order_line_id'] = one.id
                         rObj = OutStock.objects.filter(delete_time=None, order_line_id=one.id).order_by('color', 'specs')
-                        samp['out_stock'] = rObj.values()
+                        if rObj.count()>0:
+                            samp['out_stock'] = rObj.values()
+                        else:
+                            ssamp={}
+                            ssamp['contract_num']  = one.contract_num
+                            ssamp['short_overflow'] = one.short_overflow
+                            ssamp['id'] = 0
+                            samp['out_stock'] =ssamp
                         samplist.append(samp)
 
                 temp = {}
