@@ -8334,6 +8334,7 @@ class other_notesView(APIView):
                                 ssampd ={}
                                 ssampd['notes_name'] = subone.notes_name
                                 ssampd['weight'] = subone.weight
+                                ssampd['notes_id'] = subone.id
                                 if subone.active == 1:
                                     ssampd['active'] = True
                                 else:
