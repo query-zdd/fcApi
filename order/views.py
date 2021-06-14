@@ -229,11 +229,8 @@ class showOutStockOneView(APIView):
                         if rObj.count()>0:
                             samp['out_stock'] = rObj.values()
                         else:
-                            ssamp={}
-                            ssamp['contract_num']  = one.contract_num
-                            ssamp['short_overflow'] = one.short_overflow
-                            ssamp['id'] = 0
-                            samp['out_stock'] =ssamp
+                            samp['out_stock'] = []
+                            samp['short_overflow'] = one.short_overflow
                         samplist.append(samp)
 
                 temp = {}
