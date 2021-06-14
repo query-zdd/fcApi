@@ -8410,13 +8410,13 @@ class other_notesView(APIView):
                         bObj = OtherNotes.objects.get(id=mid)
                         bObj.update_time = dt
                         bObj.notes_name = done['notes_name']
-                        bObj.category_setting_id = done['category_setting_id']
+                        bObj.category_setting_id = done['cat_set_id']
                         bObj.active = done['active']
                         bObj.save()
                     else:
                         ccat = OtherNotes.objects.filter(
                             notes_name=done['notes_name'],
-                            category_setting_id=done['category_setting_id'],
+                            category_setting_id=done['cat_set_id'],
                             delete_time=None
                         )
                         if ccat.count() > 0:
@@ -8430,7 +8430,7 @@ class other_notesView(APIView):
                             bObj.create_time = dt
                             num = OtherNotes.objects.all().count() + 1
                             bObj.notes_name = done['notes_name']
-                            bObj.category_setting_id = done['category_setting_id']
+                            bObj.category_setting_id = done['cat_set_id']
                             bObj.active = done['active']
                             bObj.weight = num
                             bObj.save()

@@ -322,7 +322,7 @@ class ocategorysubUOneSerializer(serializers.Serializer):
 class otherNotesSerializer(serializers.Serializer):
     notes_name = serializers.CharField(error_messages={'required': '必须传入其他注意事项内容'})
     active = serializers.ChoiceField(default=0, choices=[(0, 'inactive'), (1, 'active')])
-    category_setting_id = serializers.CharField(error_messages={'required': '必须传入其他注意事项类别ID'})
+    cat_set_id = serializers.IntegerField(error_messages={'required': '必须传入其他注意事项类别ID'})
 
 class otherNotesUSerializer(serializers.Serializer):
     notes_name = serializers.IntegerField(error_messages={'required': '必须传入其他注意事项内容'})
