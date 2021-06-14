@@ -536,9 +536,9 @@ class machiningView(APIView):
                     orderline.save()
                     # 更新order
                     order = PlanOrder.objects.get(id=data['order_id'])
-                    order.is_work_progrem = 1
+                    order.is_workprogram = 1
                     pg_num = PlanOrderLine.objects.filter(order_id=data['order_id'], is_work_progrem=1).count()
-                    order.is_work_progrem = pg_num
+                    order.workprogram_num = pg_num
                     order.save()
                 except:
                     pass
