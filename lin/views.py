@@ -9776,6 +9776,7 @@ class planOrderView(APIView):
                     is_pushprogram = valObj.data['is_pushprogram'] if valObj.data['is_pushprogram'] is not None else 999
                     is_workprogram = valObj.data['is_workprogram'] if valObj.data['is_workprogram'] is not None else 999
                     is_buyprogram = valObj.data['is_buyprogram'] if valObj.data['is_buyprogram'] is not None else 999
+                    is_manage = valObj.data['is_manage'] if valObj.data['is_manage'] is not None else 0
                     if order_type != 0:
                         rObj = rObj.filter(order_type = order_type)
                     if order_custom:
@@ -9795,6 +9796,10 @@ class planOrderView(APIView):
                     total = rObj.count()
                     if rObj.count() > start:
                         rObj = rObj.all()[start:start+page_size]
+                        if is_manage:
+                            for o_one in rObj:
+                                num = OrderLinePacking.objects.filter(order_id = o_one['id']).count()
+                                o_one['pack_num'] = num
                         result = []
                         temp = {}
                         temp["data"] = rObj.values()

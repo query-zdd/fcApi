@@ -425,6 +425,8 @@ class factoryMakeOneView(APIView):
                 sort_type = valObj.data['sort_type'] if valObj.data['sort_type'] is not None else 0
                 samplist = []
                 fmObj = FactoryMake.objects.filter(delete_time=None,order_id=nid)
+                orderObj = PlanOrder.objects.get(id=nid)
+                orderLineObj = PlanOrderLine.objects.filter(order_id=nid)
                 samplist=[]
                 for one in fmObj:
                     samp={}
@@ -440,6 +442,11 @@ class factoryMakeOneView(APIView):
                     samplist.append(samp)
                 temp = {}
                 temp["data"] = samplist
+                temp['work_type'] = orderObj.order_type
+                temp['contract_num'] = orderObj.contract_num
+                temp['order_num'] = orderObj.order_num
+                temp['short_overflow_num'] = orderObj.order_num
+                temp['inspect_company'] = orderLineObj[0].inspect_company
                 temp['error_code'] = 0
                 temp['message'] = "成功"
                 temp['request'] = request.method + '  ' + request.get_full_path()
@@ -1863,7 +1870,6 @@ class packingOneView(APIView):
         valObj = orderOutstockGetOneSerializer(data=request.query_params)
         if valObj.is_valid():
             try:
-
                 orderObj = PlanOrder.objects.get(delete_time=None, id=nid)
                 orderLine = PlanOrderLine.objects.filter(order_id=nid)
                 samplist=[]
