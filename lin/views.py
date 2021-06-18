@@ -9798,8 +9798,8 @@ class planOrderView(APIView):
                         rObj = rObj.all()[start:start+page_size]
                         if is_manage:
                             for o_one in rObj:
-                                num = OrderLinePacking.objects.filter(order_id = o_one['id']).count()
-                                o_one['pack_num'] = num
+                                num = OrderLinePacking.objects.filter(order_id = o_one.id).count()
+                                o_one.pack_num = num
                         result = []
                         temp = {}
                         temp["data"] = rObj.values()
