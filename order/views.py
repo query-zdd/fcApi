@@ -3410,9 +3410,21 @@ class colorSizeDataView(APIView):
             else:
                 bObj = OrderColorSizeInfo()
             bObj.order_id = data['order_id']
-            bObj.order_color_size_info = data['order_color_size_info']
+            flag = data['flag']
+            if flag==1:
+                bObj.order_color_size_info = data['order_color_size_info']
+            if flag ==2:
+                bObj.packing_info = data['packing_info']
             bObj.save()
-            msg = "录入订单的颜色规格信息"
+            # 更改装箱要求的状态
+            try:
+                ppObj = OrderLinePacking.objects.filter(order_id=data['order_id'])
+                for one in ppObj:
+                    one.status = 2
+                    one.save()
+            except:
+                pass
+            msg = "统一按照订单录入颜色规格相关信息"
             error_code = 0
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -3442,6 +3454,7 @@ class colorSizeDataOneView(APIView):
             temp = {}
             if subinfo.count()>0:
                 temp["color_size"] = subinfo[0].order_color_size_info
+                temp['packing_info'] = subinfo[0].packing_info
             else:
                 temp["color_size"] = ""
             temp['error_code'] = 0

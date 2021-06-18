@@ -618,6 +618,7 @@ class OrderColorSizeInfo(models.Model):
     order_id = models.IntegerField(blank=True, null=True)
     order_color_size_info = models.TextField(blank=True, null=True)
     order_line_id = models.IntegerField(blank=True, null=True)
+    packing_info = models.TextField(blank=True, null=True)
 
     class Meta:
         managed = False

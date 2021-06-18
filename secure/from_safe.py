@@ -811,6 +811,8 @@ class indicateDateSerializer(serializers.Serializer):
 
 class colorSizeDataSerializer(serializers.Serializer):
     order_color_size_info = serializers.CharField(error_messages={'required': '必须传入订单颜色规格信息！'})
+    packing_info = serializers.CharField(error_messages={'required': '必须传入统一装箱要求！'})
+    flag = serializers.IntegerField(error_messages={'required': '必须传入标志位'})
     order_id = serializers.IntegerField(error_messages={'required': '必须传入订单id'})
 
 class reightSpaceSerializer(serializers.Serializer):
