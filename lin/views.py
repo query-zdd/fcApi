@@ -5534,7 +5534,7 @@ class departmentView(APIView):
                         temp['active'] = False
                     temp["department_name"] = one.department_name
                     temp['id'] = one.id
-                    post = Post.objects.filter(department_id=one.id)
+                    post = Post.objects.filter(delete_time=None,department_id=one.id)
                     samp = []
                     for o in post:
                         sampd = {}
