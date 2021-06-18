@@ -2080,6 +2080,7 @@ class packingLineOneView(APIView):
                     samp['color'] = one.color
                     samp['color_name'] = one.color_name
                     samp['color_num'] = one.color_num
+                    samp['contract_num'] = one.contract_num
                     samp['specs'] = one.specs
                     samp['out_stock_id'] = one.id
                     samp['order_num'] = one.order_num
