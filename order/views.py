@@ -2573,9 +2573,21 @@ class shipmentInStockOneView(APIView):
                     samp['buy_all_num'] = one.buy_all_num
                     samp['loss_lv'] = one.loss_lv
                     samp['supplier'] = one.supplier
+                    samp['plan_start_time'] = '2020-03-18'
+                    samp['down_day'] = 3
                     samp['order_cloth_ship_id'] = one.id
                     rObj = OrderClothLineShip.objects.filter(delete_time=None, order_cloth_id=one.order_cloth_id,order_cloth_ship_id=one.id).order_by('color', 'specs')
+                    sure_num = 0
+                    no_sure_num = 0
+                    for one in rObj:
+                        if one.is_sure == 1:
+                            sure_num = sure_num + 1
+                        else:
+                            no_sure_num = no_sure_num + 1
+                    samp['sure_num'] = sure_num
+                    samp['no_sure_num'] = no_sure_num
                     samp['sub_data'] = rObj.values()
+
                     samplist.append(samp)
 
                 temp = {}
