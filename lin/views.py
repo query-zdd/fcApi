@@ -8660,6 +8660,8 @@ class planView(APIView):
                 if status:
                     if status==4:
                         rObj = Plan.objects.filter(status=status)
+                    elif status==0:
+                        rObj = rObj.filter(status__in=[0,1,2])
                     else:
                         rObj = rObj.filter(status=status)
                 if customer_name_id != 0:

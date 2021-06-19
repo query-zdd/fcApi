@@ -1924,73 +1924,76 @@ class packingLineView(APIView):
     @csrf_exempt
     def post(self, request):
         data = request.data
-        valObj = packingSublineSerializer(data=request.data)
-        if valObj.is_valid():
-            #################校验数据################################
-            d_flag = 0
-            d_num = 0
-            l_msg = []
-            dataone = data['data']
-            for done in dataone:
-                d_num = d_num + 1
-                valObjline = packingSubLineoneSerializer(data=done)
-                if not valObjline.is_valid():
-                    d_flag = 1
-                    samp = {}
-                    samp['msg'] = valObjline.errors
-                    samp['key_num'] = d_num
-                    l_msg.append(samp)
-            #################校验数据################################
+        for one in data:
+            valObj = packingSublineSerializer(data=one)
+            if valObj.is_valid():
+                #################校验数据################################
+                d_flag = 0
+                d_num = 0
+                l_msg = []
+                dataone = one['data']
+                for done in dataone:
+                    d_num = d_num + 1
+                    valObjline = packingSubLineoneSerializer(data=done)
+                    if not valObjline.is_valid():
+                        d_flag = 1
+                        samp = {}
+                        samp['msg'] = valObjline.errors
+                        samp['key_num'] = d_num
+                        l_msg.append(samp)
+                #################校验数据################################
             dt = datetime.now()
             ##############保存装箱指示#############################
             if d_flag == 0:
-                for done in dataone:
-                    try:
+                for subOne in data:
+                    dataone = subOne['data']
+                    for done in dataone:
                         try:
-                            mid = done["id"]
-                            if mid:
-                                bObj = OrderLinePackingSub.objects.get(id=mid)
-                                bObj.update_time = dt
-                            else:
-                                cobj = OrderLinePackingSub.objects.filter(out_stock_id=done['out_stock_id'],delete_time=None)
-                                if cobj.count()>0:
+                            try:
+                                mid = done["id"]
+                                if mid:
+                                    bObj = OrderLinePackingSub.objects.get(id=mid)
+                                    bObj.update_time = dt
+                                else:
+                                    cobj = OrderLinePackingSub.objects.filter(out_stock_id=done['out_stock_id'],delete_time=None)
+                                    if cobj.count()>0:
+                                        bObj = cobj[0]
+                                    else:
+                                        bObj = OrderLinePackingSub()
+                                    bObj.create_time = dt
+                                    bObj.status = 0
+                            except:
+                                cobj = OrderLinePackingSub.objects.filter(out_stock_id=done['out_stock_id'],
+                                                                          delete_time=None)
+                                if cobj.count() > 0:
                                     bObj = cobj[0]
                                 else:
                                     bObj = OrderLinePackingSub()
                                 bObj.create_time = dt
                                 bObj.status = 0
-                        except:
-                            cobj = OrderLinePackingSub.objects.filter(out_stock_id=done['out_stock_id'],
-                                                                      delete_time=None)
-                            if cobj.count() > 0:
-                                bObj = cobj[0]
-                            else:
-                                bObj = OrderLinePackingSub()
-                            bObj.create_time = dt
-                            bObj.status = 0
-                        bObj.order_line_id = data['order_line_id']
-                        bObj.out_stock_id = done['out_stock_id']
-                        bObj.parent_id = done['parent_id']
-                        bObj.pack_num = done['pack_num']
-                        bObj.save()
-                        #更改装箱要求的状态
-                        try:
-                            ppObj = OrderLinePacking.objects.get(id=done['parent_id'])
-                            ppObj.status = 1
-                            ppObj.save()
-                        except:
-                            pass
+                            bObj.order_line_id = subOne['order_line_id']
+                            bObj.out_stock_id = done['out_stock_id']
+                            bObj.parent_id = done['parent_id']
+                            bObj.pack_num = done['pack_num']
+                            bObj.save()
+                            #更改装箱要求的状态
+                            try:
+                                ppObj = OrderLinePacking.objects.get(id=done['parent_id'])
+                                ppObj.status = 1
+                                ppObj.save()
+                            except:
+                                pass
 
-                    except:
-                        msg = "参数错误"
-                        error_code = 10030
-                        request = request.method + '  ' + request.get_full_path()
-                        post_result = {
-                            "error_code": error_code,
-                            "message": msg,
-                            "request": request,
-                        }
-                        return Response(post_result)
+                        except:
+                            msg = "参数错误"
+                            error_code = 10030
+                            request = request.method + '  ' + request.get_full_path()
+                            post_result = {
+                                "error_code": error_code,
+                                "message": msg,
+                                "request": request,
+                            }
+                            return Response(post_result)
                 msg = "创建/编辑 装箱指示"
                 error_code = 0
                 request = request.method + '  ' + request.get_full_path()
