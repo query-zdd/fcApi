@@ -415,6 +415,7 @@ class planOrderSerializer(serializers.Serializer):
     is_workprogram = serializers.IntegerField(default=999)
     is_buyprogram = serializers.IntegerField(default=999)
     is_manage = serializers.IntegerField(default=0)
+    is_cloth_sure = serializers.IntegerField(default=0)
 
 class planOrderOneSerializer(serializers.Serializer):
     dhkhao = serializers.CharField(error_messages={'required': '必须传入大货款号'})
