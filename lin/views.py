@@ -9809,7 +9809,11 @@ class planOrderView(APIView):
                                 o_one.pack_num = num
                         result = []
                         temp = {}
-                        temp["data"] = rObj.values()
+                        data_n = rObj.values()
+                        for p_one in data_n:
+                            planObj = Plan.objects.get(id=p_one["plan_id"])
+                            p_one["customer_name_id"] = planObj.customer_name_id
+                        temp["data"] = data_n
                         temp['page_size'] = page_size
                         temp['total'] = total
                         temp['error_code'] = 0
