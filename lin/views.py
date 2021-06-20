@@ -8962,15 +8962,31 @@ class planOneView(APIView):
                     samp['brand'] = bobj.brand
                     samp['plan_org_id'] = one.plan_org_id
                     pObj1 = Archives.objects.get(id=one.plan_org_id)
+                    pDObj1 = Department.objects.get(id=pObj1.department_id)
+                    pPObj1 = Post.objects.get(id=pObj1.post_id)
+                    samp['plan_org_department'] = pDObj1.department_name
+                    samp['plan_org_post'] = pPObj1.post_name
                     samp['plan_org_er'] = pObj1.name
                     samp['plan_id'] = one.plan_id
                     pObj2 = Archives.objects.get(id=one.plan_id)
+                    pDObj2 = Department.objects.get(id=pObj2.department_id)
+                    pPObj2 = Post.objects.get(id=pObj2.post_id)
+                    samp['plan_department'] = pDObj2.department_name
+                    samp['plan_post'] = pPObj2.post_name
                     samp['plan_er'] = pObj2.name
                     samp['material_plan_id'] = one.material_plan_id
                     pObj3 = Archives.objects.get(id=one.material_plan_id)
+                    pDObj3 = Department.objects.get(id=pObj3.department_id)
+                    pPObj3 = Post.objects.get(id=pObj3.post_id)
+                    samp['material_plan_department'] = pDObj3.department_name
+                    samp['material_plan_post'] = pPObj3.post_name
                     samp['material_plan_er'] = pObj3.name
                     samp['price_id'] = one.price_id
                     pObj4 = Archives.objects.get(id=one.price_id)
+                    pDObj4 = Department.objects.get(id=pObj4.department_id)
+                    pPObj4 = Post.objects.get(id=pObj4.post_id)
+                    samp['price_department'] = pDObj4.department_name
+                    samp['price_post'] = pPObj4.post_name
                     samp['price_er'] = pObj4.name
                     samp['goods_name'] = one.goods_name
                     samp['price_code'] = one.price_code
