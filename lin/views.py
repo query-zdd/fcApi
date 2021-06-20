@@ -3163,7 +3163,7 @@ class colourView(APIView):
                             sampd['active'] = True
                         else:
                             sampd['active'] = False
-                        sampd['colour_id'] =one.id
+                        sampd['colour_id'] =o.id
                         sampd['id'] =one.id
                         sampd['sub_colour_name'] = o.sub_colour_name
                         sampd['weight'] = o.weight
