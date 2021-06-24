@@ -588,6 +588,7 @@ class harbourView(APIView):
                             temp['active'] = False
                         temp["harbour_en"] = one.harbour_en
                         temp["harbour_zh"] = one.harbour_zh
+                        temp['order_id'] = one.order_id
                         temp['harbour_id'] = one.id
                         temp['basic_value_zh'] = bObj.basic_value_zh
                         temp['weight'] = one.weight
