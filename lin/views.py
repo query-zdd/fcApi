@@ -10600,6 +10600,13 @@ class planColorSpecsView(APIView):
                         "request": request,
                     }
                     return Response(post_result)
+            l_list  = PlanClothSampleNumber.objects.filter(pcsl_id = pcsl_id)
+            send_num = 0
+            for one in l_list:
+                send_num =send_num+one.num
+            pcslOne = PlanClothSampleLine.objects.get(id=pcsl_id)
+            pcslOne.send_num = send_num
+            pcslOne.save()
             msg = "创建在建企划-成衣样品数量"
             error_code = 0
             request = request.method + '  ' + request.get_full_path()
