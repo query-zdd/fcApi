@@ -10296,6 +10296,8 @@ class planClothSampleView(APIView):
                     rObj = rObj.filter(id=s_id)
                 temp = {}
                 temp["data"] = rObj.values()
+                custom = CustomerFiles.objects.get(id=planObj.customer_name_id)
+                temp['customer_simple_name'] = custom.customer_simple_name
                 temp['error_code'] = 0
                 temp['message'] = "成功"
                 temp['request'] = request.method + '  ' + request.get_full_path()
