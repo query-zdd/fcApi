@@ -9652,8 +9652,8 @@ class planPriceOneView(APIView):
                 temp['plan_datetime'] = pObj[0].plan_datetime
                 temp['goods_name'] = pObj[0].goods_name
                 temp['price_code'] = pObj[0].price_code
-                custom = CustomerCompany.objects.get(id=pObj[0].customer_name_id)
-                temp['company_name_simple'] = custom.company_name_simple
+                custom = CustomerFiles.objects.get(id=pObj[0].customer_name_id)
+                temp['company_name_simple'] = custom.customer_simple_name
                 brand = Marks.objects.get(id=pObj[0].brand_id)
                 temp['brand'] = brand.brand
                 tempf['data'] = temp
