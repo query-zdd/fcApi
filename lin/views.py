@@ -668,7 +668,7 @@ class harbourView(APIView):
                     else:
                         harbour = Harbour.objects.filter(
                             harbour_zh=done['harbour_zh'],
-                            order_id=done['harbour_en'],
+                            order_id=done['order_id'],
                             harbour_type=done['harbour_type'],
                             delete_time=None
                         )
@@ -10272,6 +10272,7 @@ class planClothSampleView(APIView):
             result = []
             try:
                 rObj = PlanClothSampleLine.objects.filter(plan_id=data["plan_id"], delete_time=None)
+                planObj = Plan.objects.get(id=data["plan_id"])
                 delivery_mode = valObj.data['delivery_mode'] if valObj.data['delivery_mode'] is not None else 0
                 department = valObj.data['department'] if valObj.data['department'] is not None else ""
                 member = valObj.data['member'] if valObj.data['member'] is not None else ""
