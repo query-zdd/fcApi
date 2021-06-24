@@ -9700,8 +9700,8 @@ class planHistoryOneView(APIView):
                     samp = {}
                     samp['plan_datetime'] = one.plan_datetime
                     samp['customer_name_id'] = one.customer_name_id
-                    cusObj = CustomerCompany.objects.get(id=one.customer_name_id)
-                    samp['company_name_simple'] = cusObj.company_name_simple
+                    cusObj = CustomerFiles.objects.get(id=one.customer_name_id)
+                    samp['company_name_simple'] = cusObj.customer_simple_name
                     samp['brand_id'] = one.brand_id
                     bobj = Marks.objects.get(id=one.brand_id)
                     samp['brand'] = bobj.brand
