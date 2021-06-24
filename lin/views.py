@@ -8657,13 +8657,12 @@ class planView(APIView):
                 end_time = valObj.data['end_time'] if valObj.data['end_time'] is not None else 0
                 price_code = valObj.data['price_code'] if valObj.data['price_code'] is not None else ""
                 status = valObj.data['status'] if valObj.data['status'] is not None else 0
-                if status:
-                    if status==4:
-                        rObj = Plan.objects.filter(status=status)
-                    elif status==0:
-                        rObj = rObj.filter(status__in=[0,1,2])
-                    else:
-                        rObj = rObj.filter(status=status)
+                if status==4:
+                    rObj = Plan.objects.filter(status=status)
+                elif status==0:
+                    rObj = rObj.filter(status__in=[0,1,2])
+                else:
+                    rObj = rObj.filter(status=status)
                 if customer_name_id != 0:
                     rObj = rObj.filter(customer_name_id = customer_name_id)
                 if brand_id:
