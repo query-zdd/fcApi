@@ -9646,6 +9646,7 @@ class planPriceOneView(APIView):
                     samp['edition'] = one.edition
                     samp['price_type'] = one.price_type
                     samp['price_rate'] = one.price_rate
+                    samp['plan_price'] = one.plan_price
                     samp['gm'] = one.gm
                     samp['plan_id'] = one.plan_id
                     result.append(samp)
