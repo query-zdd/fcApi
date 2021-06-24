@@ -10013,6 +10013,9 @@ class planOrderView(APIView):
                 #企划成功
                 planObj.status = 3
                 planObj.save()
+            # 企划状态更改
+            planObj.status = 3
+            planObj.save()
             ##############保存order#############################
             if d_flag == 0:
                 contracr_num_all=0
