@@ -9360,7 +9360,10 @@ class planPriceSubView(APIView):
                     bObj.status = 0
                     bObj.progrem = done['progrem']
                     bObj.price = done['price']
-                    bObj.comments = done['comments']
+                    try:
+                        bObj.comments = done['comments']
+                    except:
+                        pass
                     bObj.plan_id = plan_id
                     ppobj = Plan.objects.filter(id=plan_id)
                     if ppobj.count() > 0:

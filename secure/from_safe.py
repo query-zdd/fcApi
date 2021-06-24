@@ -386,7 +386,7 @@ class materialOneSerializer(serializers.Serializer):
 class planpricesubOneSerializer(serializers.Serializer):
     progrem = serializers.CharField(error_messages={'required': '必须传入成本项目'})
     price = serializers.CharField(error_messages={'required': '必须传入成本项目金额'})
-    comments = serializers.CharField(error_messages={'required': '必须传入备注'})
+    # comments = serializers.CharField(default="备注")
     id = serializers.IntegerField(default=0)
 
 
