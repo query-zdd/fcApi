@@ -488,10 +488,10 @@ class planClothOneSerializer(serializers.Serializer):
 
 class planClothlineSerializer(serializers.Serializer):
     delivery_mode = serializers.IntegerField(error_messages={'required': '必须传入成衣样品提供方式'})
-    department = serializers.CharField(allow_blank=True, default='')
-    member = serializers.CharField(allow_blank=True, default='')
-    custom_type = serializers.CharField(allow_blank=True, default='')
-    custom = serializers.CharField(allow_blank=True, default='')
+    department = serializers.CharField(allow_blank=True, allow_null=True,default="")
+    member = serializers.CharField(allow_blank=True, allow_null=True,default="")
+    custom_type = serializers.CharField(allow_blank=True, allow_null=True,default="")
+    custom = serializers.CharField(allow_blank=True, allow_null=True,default="")
     required_time = serializers.CharField(error_messages={'required': '必须传入要求日期'})
     sample_type = serializers.CharField(error_messages={'required': '必须传入成衣样品类型名称'})
     delivery_member = serializers.CharField(error_messages={'required': '必须传入提供人员'})
@@ -499,7 +499,8 @@ class planClothlineSerializer(serializers.Serializer):
     countdown = serializers.CharField(error_messages={'required': '必须传入倒计时'})
     send_num = serializers.IntegerField(default=0)
     send_time = serializers.CharField(error_messages={'required': '必须传入寄送时间'})
-    is_fee = serializers.CharField(error_messages={'required': '必须传入是否结算'})
+    is_fee = serializers.IntegerField(error_messages={'required': '必须传入是否支付打样费'})
+    is_pay = serializers.IntegerField(error_messages={'required': '必须传入是否结算'})
     file_url = serializers.CharField(error_messages={'required': '必须传入资料文件'})
     id = serializers.IntegerField(default=0)
 
@@ -635,20 +636,20 @@ class orderClothLineSubShipSerializer(serializers.Serializer):
 ##########面辅料注意事项
 
 class orderNotesSerializer(serializers.Serializer):
-    order_id = serializers.IntegerField(default=0)
+    order_id = serializers.IntegerField(allow_null=True, default=0)
     plan_id = serializers.IntegerField(error_messages={'required': '必须传入企划id'})
 
 class orderNotesLineSerializer(serializers.Serializer):
     notes_id = serializers.CharField(error_messages={'required': '必须传入注意事项id'})
-    beizhu = serializers.CharField(default='')
-    people = serializers.CharField(default='')
-    people_department = serializers.CharField(default='')
-    people_post = serializers.CharField(default='')
-    liuyan = serializers.CharField(default='')
-    is_sure = serializers.IntegerField(default=0)
-    status = serializers.IntegerField(default=0)
-    warm_mode_id = serializers.IntegerField(default=0)
-    id = serializers.IntegerField(default=0)
+    beizhu = serializers.CharField(allow_blank=True, allow_null=True,default='')
+    people = serializers.CharField(allow_blank=True, allow_null=True,default='')
+    people_department = serializers.CharField(allow_blank=True, allow_null=True,default='')
+    people_post = serializers.CharField(allow_blank=True, allow_null=True,default='')
+    liuyan = serializers.CharField(allow_blank=True, allow_null=True,default='')
+    is_sure = serializers.IntegerField(allow_null=True,default=0)
+    status = serializers.IntegerField(allow_null=True,default=0)
+    warm_mode_id = serializers.IntegerField(allow_null=True,default=0)
+    id = serializers.IntegerField(allow_null=True,default=0)
 
 class setWarmSerializer(serializers.Serializer):
     warm_type = serializers.IntegerField(error_messages={'required':'必须传入预警类型'})
@@ -658,11 +659,11 @@ class setWarmSerializer(serializers.Serializer):
     active = serializers.IntegerField(error_messages={'required': '数据参数不可为空！'})
 
 class orderNotesOneSerializer(serializers.Serializer):
-    order_cloth_id = serializers.IntegerField(error_messages={'required': '必须传入面辅料采购信息id！'})
-    order_id = serializers.IntegerField(error_messages={'required': '必须传入订单id信息！'})
+    plan_id = serializers.IntegerField(allow_null=True,default=0)
+    order_id = serializers.IntegerField(allow_null=True,default=0)
 
 class orderNotesOne1Serializer(serializers.Serializer):
-    order_id = serializers.IntegerField(error_messages={'required': '必须传入订单id信息！'})
+    order_id = serializers.IntegerField(default=0)
 
 
 class packingSerializer(serializers.Serializer):

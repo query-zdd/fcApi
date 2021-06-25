@@ -10378,6 +10378,7 @@ class planClothSampleView(APIView):
                             bObj.send_num = done['send_num']
                             bObj.send_time = done['send_time']
                             bObj.is_fee = done['is_fee']
+                            bObj.is_pay = done['is_pay']
                             bObj.file_url = done['file_url']
                             bObj.status = 0
                             bObj.pcs_id = 0

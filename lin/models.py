@@ -851,6 +851,7 @@ class PlanClothSampleLine(models.Model):
     countdown = models.CharField(max_length=255, blank=True, null=True)
     send_num = models.IntegerField(blank=True, null=True)
     send_time = models.DateTimeField(blank=True, null=True)
+    is_pay = models.IntegerField(blank=True, null=True)
     is_fee = models.IntegerField(blank=True, null=True)
     status = models.IntegerField(blank=True, null=True)
     file_url = models.CharField(max_length=255, blank=True, null=True)

@@ -1051,7 +1051,6 @@ class orderNotesView(APIView):
                                         bObj.warm_time = time5
                                 except:
                                     pass
-
                         bObj.save()
                     except:
                         msg = "参数错误"
@@ -1064,7 +1063,7 @@ class orderNotesView(APIView):
                         }
                         return Response(post_result)
 
-            msg = "创建/编辑出货方案成功"
+            msg = "创建/编辑注意事项成功"
             error_code = 0
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -1128,6 +1127,9 @@ class orderNotesView(APIView):
             try:
                 notesAll = ClothNotes.objects.filter(delete_time=None).order_by('category_id', 'weight')
                 noteslist = notesAll.values()
+                notes_all_num = 0
+                notes_sure_num = 0
+                notes_nosure_num = 0
                 for one in noteslist:
                     noteCat = ClothCategory.objects.get(delete_time=None, id=one["category_id"])
                     noteCloth = Cloth.objects.get(id=noteCat.cloth_id, delete_time=None)
@@ -1138,9 +1140,13 @@ class orderNotesView(APIView):
                     one["category_id"] = noteCat.id
                     one["cloth_name"] = noteCloth.cloth
                     one["cloth_id"] = noteCloth.id
-                    orderNote = OrderNotes.objects.filter(order_cloth_id=valObj.data['order_cloth_id'],
-                                                          notes_id=one["id"], order_id=valObj.data['order_id'])
+                    orderNote = OrderNotes.objects.filter(notes_id=one["id"], plan_id=valObj.data['plan_id'])
                     if orderNote.count() > 0:
+                        notes_all_num = notes_all_num+1
+                        if orderNote[0].is_sure==1:
+                            notes_sure_num = notes_sure_num+1
+                        else:
+                            notes_nosure_num = notes_nosure_num+1
                         one['people'] = orderNote[0].people
                         one['people_department'] = orderNote[0].people_department
                         one['people_post'] = orderNote[0].people_post
@@ -1148,6 +1154,12 @@ class orderNotesView(APIView):
                         one['beizhu'] = orderNote[0].beizhu
                         one['warm_time'] = orderNote[0].warm_time
                         one['warm_day_num'] = orderNote[0].warm_day_num
+                        one['warm_mode_id'] = orderNote[0].warm_mode_id
+                        try:
+                            baseWarm = BaseWarm.objects.get(id=orderNote[0].warm_mode_id)
+                            one["warm_num_name"] = baseWarm.warm_num_name
+                        except:
+                            one["warm_num_name"] =None
                         dt1 = datetime.now()
                         dt2 = orderNote[0].warm_time
                         one["down_days_num"] = downDay(dt1, dt2)
@@ -1156,6 +1168,9 @@ class orderNotesView(APIView):
                         one['is_active'] = 0
                 temp = {}
                 temp["data"] = noteslist
+                temp['notes_nosure_num'] = notes_nosure_num
+                temp['notes_sure_num'] = notes_sure_num
+                temp['notes_all_num'] = notes_all_num
                 temp['error_code'] = 0
                 temp['message'] = "成功"
                 temp['request'] = request.method + '  ' + request.get_full_path()
@@ -1190,7 +1205,10 @@ class orderNotesOneView(APIView):
         valObj = orderNotesOne1Serializer(data=request.query_params)
         if valObj.is_valid():
             try:
-                orderNote = OrderNotes.objects.filter(order_cloth_id=nid, order_id=nid)
+                notes_all_num = 0
+                notes_sure_num = 0
+                notes_nosure_num = 0
+                orderNote = OrderNotes.objects.filter(plan_id=nid)
                 note_id_list = [one.notes_id for one in orderNote]
                 notesAll = ClothNotes.objects.filter(delete_time=None, id__in=note_id_list).order_by('category_id','weight')
                 noteslist  = notesAll.values()
@@ -1204,8 +1222,13 @@ class orderNotesOneView(APIView):
                     one["category_id"] = noteCat.id
                     one["cloth_name"] = noteCloth.cloth
                     one["cloth_id"] = noteCloth.id
-                    orderNote =OrderNotes.objects.filter(order_cloth_id=nid, order_id=nid,notes_id=one['id'])
+                    orderNote =OrderNotes.objects.filter(plan_id=nid,notes_id=one['id'])
                     if orderNote.count()>0:
+                        notes_all_num = notes_all_num + 1
+                        if orderNote[0].is_sure == 1:
+                            notes_sure_num = notes_sure_num + 1
+                        else:
+                            notes_nosure_num = notes_nosure_num + 1
                         one['people'] = orderNote[0].people
                         one['people_department'] = orderNote[0].people_department
                         one['people_post'] = orderNote[0].people_post
@@ -1213,14 +1236,24 @@ class orderNotesOneView(APIView):
                         one['beizhu'] = orderNote[0].beizhu
                         one['warm_time'] = orderNote[0].warm_time
                         one['warm_day_num'] = orderNote[0].warm_day_num
+                        one['warm_mode_id'] = orderNote[0].warm_mode_id
+                        try:
+                            baseWarm = BaseWarm.objects.get(id=orderNote[0].warm_mode_id)
+                            one["warm_num_name"] = baseWarm.warm_num_name
+                        except:
+                            one["warm_num_name"] = None
                         dt1 = datetime.now()
                         dt2 = orderNote[0].warm_time
                         one["down_days_num"] = downDay(dt1,dt2)
                         one['is_active'] = 1
+                        one['is_sure'] = orderNote[0].is_sure
                     else:
                         one['is_active'] = 0
                 temp = {}
                 temp["data"] =noteslist
+                temp['notes_nosure_num'] = notes_nosure_num
+                temp['notes_sure_num'] = notes_sure_num
+                temp['notes_all_num'] = notes_all_num
                 temp['error_code'] = 0
                 temp['message'] = "成功"
                 temp['request'] = request.method + '  ' + request.get_full_path()
@@ -1248,7 +1281,10 @@ class orderNotesOneView(APIView):
 
 # 日期之差
 def downDay(d1,d2):
-    dayNum = (d2.date()-d1.date()).days
+    if d1 and d2:
+        dayNum = (d2.date()-d1.date()).days
+    else:
+        dayNum = None
     return dayNum
 
 
