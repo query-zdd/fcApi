@@ -492,7 +492,6 @@ class planClothlineSerializer(serializers.Serializer):
     member = serializers.CharField(default='')
     custom_type = serializers.CharField(default='')
     custom = serializers.CharField(default='')
-    is_fee = serializers.IntegerField(default=0)
     id = serializers.IntegerField(default=0)
     required_time = serializers.CharField(error_messages={'required': '必须传入要求日期'})
     sample_type = serializers.CharField(error_messages={'required': '必须传入成衣样品类型名称'})

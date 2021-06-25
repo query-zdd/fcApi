@@ -10364,10 +10364,12 @@ class planClothSampleView(APIView):
                                 bObj = PlanClothSampleLine()
                                 bObj.create_time = dt
                             bObj.delivery_mode = valObjOne.data['delivery_mode']
-                            bObj.department = valObjOne.data['department']
-                            bObj.member = valObjOne.data['member']
-                            bObj.custom_type = valObjOne.data['custom_type']
-                            bObj.custom = valObjOne.data['custom']
+                            if valObjOne.data['delivery_mode'] ==1:
+                                bObj.department = valObjOne.data['department']
+                                bObj.member = valObjOne.data['member']
+                            else:
+                                bObj.custom_type = valObjOne.data['custom_type']
+                                bObj.custom = valObjOne.data['custom']
                             bObj.required_time = done['required_time']
                             bObj.sample_type = done['sample_type']
                             bObj.delivery_member = done['delivery_member']
