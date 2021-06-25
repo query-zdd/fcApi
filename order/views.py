@@ -991,7 +991,7 @@ class orderNotesView(APIView):
                                 bObj.update_time = dt
                             else:
                                 if valObjline.data['notes_id']:
-                                    bList = OrderNotes.objects.filter(plan_id=data['plan_id'],notes_id=valObjline.data['notes_id'])
+                                    bList = OrderNotes.objects.filter(plan_id=valObj.data['plan_id'],notes_id=valObjline.data['notes_id'])
                                     if bList.count()>0:
                                         bObj = bList[0]
                                         bObj.update_time = dt
@@ -1017,36 +1017,40 @@ class orderNotesView(APIView):
                         if valObjline.data['status']:
                             bObj.status = valObjline.data['status']
                         #1：计划发货日；2：计划上手日期；3：送检日；4：提货日；5、进仓日期
-                        if valObjline.data['warm_mode_id'] and order_id:
+                        if valObjline.data['warm_mode_id']:
                             bWarm = BaseWarm.objects.get(id=valObjline.data['warm_mode_id'])
                             bObj.warm_mode_id = valObjline.data['warm_mode_id']
                             bObj.warm_day_num = bWarm.warm_time_num
-                            orderObj = PlanOrder.objects.get(id=data['order_id'],delete_time=None)
-                            orderLine = PlanOrderLine.objects.filter(order_id=data['order_id'],delete_time=None)
-                            time1 = orderLine[0].send_time
-                            time2 = orderObj.plan_time
-                            time3 = orderLine[0].inspect_time
-                            time4 = orderLine[0].delivery_time
-                            time5 = orderLine[0].warehouse_time
-                            for onetime in orderLine:
-                                if time1 < onetime.send_time:
-                                    time1 = onetime.send_time
-                                if time3 < onetime.inspect_time:
-                                    time3 = onetime.inspect_time
-                                if time4 < onetime.delivery_time:
-                                    time4 = onetime.delivery_time
-                                if time5 < onetime.warehouse_time:
-                                    time5 = onetime.warehouse_time
-                            if bWarm.warm_type == 1:
-                                bObj.warm_time = time1
-                            elif bWarm.warm_type == 2:
-                                bObj.warm_time = time2
-                            elif bWarm.warm_type == 3:
-                                bObj.warm_time = time3
-                            elif bWarm.warm_type == 4:
-                                bObj.warm_time = time4
-                            elif bWarm.warm_type == 5:
-                                bObj.warm_time = time5
+                            if order_id:
+                                try:
+                                    orderObj = PlanOrder.objects.get(id=data['order_id'],delete_time=None)
+                                    orderLine = PlanOrderLine.objects.filter(order_id=data['order_id'],delete_time=None)
+                                    time1 = orderLine[0].send_time
+                                    time2 = orderObj.plan_time
+                                    time3 = orderLine[0].inspect_time
+                                    time4 = orderLine[0].delivery_time
+                                    time5 = orderLine[0].warehouse_time
+                                    for onetime in orderLine:
+                                        if time1 < onetime.send_time:
+                                            time1 = onetime.send_time
+                                        if time3 < onetime.inspect_time:
+                                            time3 = onetime.inspect_time
+                                        if time4 < onetime.delivery_time:
+                                            time4 = onetime.delivery_time
+                                        if time5 < onetime.warehouse_time:
+                                            time5 = onetime.warehouse_time
+                                    if bWarm.warm_type == 1:
+                                        bObj.warm_time = time1
+                                    elif bWarm.warm_type == 2:
+                                        bObj.warm_time = time2
+                                    elif bWarm.warm_type == 3:
+                                        bObj.warm_time = time3
+                                    elif bWarm.warm_type == 4:
+                                        bObj.warm_time = time4
+                                    elif bWarm.warm_type == 5:
+                                        bObj.warm_time = time5
+                                except:
+                                    pass
 
                         bObj.save()
                     except:

@@ -484,6 +484,9 @@ class planColorSpecsGetOneSerializer(serializers.Serializer):
 
 class planClothOneSerializer(serializers.Serializer):
     plan_id = serializers.IntegerField(error_messages={'required': '必须传入在建企划ID'})
+
+
+class planClothlineSerializer(serializers.Serializer):
     delivery_mode = serializers.IntegerField(error_messages={'required': '必须传入成衣样品提供方式'})
     department = serializers.CharField(default='')
     member = serializers.CharField(default='')
@@ -491,8 +494,6 @@ class planClothOneSerializer(serializers.Serializer):
     custom = serializers.CharField(default='')
     is_fee = serializers.IntegerField(default=0)
     id = serializers.IntegerField(default=0)
-
-class planClothlineSerializer(serializers.Serializer):
     required_time = serializers.CharField(error_messages={'required': '必须传入要求日期'})
     sample_type = serializers.CharField(error_messages={'required': '必须传入成衣样品类型名称'})
     delivery_member = serializers.CharField(error_messages={'required': '必须传入提供人员'})

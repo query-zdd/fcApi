@@ -10346,61 +10346,41 @@ class planClothSampleView(APIView):
                     l_msg.append(samp)
             #################校验数据################################
             dt = datetime.now()
-            # ##############保存sample#############################
-            # oid = valObj.data['id']
-            # if oid:
-            #     sample = PlanClothSample.objects.get(id=oid)
-            #     sample.update_time = dt
-            # else:
-            #     sample = PlanClothSample()
-            #     sample.create_time = dt
-            # sample.plan_id = valObj.data['plan_id']
-            # sample.delivery_mode = valObj.data['delivery_mode']
-            # sample.department = valObj.data['department']
-            # sample.member = valObj.data['member']
-            # sample.custom_type = valObj.data['custom_type']
-            # sample.custom = valObj.data['custom']
-            # sample.is_fee = valObj.data['is_fee']
-            # sample.status = 0
-            # sample.save()
-            # if oid:
-            #     sampleone = PlanClothSample.objects.get(id=oid)
-            # else:
-            #     sampleone = PlanClothSample.objects.latest('id')
-            # ##############保存sample#############################
             if d_flag == 0:
                 for done in dataone:
                     try:
-                        try:
-                            mid = done["id"]
-                            if mid:
-                                bObj = PlanClothSampleLine.objects.get(id=mid)
-                                bObj.update_time = dt
-                            else:
+                        valObjOne = planClothlineSerializer(data=done)
+                        if valObjOne.is_valid():
+                            try:
+                                mid = done["id"]
+                                if mid:
+                                    bObj = PlanClothSampleLine.objects.get(id=mid)
+                                    bObj.update_time = dt
+                                else:
+                                    bObj = PlanClothSampleLine()
+                                    bObj.create_time = dt
+
+                            except:
                                 bObj = PlanClothSampleLine()
                                 bObj.create_time = dt
-
-                        except:
-                            bObj = PlanClothSampleLine()
-                            bObj.create_time = dt
-                        bObj.delivery_mode = valObj.data['delivery_mode']
-                        bObj.department = valObj.data['department']
-                        bObj.member = valObj.data['member']
-                        bObj.custom_type = valObj.data['custom_type']
-                        bObj.custom = valObj.data['custom']
-                        bObj.required_time = done['required_time']
-                        bObj.sample_type = done['sample_type']
-                        bObj.delivery_member = done['delivery_member']
-                        bObj.send_custom = done['send_custom']
-                        bObj.countdown = done['countdown']
-                        bObj.send_num = done['send_num']
-                        bObj.send_time = done['send_time']
-                        bObj.is_fee = done['is_fee']
-                        bObj.file_url = done['file_url']
-                        bObj.status = 0
-                        bObj.pcs_id = 0
-                        bObj.plan_id = valObj.data['plan_id']
-                        bObj.save()
+                            bObj.delivery_mode = valObjOne.data['delivery_mode']
+                            bObj.department = valObjOne.data['department']
+                            bObj.member = valObjOne.data['member']
+                            bObj.custom_type = valObjOne.data['custom_type']
+                            bObj.custom = valObjOne.data['custom']
+                            bObj.required_time = done['required_time']
+                            bObj.sample_type = done['sample_type']
+                            bObj.delivery_member = done['delivery_member']
+                            bObj.send_custom = done['send_custom']
+                            bObj.countdown = done['countdown']
+                            bObj.send_num = done['send_num']
+                            bObj.send_time = done['send_time']
+                            bObj.is_fee = done['is_fee']
+                            bObj.file_url = done['file_url']
+                            bObj.status = 0
+                            bObj.pcs_id = 0
+                            bObj.plan_id = valObj.data['plan_id']
+                            bObj.save()
 
                     except:
                         msg = "参数错误"
