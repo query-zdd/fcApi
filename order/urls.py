@@ -23,6 +23,9 @@ urlpatterns = [
     url('^orderNotes$', views.orderNotesView.as_view()),
     url('^orderNotes/(?P<nid>\d+)', views.orderNotesOneView.as_view()),
 
+    url('^orderNotesOther$', views.orderNotesOtherView.as_view()),
+    url('^orderNotesOther/(?P<nid>\d+)', views.orderNotesOtherOneView.as_view()),
+
     url('^shipment$', views.shipmentView.as_view()),
     url('^shipment/(?P<nid>\d+)', views.shipmentOneView.as_view()),
 

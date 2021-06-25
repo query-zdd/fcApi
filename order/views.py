@@ -1090,25 +1090,22 @@ class orderNotesView(APIView):
             data = request.data
             ids = data['ids']
             for nid in ids:
-                bObj = OrderCloth.objects.get(id=nid)
-                dt = datetime.now()
-                subObj = OrderClothLine.objects.filter(order_cloth_id=bObj.id)
-                for one in subObj:
-                    one.delete_time = dt
-                    one.save()
-                bObj.delete_time = dt
-                bObj.save()
+                try:
+                    bObj = OrderNotes.objects.get(notes_id=nid)
+                    bObj.delete()
+                except:
+                    pass
             # 返回数据
             request = request.method + '  ' + request.get_full_path()
             error_code = 0
             post_result = {
                 "error_code": error_code,
-                "message": "出货方案删除成功!",
+                "message": "注意事项删除成功!",
                 "request": request,
             }
             return Response(post_result)
         except:
-            msg = "面辅料方案不存在!",
+            msg = "注意事项不存在!",
             error_code = 10020
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -1286,6 +1283,326 @@ def downDay(d1,d2):
     else:
         dayNum = None
     return dayNum
+
+
+############################订单管理-其他注意事项###############################################
+
+class orderNotesOtherView(APIView):
+    # 添加/编辑 注意事项
+    @csrf_exempt
+    def post(self, request):
+        data = request.data
+        valObj = orderNotesSerializer(data=request.data)
+        if valObj.is_valid():
+            #################校验数据################################
+            d_flag = 0
+            d_num = 0
+            l_msg = []
+            order_id = valObj.data['order_id'] if valObj.data['order_id'] is not None else 0
+            dataone = data['data']
+            dt = datetime.now()
+            for done in dataone:
+                d_num = d_num + 1
+                valObjline = orderNotesLineSerializer(data=done)
+                if not valObjline.is_valid():
+                    d_flag = 1
+                    samp = {}
+                    samp['msg'] = valObjline.errors
+                    samp['key_num'] = d_num
+                    l_msg.append(samp)
+                if valObjline.is_valid():
+                    try:
+                        try:
+                            mid = done["id"]
+                            if mid:
+                                bObj = OrderNotesOther.objects.get(id=mid)
+                                bObj.update_time = dt
+                            else:
+                                if valObjline.data['notes_id']:
+                                    bList = OrderNotesOther.objects.filter(plan_id=valObj.data['plan_id'],notes_id=valObjline.data['notes_id'])
+                                    if bList.count()>0:
+                                        bObj = bList[0]
+                                        bObj.update_time = dt
+                                    else:
+                                        bObj = OrderNotesOther()
+                                        bObj.create_time = dt
+                        except:
+                            bObj = OrderNotesOther()
+                            bObj.create_time = dt
+                        bObj.order_id = order_id
+                        bObj.plan_id = data['plan_id']
+                        if valObjline.data['beizhu']:
+                            bObj.beizhu = valObjline.data['beizhu']
+                        bObj.notes_id = valObjline.data['notes_id']
+                        if valObjline.data['people'] :
+                            bObj.people = valObjline.data['people']
+                            bObj.people_department = valObjline.data['people_department']
+                            bObj.people_post = valObjline.data['people_post']
+                        if valObjline.data['liuyan']:
+                            bObj.liuyan = valObjline.data['liuyan']
+                        if valObjline.data['is_sure']:
+                            bObj.is_sure = valObjline.data['is_sure']
+                        if valObjline.data['status']:
+                            bObj.status = valObjline.data['status']
+                        #1：计划发货日；2：计划上手日期；3：送检日；4：提货日；5、进仓日期
+                        if valObjline.data['warm_mode_id']:
+                            bWarm = BaseWarm.objects.get(id=valObjline.data['warm_mode_id'])
+                            bObj.warm_mode_id = valObjline.data['warm_mode_id']
+                            bObj.warm_day_num = bWarm.warm_time_num
+                            if order_id:
+                                try:
+                                    orderObj = PlanOrder.objects.get(id=data['order_id'],delete_time=None)
+                                    orderLine = PlanOrderLine.objects.filter(order_id=data['order_id'],delete_time=None)
+                                    time1 = orderLine[0].send_time
+                                    time2 = orderObj.plan_time
+                                    time3 = orderLine[0].inspect_time
+                                    time4 = orderLine[0].delivery_time
+                                    time5 = orderLine[0].warehouse_time
+                                    for onetime in orderLine:
+                                        if time1 < onetime.send_time:
+                                            time1 = onetime.send_time
+                                        if time3 < onetime.inspect_time:
+                                            time3 = onetime.inspect_time
+                                        if time4 < onetime.delivery_time:
+                                            time4 = onetime.delivery_time
+                                        if time5 < onetime.warehouse_time:
+                                            time5 = onetime.warehouse_time
+                                    if bWarm.warm_type == 1:
+                                        bObj.warm_time = time1
+                                    elif bWarm.warm_type == 2:
+                                        bObj.warm_time = time2
+                                    elif bWarm.warm_type == 3:
+                                        bObj.warm_time = time3
+                                    elif bWarm.warm_type == 4:
+                                        bObj.warm_time = time4
+                                    elif bWarm.warm_type == 5:
+                                        bObj.warm_time = time5
+                                except:
+                                    pass
+                        bObj.save()
+                    except:
+                        msg = "参数错误"
+                        error_code = 10030
+                        request = request.method + '  ' + request.get_full_path()
+                        post_result = {
+                            "error_code": error_code,
+                            "message": msg,
+                            "request": request,
+                        }
+                        return Response(post_result)
+
+            msg = "创建/编辑注意事项成功"
+            error_code = 0
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+    #批量删除 注意事项
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for nid in ids:
+                try:
+                    bObj = OrderNotesOther.objects.get(notes_id=nid)
+                    bObj.delete()
+                except:
+                    pass
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "其他注意事项删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "注意事项不存在!",
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+    # 获取订单 注意事项所有
+    @csrf_exempt
+    def get(self, request):
+        data = request.query_params
+        valObj = orderNotesOneSerializer(data=request.query_params)
+        if valObj.is_valid():
+            try:
+                notesAll = OtherNotes.objects.filter(delete_time=None).order_by('category_setting_id', 'weight')
+                noteslist = notesAll.values()
+                notes_all_num = 0
+                notes_sure_num = 0
+                notes_nosure_num = 0
+                for one in noteslist:
+                    noteCat = OtherCategorySetting.objects.get(delete_time=None, id=one["category_setting_id"])
+                    noteCloth = OtherSubCategory.objects.get(id=noteCat.sub_category_id, delete_time=None)
+                    noteClothClass = OtherCategory.objects.get(id=noteCloth.category_id)
+                    one["cloth_class_name"] = noteClothClass.category_name
+                    one["cloth_class_id"] = noteClothClass.id
+                    one["category_name"] = noteCat.category_set_name
+                    one["category_id"] = noteCat.id
+                    one["cloth_name"] = noteCloth.sub_name
+                    one["cloth_id"] = noteCloth.id
+                    orderNote = OrderNotesOther.objects.filter(notes_id=one["id"], plan_id=valObj.data['plan_id'])
+                    if orderNote.count() > 0:
+                        notes_all_num = notes_all_num+1
+                        if orderNote[0].is_sure==1:
+                            notes_sure_num = notes_sure_num+1
+                        else:
+                            notes_nosure_num = notes_nosure_num+1
+                        one['people'] = orderNote[0].people
+                        one['people_department'] = orderNote[0].people_department
+                        one['people_post'] = orderNote[0].people_post
+                        one['liuyan'] = orderNote[0].liuyan
+                        one['beizhu'] = orderNote[0].beizhu
+                        one['warm_time'] = orderNote[0].warm_time
+                        one['warm_day_num'] = orderNote[0].warm_day_num
+                        one['warm_mode_id'] = orderNote[0].warm_mode_id
+                        try:
+                            baseWarm = BaseWarm.objects.get(id=orderNote[0].warm_mode_id)
+                            one["warm_num_name"] = baseWarm.warm_num_name
+                        except:
+                            one["warm_num_name"] =None
+                        dt1 = datetime.now()
+                        dt2 = orderNote[0].warm_time
+                        one["down_days_num"] = downDay(dt1, dt2)
+                        one['is_active'] = 1
+                    else:
+                        one['is_active'] = 0
+                temp = {}
+                temp["data"] = noteslist
+                temp['notes_nosure_num'] = notes_nosure_num
+                temp['notes_sure_num'] = notes_sure_num
+                temp['notes_all_num'] = notes_all_num
+                temp['error_code'] = 0
+                temp['message'] = "成功"
+                temp['request'] = request.method + '  ' + request.get_full_path()
+                return Response(temp)
+            except:
+                msg = "未找到对应的注意事项信息"
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+
+class orderNotesOtherOneView(APIView):
+    # 获取订单 注意事项（当前面辅料）
+    @csrf_exempt
+    def get(self, request, nid):
+        data = request.query_params
+        valObj = orderNotesOne1Serializer(data=request.query_params)
+        if valObj.is_valid():
+            try:
+                notes_all_num = 0
+                notes_sure_num = 0
+                notes_nosure_num = 0
+                orderNote = OrderNotesOther.objects.filter(plan_id=nid)
+                note_id_list = [one.notes_id for one in orderNote]
+                notesAll = OtherNotes.objects.filter(delete_time=None, id__in=note_id_list).order_by('category_setting_id','weight')
+                noteslist  = notesAll.values()
+                for one in noteslist:
+                    noteCat = OtherCategorySetting.objects.get(delete_time=None, id=one["category_setting_id"])
+                    noteCloth = OtherSubCategory.objects.get(id=noteCat.sub_category_id, delete_time=None)
+                    noteClothClass = OtherCategory.objects.get(id=noteCloth.category_id)
+                    one["cloth_class_name"] = noteClothClass.category_name
+                    one["cloth_class_id"] = noteClothClass.id
+                    one["category_name"] = noteCat.category_set_name
+                    one["category_id"] = noteCat.id
+                    one["cloth_name"] = noteCloth.sub_name
+                    one["cloth_id"] = noteCloth.id
+                    orderNote =OrderNotesOther.objects.filter(plan_id=nid,notes_id=one['id'])
+                    if orderNote.count()>0:
+                        notes_all_num = notes_all_num + 1
+                        if orderNote[0].is_sure == 1:
+                            notes_sure_num = notes_sure_num + 1
+                        else:
+                            notes_nosure_num = notes_nosure_num + 1
+                        one['people'] = orderNote[0].people
+                        one['people_department'] = orderNote[0].people_department
+                        one['people_post'] = orderNote[0].people_post
+                        one['liuyan'] = orderNote[0].liuyan
+                        one['beizhu'] = orderNote[0].beizhu
+                        one['warm_time'] = orderNote[0].warm_time
+                        one['warm_day_num'] = orderNote[0].warm_day_num
+                        one['warm_mode_id'] = orderNote[0].warm_mode_id
+                        try:
+                            baseWarm = BaseWarm.objects.get(id=orderNote[0].warm_mode_id)
+                            one["warm_num_name"] = baseWarm.warm_num_name
+                        except:
+                            one["warm_num_name"] = None
+                        dt1 = datetime.now()
+                        dt2 = orderNote[0].warm_time
+                        one["down_days_num"] = downDay(dt1,dt2)
+                        one['is_active'] = 1
+                        one['is_sure'] = orderNote[0].is_sure
+                    else:
+                        one['is_active'] = 0
+                temp = {}
+                temp["data"] =noteslist
+                temp['notes_nosure_num'] = notes_nosure_num
+                temp['notes_sure_num'] = notes_sure_num
+                temp['notes_all_num'] = notes_all_num
+                temp['error_code'] = 0
+                temp['message'] = "成功"
+                temp['request'] = request.method + '  ' + request.get_full_path()
+                return Response(temp)
+            except:
+                msg = "未找到对应的注意事项信息"
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
 
 
 ############################订单管理-发货方案###############################################

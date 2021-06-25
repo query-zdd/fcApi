@@ -703,6 +703,30 @@ class OrderNotes(models.Model):
         db_table = 'order_notes'
 
 
+class OrderNotesOther(models.Model):
+    create_time = models.DateTimeField(blank=True, null=True)
+    update_time = models.DateTimeField(blank=True, null=True)
+    delete_time = models.DateTimeField(blank=True, null=True)
+    order_id = models.IntegerField(blank=True, null=True)
+    plan_id = models.IntegerField(blank=True, null=True)
+    notes_id = models.IntegerField(blank=True, null=True)
+    beizhu = models.CharField(max_length=255, blank=True, null=True)
+    warm_time = models.DateTimeField(blank=True, null=True)
+    people = models.CharField(max_length=255, blank=True, null=True)
+    people_department = models.CharField(max_length=255, blank=True, null=True)
+    people_post = models.CharField(max_length=255, blank=True, null=True)
+    liuyan = models.CharField(max_length=255, blank=True, null=True)
+    is_sure = models.IntegerField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True)
+    warm_mode_id = models.CharField(max_length=255, blank=True, null=True)
+    warm_day_num = models.IntegerField(blank=True, null=True)
+    warm_status_day_num = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'order_notes_other'
+
+
 class OtherCategory(models.Model):
     create_time = models.DateTimeField(blank=True, null=True)
     update_time = models.DateTimeField(blank=True, null=True)
