@@ -970,6 +970,7 @@ class orderNotesView(APIView):
             d_flag = 0
             d_num = 0
             l_msg = []
+            order_id = valObj.data['order_id'] if valObj.data['order_id'] is not None else 0
             dataone = data['data']
             dt = datetime.now()
             for done in dataone:
@@ -990,8 +991,7 @@ class orderNotesView(APIView):
                                 bObj.update_time = dt
                             else:
                                 if valObjline.data['notes_id']:
-                                    bList = OrderNotes.objects.filter(order_id=data['order_id'],
-                                                                     order_cloth_id=data['order_cloth_id'],notes_id=valObjline.data['notes_id'])
+                                    bList = OrderNotes.objects.filter(plan_id=data['plan_id'],notes_id=valObjline.data['notes_id'])
                                     if bList.count()>0:
                                         bObj = bList[0]
                                         bObj.update_time = dt
@@ -1001,8 +1001,8 @@ class orderNotesView(APIView):
                         except:
                             bObj = OrderNotes()
                             bObj.create_time = dt
-                        bObj.order_id = data['order_id']
-                        bObj.order_cloth_id = data['order_cloth_id']
+                        bObj.order_id = order_id
+                        bObj.plan_id = data['plan_id']
                         if valObjline.data['beizhu']:
                             bObj.beizhu = valObjline.data['beizhu']
                         bObj.notes_id = valObjline.data['notes_id']
@@ -1017,11 +1017,10 @@ class orderNotesView(APIView):
                         if valObjline.data['status']:
                             bObj.status = valObjline.data['status']
                         #1：计划发货日；2：计划上手日期；3：送检日；4：提货日；5、进仓日期
-                        if valObjline.data['warm_mode_id']:
+                        if valObjline.data['warm_mode_id'] and order_id:
                             bWarm = BaseWarm.objects.get(id=valObjline.data['warm_mode_id'])
                             bObj.warm_mode_id = valObjline.data['warm_mode_id']
                             bObj.warm_day_num = bWarm.warm_time_num
-
                             orderObj = PlanOrder.objects.get(id=data['order_id'],delete_time=None)
                             orderLine = PlanOrderLine.objects.filter(order_id=data['order_id'],delete_time=None)
                             time1 = orderLine[0].send_time

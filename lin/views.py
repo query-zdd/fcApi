@@ -11050,7 +11050,7 @@ class plateMakingOneView(APIView):
             }
             return Response(post_result)
 
-############################商品尺码###############################################
+############################预警方式###############################################
 class warmSetView(APIView):
     @csrf_exempt
     def get(self, request):
@@ -11087,43 +11087,76 @@ class warmSetView(APIView):
             }
             return Response(post_result)
 
-    # 添加用料单位
+    # 添加预警方式
     @csrf_exempt
     def post(self, request):
-        data = request.query_params
-        valObj = setWarmSerializer(data=request.query_params)
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认企划Id正确！"
+            samp['key_num'] = "name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = setWarmSerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
         dt = datetime.now()
-        if valObj.is_valid():
-            try:
-                warmobj = BaseWarm.objects.filter(
-                    warm_type=data['warm_type'],
-                    warm_time_num=data['warm_time_num'],
-                    warm_name=data['warm_name'],
-                    delete_time=None
-                )
-                if warmobj.count()>0:
-                    msg = "预警信息已经存在"
-                    error_code = 400
-                    request = request.method + '  ' + request.get_full_path()
-                    post_result = {
-                        "error_code": error_code,
-                        "message": msg,
-                        "request": request,
-                    }
-                    return Response(post_result)
-                else:
+        if d_flag == 0:
+            for done in data:
+                try:
+                    try:
+                        mid = done["id"]
+                        if mid:
+                            bObj = BaseWarm.objects.get(id=mid)
+                            bObj.update_time = dt
+                        else:
+                            warmobj = BaseWarm.objects.filter(
+                                warm_type=done['warm_type'],
+                                warm_time_num=done['warm_time_num'],
+                                warm_name=done['warm_name'],
+                                delete_time=None
+                            )
+                            if warmobj.count() > 0:
+                                msg = "预警信息已经存在"
+                                error_code = 400
+                                request = request.method + '  ' + request.get_full_path()
+                                post_result = {
+                                    "error_code": error_code,
+                                    "message": msg,
+                                    "request": request,
+                                }
+                                return Response(post_result)
+                            bObj = BaseWarm()
+                            bObj.create_time = dt
+                    except:
+                        bObj = BaseWarm()
+                        bObj.create_time = dt
                     num = BaseWarm.objects.all().count() + 1
-                    bObj = BaseWarm()
-                    bObj.warm_type = data['warm_type']
-                    bObj.warm_time_num = data['warm_time_num']
-                    bObj.warm_num_name = data['warm_num_name']
-                    bObj.warm_name = data['warm_name']
-                    bObj.active = data['active']
+                    bObj.warm_type = done['warm_type']
+                    bObj.warm_time_num = done['warm_time_num']
+                    bObj.warm_num_name = done['warm_num_name']
+                    bObj.warm_name = done['warm_name']
+                    bObj.active = done['active']
                     bObj.create_time = dt
-                    bObj.weight = num
+                    if not mid:
+                        bObj.weight = num
                     bObj.save()
-                    msg = "创建预警信息"
-                    error_code = 0
+                except:
+                    msg = "参数校验失败！"
+                    error_code = 10030
                     request = request.method + '  ' + request.get_full_path()
                     post_result = {
                         "error_code": error_code,
@@ -11131,19 +11164,48 @@ class warmSetView(APIView):
                         "request": request,
                     }
                     return Response(post_result)
-            except:
-                msg = "参数校验不通过！"
-                error_code = 10030
-                request = request.method + '  ' + request.get_full_path()
-                post_result = {
-                    "error_code": error_code,
-                    "message": msg,
-                    "request": request,
-                }
-                return Response(post_result)
+            msg = "创建修改预警信息"
+            error_code = 0
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         else:
-            msg = valObj.errors
+            msg = l_msg
             error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = BaseWarm.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "预警方式删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "预警方式不存在!",
+            error_code = 10020
             request = request.method + '  ' + request.get_full_path()
             post_result = {
                 "error_code": error_code,
@@ -11794,3 +11856,4 @@ class orderDateSetSortView(APIView):
                 "request": request,
             }
             return Response(post_result)
+

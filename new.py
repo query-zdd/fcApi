@@ -684,7 +684,7 @@ class OrderNotes(models.Model):
     update_time = models.DateTimeField(blank=True, null=True)
     delete_time = models.DateTimeField(blank=True, null=True)
     order_id = models.IntegerField(blank=True, null=True)
-    order_cloth_id = models.IntegerField(blank=True, null=True)
+    plan_id = models.IntegerField(blank=True, null=True)
     notes_id = models.IntegerField(blank=True, null=True)
     beizhu = models.CharField(max_length=255, blank=True, null=True)
     warm_time = models.DateTimeField(blank=True, null=True)

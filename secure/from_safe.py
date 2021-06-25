@@ -636,8 +636,8 @@ class orderClothLineSubShipSerializer(serializers.Serializer):
 ##########面辅料注意事项
 
 class orderNotesSerializer(serializers.Serializer):
-    order_id = serializers.IntegerField(error_messages={'required': '必须传入订单id'})
-    order_cloth_id = serializers.IntegerField(error_messages={'required': '必须传入面辅料采购id'})
+    order_id = serializers.IntegerField(default=0)
+    plan_id = serializers.IntegerField(error_messages={'required': '必须传入企划id'})
 
 class orderNotesLineSerializer(serializers.Serializer):
     notes_id = serializers.CharField(error_messages={'required': '必须传入注意事项id'})

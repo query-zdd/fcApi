@@ -205,5 +205,4 @@ urlpatterns = [
     url('^orderDateSet/sort/(?P<bid>\d+)', views.orderDateSetSortView.as_view()),
 
 
-
 ]
