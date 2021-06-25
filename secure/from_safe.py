@@ -488,11 +488,10 @@ class planClothOneSerializer(serializers.Serializer):
 
 class planClothlineSerializer(serializers.Serializer):
     delivery_mode = serializers.IntegerField(error_messages={'required': '必须传入成衣样品提供方式'})
-    department = serializers.CharField(default='')
-    member = serializers.CharField(default='')
-    custom_type = serializers.CharField(default='')
-    custom = serializers.CharField(default='')
-    id = serializers.IntegerField(default=0)
+    department = serializers.CharField(allow_blank=True, default='')
+    member = serializers.CharField(allow_blank=True, default='')
+    custom_type = serializers.CharField(allow_blank=True, default='')
+    custom = serializers.CharField(allow_blank=True, default='')
     required_time = serializers.CharField(error_messages={'required': '必须传入要求日期'})
     sample_type = serializers.CharField(error_messages={'required': '必须传入成衣样品类型名称'})
     delivery_member = serializers.CharField(error_messages={'required': '必须传入提供人员'})
