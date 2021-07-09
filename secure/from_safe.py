@@ -521,7 +521,7 @@ class orderOutstockSerializer(serializers.Serializer):
     order_line_id = serializers.IntegerField(error_messages={'required': '必须传入订单列表id'})
     short_overflow = serializers.IntegerField(error_messages={'required': '必须传入短溢装'})
     short_overflow_direct = serializers.IntegerField(error_messages={'required': '必须传入指示短溢装'})
-    dhkhao = serializers.CharField(default='')
+    dhkhao = serializers.CharField(allow_blank=True, allow_null=True,default='')
 
 class orderOutstockLineSerializer(serializers.Serializer):
     color = serializers.CharField(error_messages={'required': '必须传入面辅料颜色'})

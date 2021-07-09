@@ -28,17 +28,37 @@ class showOutStockView(APIView):
             #################校验数据################################
             d_flag = 0
             d_num = 0
+            contact_num = 0
             l_msg = []
             dataone = data['data']
             for done in dataone:
                 d_num = d_num + 1
                 valObjline = orderOutstockLineSerializer(data=done)
+                try:
+                    if int(done["id"])==0:
+                        contact_num += done['contract_num']
+                except:
+                    pass
                 if not valObjline.is_valid():
                     d_flag = 1
                     samp = {}
                     samp['msg'] = valObjline.errors
                     samp['key_num'] = d_num
                     l_msg.append(samp)
+            orderlineObj = PlanOrderLine.objects.get(id=data["order_line_id"])
+            outall = OutStock.objects.filter(order_line_id=data["order_line_id"])
+            for o in outall:
+                contact_num +=o.contract_num
+            if orderlineObj.contract_num!=contact_num:
+                msg = "合同数量不一致"
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
             #################校验数据################################
             dt = datetime.now()
             ##############保存出货方案#############################
