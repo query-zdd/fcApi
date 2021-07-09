@@ -518,9 +518,6 @@ class planClothgetSerializer(serializers.Serializer):
 ######################订单管理
 class orderOutstockSerializer(serializers.Serializer):
     order_id = serializers.IntegerField(error_messages={'required': '必须传入订单id'})
-    order_line_id = serializers.IntegerField(error_messages={'required': '必须传入订单列表id'})
-    short_overflow = serializers.IntegerField(error_messages={'required': '必须传入短溢装'})
-    short_overflow_direct = serializers.IntegerField(error_messages={'required': '必须传入指示短溢装'})
     dhkhao = serializers.CharField(allow_blank=True, allow_null=True,default='')
 
 class orderOutstockLineSerializer(serializers.Serializer):
@@ -530,6 +527,9 @@ class orderOutstockLineSerializer(serializers.Serializer):
     specs = serializers.CharField(error_messages={'required': '必须传入尺寸'})
     contract_num = serializers.IntegerField(error_messages={'required': '必须传入合同数量'})
     order_num = serializers.IntegerField(error_messages={'required': '必须传入订单数量'})
+    order_line_id = serializers.IntegerField(error_messages={'required': '必须传入订单列表id'})
+    short_overflow = serializers.IntegerField(error_messages={'required': '必须传入短溢装'})
+    short_overflow_direct = serializers.IntegerField(error_messages={'required': '必须传入指示短溢装'})
     id = serializers.IntegerField(default=0)
 
 class orderOutstockGetOneSerializer(serializers.Serializer):

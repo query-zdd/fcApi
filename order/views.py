@@ -28,7 +28,8 @@ class showOutStockView(APIView):
             #################校验数据################################
             d_flag = 0
             d_num = 0
-            contact_num = 0
+            contact_ids = []
+            contact_info={}
             l_msg = []
             dataone = data['data']
             for done in dataone:
@@ -36,7 +37,21 @@ class showOutStockView(APIView):
                 valObjline = orderOutstockLineSerializer(data=done)
                 try:
                     if int(done["id"])==0:
-                        contact_num += done['contract_num']
+                        order_one_lv = (100 + done["short_overflow"] + done['short_overflow_direct'])/ 100
+                        str_key = "k" + str(done['order_line_id'])
+                        num_str_key = "num" + str(done['order_line_id'])
+                        lv_str_key = "lvm" + str(done['order_line_id'])
+                        if done['order_line_id'] not in contact_ids:
+                            contact_ids.append(done['order_line_id'])
+                            # 合同数量
+                            contact_info[str_key] = done['contract_num']
+                            # 下单数量=合同数量+短溢装数量（合同短溢装+指示短溢装）
+                            contact_info[num_str_key] = done['order_num']
+                            contact_info[lv_str_key] = order_one_lv
+                        else:
+                            contact_info[str_key] += done['contract_num']
+                            contact_info[num_str_key] += done['order_num']
+                            contact_info[lv_str_key] = order_one_lv
                 except:
                     pass
                 if not valObjline.is_valid():
@@ -45,20 +60,36 @@ class showOutStockView(APIView):
                     samp['msg'] = valObjline.errors
                     samp['key_num'] = d_num
                     l_msg.append(samp)
-            orderlineObj = PlanOrderLine.objects.get(id=data["order_line_id"])
-            outall = OutStock.objects.filter(order_line_id=data["order_line_id"])
-            for o in outall:
-                contact_num +=o.contract_num
-            if orderlineObj.contract_num!=contact_num:
-                msg = "合同数量不一致"
-                error_code = 10030
-                request = request.method + '  ' + request.get_full_path()
-                post_result = {
-                    "error_code": error_code,
-                    "message": msg,
-                    "request": request,
-                }
-                return Response(post_result)
+            for k_id in contact_ids:
+                orderlineObj = PlanOrderLine.objects.get(id=k_id)
+                outall = OutStock.objects.filter(order_line_id=k_id)
+                str_key = "k"+str(k_id)
+                num_str_key = "num" +str(k_id)
+                lv_str_key = "lvm" + str(k_id)
+                for o in outall:
+                    contact_info[str_key] += o.contract_num
+                    contact_info[num_str_key] +=o.order_num
+                if orderlineObj.contract_num!=contact_info[str_key]:
+                    msg = "合同数量不一致"
+                    error_code = 10030
+                    request = request.method + '  ' + request.get_full_path()
+                    post_result = {
+                        "error_code": error_code,
+                        "message": msg,
+                        "request": request,
+                    }
+                    return Response(post_result)
+                # if int(orderlineObj.contract_num*contact_info[lv_str_key]) !=contact_info[num_str_key]:
+                #     msg = "下单数量不一致"
+                #     error_code = 10030
+                #     request = request.method + '  ' + request.get_full_path()
+                #     post_result = {
+                #         "error_code": error_code,
+                #         "message": msg,
+                #         "request": request,
+                #     }
+                #     return Response(post_result)
+
             #################校验数据################################
             dt = datetime.now()
             ##############保存出货方案#############################
@@ -77,16 +108,23 @@ class showOutStockView(APIView):
                             bObj = OutStock()
                             bObj.create_time = dt
                         bObj.order_id = data['order_id']
-                        bObj.order_line_id = data['order_line_id']
+                        bObj.order_line_id = done['order_line_id']
                         bObj.color = done['color']
                         bObj.color_name = done['color_name']
                         bObj.color_num = done['color_num']
                         bObj.specs = done['specs']
                         bObj.contract_num = done['contract_num']
-                        bObj.short_overflow = data['short_overflow']
-                        bObj.short_overflow_direct = data['short_overflow_direct']
+                        bObj.short_overflow = done['short_overflow']
+                        bObj.short_overflow_direct = done['short_overflow_direct']
                         bObj.order_num = done['order_num']
                         bObj.save()
+                        # 更新orderline
+                        num_str_key = "num" + str(done['order_line_id'])
+                        orderline = PlanOrderLine.objects.get(id=done['order_line_id'])
+                        orderline.is_pushprogram = 1
+                        orderline.order_num = contact_info[num_str_key]
+                        orderline.short_overflow_direct = done['short_overflow_direct']
+                        orderline.save()
                     except:
                         msg = "参数错误"
                         error_code = 10030
@@ -98,16 +136,15 @@ class showOutStockView(APIView):
                         }
                         return Response(post_result)
                 try:
-                    # 更新orderline
-                    orderline = PlanOrderLine.objects.get(id=data['order_line_id'])
-                    orderline.is_pushprogram =1
-                    orderline.short_overflow_direct = data['short_overflow_direct']
-                    orderline.save()
                     # 更新order
                     order = PlanOrder.objects.get(id=data['order_id'])
                     order.is_pushprogram =1
-                    pg_num = PlanOrderLine.objects.filter(order_id=data['order_id'],is_pushprogram=1).count()
-                    order.pushprogram_num =pg_num
+                    pgone = PlanOrderLine.objects.filter(order_id=data['order_id'],is_pushprogram=1)
+                    order.pushprogram_num =pgone.count()
+                    o_order_num = 0
+                    for pgone_num in pgone:
+                        o_order_num +=pgone_num.order_num
+                    order.order_num = o_order_num
                     if dhkhao:
                         order.dhkhao = dhkhao
                     order.save()
