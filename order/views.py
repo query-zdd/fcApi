@@ -29,6 +29,7 @@ class showOutStockView(APIView):
             d_flag = 0
             d_num = 0
             contact_ids = []
+            del_out_id=[]
             contact_info={}
             l_msg = []
             dataone = data['data']
@@ -52,6 +53,24 @@ class showOutStockView(APIView):
                             contact_info[str_key] += done['contract_num']
                             contact_info[num_str_key] += done['order_num']
                             contact_info[lv_str_key] = order_one_lv
+                    else:
+                        order_one_lv = (100 + done["short_overflow"] + done['short_overflow_direct']) / 100
+                        str_key = "k" + str(done['order_line_id'])
+                        num_str_key = "num" + str(done['order_line_id'])
+                        lv_str_key = "lvm" + str(done['order_line_id'])
+                        if done['order_line_id'] not in contact_ids:
+                            contact_ids.append(done['order_line_id'])
+                            # 合同数量
+                            contact_info[str_key] = done['contract_num']
+                            # 下单数量=合同数量+短溢装数量（合同短溢装+指示短溢装）
+                            contact_info[num_str_key] = done['order_num']
+                            contact_info[lv_str_key] = order_one_lv
+                        else:
+                            contact_info[str_key] += done['contract_num']
+                            contact_info[num_str_key] += done['order_num']
+                            contact_info[lv_str_key] = order_one_lv
+                        if done['id'] not in del_out_id:
+                            del_out_id.append(done['id'])
                 except:
                     pass
                 if not valObjline.is_valid():
@@ -62,7 +81,7 @@ class showOutStockView(APIView):
                     l_msg.append(samp)
             for k_id in contact_ids:
                 orderlineObj = PlanOrderLine.objects.get(id=k_id)
-                outall = OutStock.objects.filter(order_line_id=k_id)
+                outall = OutStock.objects.filter(~Q(id__in=del_out_id),order_line_id=k_id)
                 str_key = "k"+str(k_id)
                 num_str_key = "num" +str(k_id)
                 lv_str_key = "lvm" + str(k_id)
@@ -79,16 +98,6 @@ class showOutStockView(APIView):
                         "request": request,
                     }
                     return Response(post_result)
-                # if int(orderlineObj.contract_num*contact_info[lv_str_key]) !=contact_info[num_str_key]:
-                #     msg = "下单数量不一致"
-                #     error_code = 10030
-                #     request = request.method + '  ' + request.get_full_path()
-                #     post_result = {
-                #         "error_code": error_code,
-                #         "message": msg,
-                #         "request": request,
-                #     }
-                #     return Response(post_result)
 
             #################校验数据################################
             dt = datetime.now()
@@ -122,7 +131,8 @@ class showOutStockView(APIView):
                         num_str_key = "num" + str(done['order_line_id'])
                         orderline = PlanOrderLine.objects.get(id=done['order_line_id'])
                         orderline.is_pushprogram = 1
-                        orderline.order_num = contact_info[num_str_key]
+                        if int(done["id"])==0:
+                            orderline.order_num = contact_info[num_str_key]
                         orderline.short_overflow_direct = done['short_overflow_direct']
                         orderline.save()
                     except:
