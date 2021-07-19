@@ -292,6 +292,8 @@ class showOutStockOneView(APIView):
 
                 temp = {}
                 temp["data"] = samplist
+                orderObj = PlanOrder.objects.get(id=nid)
+                temp['orderObj'] = model_to_dict(orderObj)
                 temp['error_code'] = 0
                 temp['message'] = "成功"
                 temp['request'] = request.method + '  ' + request.get_full_path()
