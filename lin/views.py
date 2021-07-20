@@ -8322,34 +8322,24 @@ class other_notesView(APIView):
                         temp["sub_name"] = one.sub_name
                         temp['sub_category_id'] = one.id
                         subcat = OtherCategorySetting.objects.filter(sub_category_id=one.id, delete_time=None)
-                        samp = []
-                        for o in subcat:
+                        ids = [one.id for one in subcat]
+                        ssubcat = OtherNotes.objects.filter(category_setting_id__in=ids).order_by("category_setting_id")
+                        ssamp=[]
+                        for subone in ssubcat:
+                            subcatone = OtherCategorySetting.objects.get(id=subone.category_setting_id)
                             sampd = {}
-                            if o.active == 1:
+                            if subone.active == 1:
                                 sampd['active'] = True
                             else:
                                 sampd['active'] = False
-                            ssubcat = OtherNotes.objects.filter(category_setting_id=o.id)
-                            ssamp=[]
-                            for subone in ssubcat:
-                                ssampd ={}
-                                ssampd['notes_name'] = subone.notes_name
-                                ssampd['weight'] = subone.weight
-                                ssampd['notes_id'] = subone.id
-                                if subone.active == 1:
-                                    ssampd['active'] = True
-                                else:
-                                    ssampd['active'] = False
-                                ssamp.append(ssampd)
-                            sampd['notes'] = ssamp
-                            sampd['category_set_name'] = o.category_set_name
-                            sampd['cat_set_id'] = o.id
-                            sampd['sub_category_id'] = o.sub_category_id
-                            sampd['sub_name'] = one.sub_name
-                            sampd['delete_time'] = o.delete_time
-                            sampd['weight'] = o.weight
-                            samp.append(sampd)
-                        temp['sub_category'] = samp
+                            sampd['notes_name'] = subone.notes_name
+                            sampd['weight'] = subone.weight
+                            sampd['notes_id'] = subone.id
+                            sampd['category_set_name'] = subcatone.category_set_name
+                            sampd['cat_set_id'] = subcatone.id
+                            ssamp.append(sampd)
+
+                        temp['notes'] = ssamp
                         result.append(temp)
                 return Response(result)
             except:
