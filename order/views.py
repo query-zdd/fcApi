@@ -13,6 +13,7 @@ from lin.models import *
 from lin.exception import Error
 from secure.upload.upload_image.config import  access_key,secret_key,base_url
 from secure.serializers import zddpaginate
+import math
 
 # Create your views here.
 ############################订单管理-出货方案###############################################
@@ -125,7 +126,7 @@ class showOutStockView(APIView):
                         bObj.contract_num = done['contract_num']
                         bObj.short_overflow = done['short_overflow']
                         bObj.short_overflow_direct = done['short_overflow_direct']
-                        bObj.order_num = done['order_num']
+                        bObj.order_num = math.ceil(done['order_num'])
                         bObj.save()
                         # 更新orderline
                         num_str_key = "num" + str(done['order_line_id'])
