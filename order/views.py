@@ -1049,11 +1049,15 @@ class orderNotesView(APIView):
                 d_num = d_num + 1
                 valObjline = orderNotesLineSerializer(data=done)
                 if not valObjline.is_valid():
-                    d_flag = 1
-                    samp = {}
-                    samp['msg'] = valObjline.errors
-                    samp['key_num'] = d_num
-                    l_msg.append(samp)
+                    msg = valObjline.errors
+                    error_code = 10030
+                    request = request.method + '  ' + request.get_full_path()
+                    post_result = {
+                        "error_code": error_code,
+                        "message": msg,
+                        "request": request,
+                    }
+                    return Response(post_result)
                 if valObjline.is_valid():
                     try:
                         try:
@@ -1209,7 +1213,7 @@ class orderNotesView(APIView):
                     one["category_id"] = noteCat.id
                     one["cloth_name"] = noteCloth.cloth
                     one["cloth_id"] = noteCloth.id
-                    one['note_id'] = one['id']
+                    one['notes_id'] = one['id']
                     orderNote = OrderNotes.objects.filter(notes_id=one["id"], plan_id=valObj.data['plan_id'])
                     if orderNote.count() > 0:
                         notes_all_num = notes_all_num+1
@@ -1294,7 +1298,7 @@ class orderNotesOneView(APIView):
                     one["category_id"] = noteCat.id
                     one["cloth_name"] = noteCloth.cloth
                     one["cloth_id"] = noteCloth.id
-                    one['note_id'] = one['id']
+                    one['notes_id'] = one['id']
                     orderNote =OrderNotes.objects.filter(plan_id=nid,notes_id=one['id'])
                     if orderNote.count()>0:
                         notes_all_num = notes_all_num + 1
@@ -1383,11 +1387,15 @@ class orderNotesOtherView(APIView):
                 d_num = d_num + 1
                 valObjline = orderNotesLineSerializer(data=done)
                 if not valObjline.is_valid():
-                    d_flag = 1
-                    samp = {}
-                    samp['msg'] = valObjline.errors
-                    samp['key_num'] = d_num
-                    l_msg.append(samp)
+                    msg = valObjline.errors
+                    error_code = 10030
+                    request = request.method + '  ' + request.get_full_path()
+                    post_result = {
+                        "error_code": error_code,
+                        "message": msg,
+                        "request": request,
+                    }
+                    return Response(post_result)
                 if valObjline.is_valid():
                     try:
                         try:
@@ -1543,7 +1551,7 @@ class orderNotesOtherView(APIView):
                     one["category_id"] = noteCat.id
                     one["cloth_name"] = noteCloth.sub_name
                     one["cloth_id"] = noteCloth.id
-                    one['note_id'] = one['id']
+                    one['notes_id'] = one['id']
                     orderNote = OrderNotesOther.objects.filter(notes_id=one["id"], plan_id=valObj.data['plan_id'])
                     if orderNote.count() > 0:
                         notes_all_num = notes_all_num+1
@@ -1628,7 +1636,7 @@ class orderNotesOtherOneView(APIView):
                     one["category_id"] = noteCat.id
                     one["cloth_name"] = noteCloth.sub_name
                     one["cloth_id"] = noteCloth.id
-                    one['note_id'] = one['id']
+                    one['notes_id'] = one['id']
                     orderNote =OrderNotesOther.objects.filter(plan_id=nid,notes_id=one['id'])
                     if orderNote.count()>0:
                         notes_all_num = notes_all_num + 1
