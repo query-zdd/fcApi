@@ -39,7 +39,7 @@ class showOutStockView(APIView):
                 valObjline = orderOutstockLineSerializer(data=done)
                 try:
                     if int(done["id"])==0:
-                        order_one_lv = (100 + done["short_overflow"] + done['short_overflow_direct'])/ 100
+                        order_one_lv = (100 + int(done["short_overflow"]) + int(done['short_overflow_direct']))/ 100
                         str_key = "k" + str(done['order_line_id'])
                         num_str_key = "num" + str(done['order_line_id'])
                         lv_str_key = "lvm" + str(done['order_line_id'])
@@ -55,7 +55,7 @@ class showOutStockView(APIView):
                             contact_info[num_str_key] += done['order_num']
                             contact_info[lv_str_key] = order_one_lv
                     else:
-                        order_one_lv = (100 + done["short_overflow"] + done['short_overflow_direct']) / 100
+                        order_one_lv = (100 + done["short_overflow"] + int(done['short_overflow_direct'])) / 100
                         str_key = "k" + str(done['order_line_id'])
                         num_str_key = "num" + str(done['order_line_id'])
                         lv_str_key = "lvm" + str(done['order_line_id'])
@@ -125,7 +125,7 @@ class showOutStockView(APIView):
                         bObj.specs = done['specs']
                         bObj.contract_num = done['contract_num']
                         bObj.short_overflow = done['short_overflow']
-                        bObj.short_overflow_direct = done['short_overflow_direct']
+                        bObj.short_overflow_direct = int(done['short_overflow_direct'])
                         bObj.order_num = math.ceil(done['order_num'])
                         bObj.save()
                         # 更新orderline
@@ -134,7 +134,7 @@ class showOutStockView(APIView):
                         orderline.is_pushprogram = 1
                         if int(done["id"])==0:
                             orderline.order_num = contact_info[num_str_key]
-                        orderline.short_overflow_direct = done['short_overflow_direct']
+                        orderline.short_overflow_direct = int(done['short_overflow_direct'])
                         orderline.save()
                     except:
                         msg = "参数错误"
@@ -149,8 +149,10 @@ class showOutStockView(APIView):
                 try:
                     # 更新order
                     order = PlanOrder.objects.get(id=data['order_id'])
-                    order.is_pushprogram =1
+                    pgall = PlanOrderLine.objects.filter(order_id=data['order_id'])
                     pgone = PlanOrderLine.objects.filter(order_id=data['order_id'],is_pushprogram=1)
+                    if pgall.count()==pgone.count():
+                        order.is_pushprogram = 1
                     order.pushprogram_num =pgone.count()
                     o_order_num = 0
                     for pgone_num in pgone:
