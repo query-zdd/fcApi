@@ -1209,6 +1209,7 @@ class orderNotesView(APIView):
                     one["category_id"] = noteCat.id
                     one["cloth_name"] = noteCloth.cloth
                     one["cloth_id"] = noteCloth.id
+                    one['note_id'] = one['id']
                     orderNote = OrderNotes.objects.filter(notes_id=one["id"], plan_id=valObj.data['plan_id'])
                     if orderNote.count() > 0:
                         notes_all_num = notes_all_num+1
@@ -1216,6 +1217,7 @@ class orderNotesView(APIView):
                             notes_sure_num = notes_sure_num+1
                         else:
                             notes_nosure_num = notes_nosure_num+1
+                        one['id'] = orderNote[0].id
                         one['people'] = orderNote[0].people
                         one['people_department'] = orderNote[0].people_department
                         one['people_post'] = orderNote[0].people_post
@@ -1291,6 +1293,7 @@ class orderNotesOneView(APIView):
                     one["category_id"] = noteCat.id
                     one["cloth_name"] = noteCloth.cloth
                     one["cloth_id"] = noteCloth.id
+                    one['note_id'] = one['id']
                     orderNote =OrderNotes.objects.filter(plan_id=nid,notes_id=one['id'])
                     if orderNote.count()>0:
                         notes_all_num = notes_all_num + 1
@@ -1298,6 +1301,7 @@ class orderNotesOneView(APIView):
                             notes_sure_num = notes_sure_num + 1
                         else:
                             notes_nosure_num = notes_nosure_num + 1
+                        one['id'] = orderNote[0].id
                         one['people'] = orderNote[0].people
                         one['people_department'] = orderNote[0].people_department
                         one['people_post'] = orderNote[0].people_post
@@ -1537,6 +1541,7 @@ class orderNotesOtherView(APIView):
                     one["category_id"] = noteCat.id
                     one["cloth_name"] = noteCloth.sub_name
                     one["cloth_id"] = noteCloth.id
+                    one['note_id'] = one['id']
                     orderNote = OrderNotesOther.objects.filter(notes_id=one["id"], plan_id=valObj.data['plan_id'])
                     if orderNote.count() > 0:
                         notes_all_num = notes_all_num+1
@@ -1544,6 +1549,7 @@ class orderNotesOtherView(APIView):
                             notes_sure_num = notes_sure_num+1
                         else:
                             notes_nosure_num = notes_nosure_num+1
+                        one['id'] = orderNote[0].id
                         one['people'] = orderNote[0].people
                         one['people_department'] = orderNote[0].people_department
                         one['people_post'] = orderNote[0].people_post
@@ -1619,6 +1625,7 @@ class orderNotesOtherOneView(APIView):
                     one["category_id"] = noteCat.id
                     one["cloth_name"] = noteCloth.sub_name
                     one["cloth_id"] = noteCloth.id
+                    one['note_id'] = one['id']
                     orderNote =OrderNotesOther.objects.filter(plan_id=nid,notes_id=one['id'])
                     if orderNote.count()>0:
                         notes_all_num = notes_all_num + 1
@@ -1626,6 +1633,7 @@ class orderNotesOtherOneView(APIView):
                             notes_sure_num = notes_sure_num + 1
                         else:
                             notes_nosure_num = notes_nosure_num + 1
+                        one['id'] = orderNote[0].id
                         one['people'] = orderNote[0].people
                         one['people_department'] = orderNote[0].people_department
                         one['people_post'] = orderNote[0].people_post
