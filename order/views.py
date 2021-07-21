@@ -1237,6 +1237,7 @@ class orderNotesView(APIView):
                         one['is_active'] = 1
                     else:
                         one['is_active'] = 0
+                        one['id'] = None
                 temp = {}
                 temp["data"] = noteslist
                 temp['notes_nosure_num'] = notes_nosure_num
@@ -1322,6 +1323,7 @@ class orderNotesOneView(APIView):
                         one['is_sure'] = orderNote[0].is_sure
                     else:
                         one['is_active'] = 0
+                        one['id'] = None
                 temp = {}
                 temp["data"] =noteslist
                 temp['notes_nosure_num'] = notes_nosure_num
@@ -1569,6 +1571,7 @@ class orderNotesOtherView(APIView):
                         one['is_active'] = 1
                     else:
                         one['is_active'] = 0
+                        one['id'] = None
                 temp = {}
                 temp["data"] = noteslist
                 temp['notes_nosure_num'] = notes_nosure_num
@@ -1654,6 +1657,7 @@ class orderNotesOtherOneView(APIView):
                         one['is_sure'] = orderNote[0].is_sure
                     else:
                         one['is_active'] = 0
+                        one['id'] = None
                 temp = {}
                 temp["data"] =noteslist
                 temp['notes_nosure_num'] = notes_nosure_num
