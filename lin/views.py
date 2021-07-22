@@ -8947,6 +8947,7 @@ class planOneView(APIView):
                     samp['customer_name_id'] = one.customer_name_id
                     cusObj = CustomerFiles.objects.get(id=one.customer_name_id)
                     samp['company_name_simple'] = cusObj.customer_simple_name
+                    samp['customer_type_id'] = cusObj.type_id
                     samp['brand_id'] = one.brand_id
                     bobj = Marks.objects.get(id=one.brand_id)
                     samp['brand'] = bobj.brand
