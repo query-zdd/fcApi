@@ -9984,12 +9984,13 @@ class planOrderView(APIView):
             bobj = Marks.objects.get(id=planObj.brand_id)
             order.custom = cusObj.customer_simple_name
             order.price_code = planObj.price_code
-            order.is_pushprogram = 0
-            order.is_workprogram = 0
-            order.is_buyprogram = 0
-            order.pushprogram_num =0
-            order.workprogram_num = 0
-            order.buyprogram_num = 0
+            if not oid:
+                order.is_pushprogram = 0
+                order.is_workprogram = 0
+                order.is_buyprogram = 0
+                order.pushprogram_num =0
+                order.workprogram_num = 0
+                order.buyprogram_num = 0
             order.plan_status = '企划成功'
             order.workflow = '企划流程..'
             order.order_line_num = len(dataone)
@@ -10060,9 +10061,10 @@ class planOrderView(APIView):
                         bObj.short_overflow = done['short_overflow']
                         bObj.pay_way = done['pay_way']
                         bObj.pod = done['pod']
-                        bObj.is_pushprogram = 0
-                        bObj.is_work_progrem = 0
-                        bObj.is_buyprogram = 0
+                        if not mid:
+                            bObj.is_pushprogram = 0
+                            bObj.is_work_progrem = 0
+                            bObj.is_buyprogram = 0
                         bObj.inspect_company = done['inspect_company']
                         bObj.delivery_way = done['delivery_way']
                         bObj.send_time = done['send_time']
