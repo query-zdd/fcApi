@@ -570,13 +570,13 @@ class factoryMakeSerializer(serializers.Serializer):
     dhkhao = serializers.CharField(default='')
 
 class factoryMakeLineSerializer(serializers.Serializer):
-    make_time = serializers.CharField(default='')
+    make_time = serializers.CharField(allow_blank=True, allow_null=True,default='')
     make_factory = serializers.CharField(allow_blank=True, allow_null=True,default='')
     coop_mode = serializers.CharField(allow_blank=True, allow_null=True,default='')
-    inspect_company = serializers.CharField(default='')
-    order_admin = serializers.CharField(default='')
-    ticketing_custom = serializers.CharField(default='')
-    id = serializers.IntegerField(default=0)
+    inspect_company = serializers.CharField(allow_blank=True, allow_null=True,default='')
+    order_admin = serializers.CharField(allow_blank=True, allow_null=True,default='')
+    ticketing_custom = serializers.CharField(allow_blank=True, allow_null=True,default='')
+    id = serializers.IntegerField(allow_null=True,default=0)
 
 ######################面辅料采购###################################
 class orderClothSerializer(serializers.Serializer):
