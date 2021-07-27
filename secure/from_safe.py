@@ -571,8 +571,8 @@ class factoryMakeSerializer(serializers.Serializer):
 
 class factoryMakeLineSerializer(serializers.Serializer):
     make_time = serializers.CharField(default='')
-    make_factory = serializers.CharField(default='')
-    coop_mode = serializers.CharField(default='')
+    make_factory = serializers.CharField(allow_blank=True, allow_null=True,default='')
+    coop_mode = serializers.CharField(allow_blank=True, allow_null=True,default='')
     inspect_company = serializers.CharField(default='')
     order_admin = serializers.CharField(default='')
     ticketing_custom = serializers.CharField(default='')
