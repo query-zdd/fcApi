@@ -514,7 +514,7 @@ class factoryMakeOneView(APIView):
                     samplist.append(samp)
                 temp = {}
                 temp["data"] = samplist
-                temp['work_type'] = orderObj.order_type
+                temp['work_type'] = orderObj.work_type
                 temp['contract_num'] = orderObj.contract_num
                 temp['order_num'] = orderObj.order_num
                 temp['short_overflow_num'] = orderObj.order_num
