@@ -584,6 +584,8 @@ class orderClothSerializer(serializers.Serializer):
     plan_id = serializers.IntegerField(error_messages={'required': '必须传入企划id'})
     work_type = serializers.CharField(default='')
     dhkhao = serializers.CharField(default='')
+    coop_mode = serializers.CharField(allow_blank=True, allow_null=True, default='')
+    ticketing_custom = serializers.CharField(allow_blank=True, allow_null=True, default='')
 
 class orderClothLineSerializer(serializers.Serializer):
     plan_material_id = serializers.CharField(error_messages={'required': '必须传入企划用料的id'})

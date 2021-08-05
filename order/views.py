@@ -373,7 +373,7 @@ class factoryMakeView(APIView):
                     ticketing_custom = valObjline.data['ticketing_custom'] if valObjline.data['ticketing_custom'] is not None else ""
                     try:
                         try:
-                            mid = done["make_factory_id"]
+                            mid = done["factoryMake"]
                             if mid:
                                 bObj = FactoryMake.objects.get(id=mid)
                                 bObj.update_time = dt
@@ -1014,6 +1014,12 @@ class orderClothOneView(APIView):
                 orderObj = PlanOrder.objects.get(delete_time=None, id=nid)
                 orderCloth = OrderCloth.objects.filter(order_id=nid)
                 planObj = Plan.objects.get(id=orderObj.plan_id)
+                fmObj = FactoryMake.objects.filter(order_id=nid)
+                coop_mode = ''
+                ticketing_custom = ''
+                for o in fmObj:
+                    coop_mode +=o.coop_mode+'|'
+                    ticketing_custom +=o.ticketing_custom+'|'
                 samplist=[]
                 for one in orderCloth:
                     samp={}
@@ -1034,6 +1040,8 @@ class orderClothOneView(APIView):
                 temp = {}
                 temp["data"] = samplist
                 temp["orderObj"] = model_to_dict(orderObj)
+                temp['coop_mode'] = coop_mode
+                temp['ticketing_custom'] = ticketing_custom
                 temp['error_code'] = 0
                 temp['message'] = "成功"
                 temp['request'] = request.method + '  ' + request.get_full_path()
