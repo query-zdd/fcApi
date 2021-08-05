@@ -576,7 +576,7 @@ class factoryMakeLineSerializer(serializers.Serializer):
     inspect_company = serializers.CharField(allow_blank=True, allow_null=True,default='')
     order_admin = serializers.CharField(allow_blank=True, allow_null=True,default='')
     ticketing_custom = serializers.CharField(allow_blank=True, allow_null=True,default='')
-    id = serializers.IntegerField(allow_null=True,default=0)
+    make_factory_id = serializers.IntegerField(allow_null=True,default=0)
 
 ######################面辅料采购###################################
 class orderClothSerializer(serializers.Serializer):
