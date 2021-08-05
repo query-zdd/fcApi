@@ -1946,6 +1946,7 @@ class shipmentOneView(APIView):
                 temp = {}
                 temp["data"] = samplist
                 temp["orderObj"] = model_to_dict(orderObj)
+                temp['plan_material_id'] = orderCloth.plan_material_id
                 temp['error_code'] = 0
                 temp['message'] = "成功"
                 temp['request'] = request.method + '  ' + request.get_full_path()
