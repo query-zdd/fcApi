@@ -528,6 +528,7 @@ class OrderCloth(models.Model):
     order_num = models.IntegerField(blank=True, null=True)
     loss_lv = models.IntegerField(blank=True, null=True)
     plan_id = models.IntegerField(blank=True, null=True)
+    plan_material_id = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -608,6 +609,7 @@ class OrderClothShip(models.Model):
     supplier = models.CharField(max_length=255, blank=True, null=True)
     all_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     order_cloth_id = models.IntegerField(blank=True, null=True)
+    plan_material_id = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False

@@ -772,6 +772,7 @@ class orderClothView(APIView):
                             bObj.create_time = dt
                         bObj.order_id = data['order_id']
                         bObj.plan_id = data['plan_id']
+                        bObj.plan_material_id = done['plan_material_id']
                         bObj.cloth_type = done['cloth_type']
                         bObj.cloth_cat = done['cloth_cat']
                         bObj.cloth_name = done['cloth_name']
@@ -792,6 +793,7 @@ class orderClothView(APIView):
                             planmObj = PlanMaterial.objects.filter(id=done['plan_material_id'], delete_time=None)
                             if planmObj.count() > 0:
                                 nbObj.supplier = planmObj[0].complayer
+                            nbObj.plan_material_id = done['plan_material_id']
                             nbObj.create_time = dt
                             nbObj.order_id = data['order_id']
                             nbObj.plan_id = data['plan_id']
@@ -985,9 +987,11 @@ class orderClothOneView(APIView):
             try:
                 orderObj = PlanOrder.objects.get(delete_time=None, id=nid)
                 orderCloth = OrderCloth.objects.filter(order_id=nid)
+                planObj = Plan.objects.get(id=orderObj.plan_id)
                 samplist=[]
                 for one in orderCloth:
                     samp={}
+                    samp['plan_material_id'] = one.plan_material_id
                     samp['cloth_type'] = one.cloth_type
                     samp['cloth_cat'] = one.cloth_cat
                     samp['cloth_name'] = one.cloth_name
