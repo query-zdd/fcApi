@@ -536,7 +536,7 @@ class factoryMakeOneView(APIView):
                     samp['ticketing_custom'] = one.ticketing_custom
                     samp['factory_make_id'] = one.id
                     rObj = FactoryMakeLine.objects.filter(delete_time=None, factory_make_id=one.id).order_by('color', 'specs')
-                    samp['sub_line'] = rObj.values()
+                    samp['subline'] = rObj.values()
                     samplist.append(samp)
                 temp = {}
                 temp["data"] = samplist
