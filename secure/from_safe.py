@@ -567,7 +567,7 @@ class machiningGetOneSerializer(serializers.Serializer):
 class factoryMakeSerializer(serializers.Serializer):
     order_id = serializers.IntegerField(error_messages={'required': '必须传入订单id'})
     work_type = serializers.CharField(error_messages={'required': '必须传入工厂方式'})
-    dhkhao = serializers.CharField(default='')
+    dhkhao = serializers.CharField(allow_blank=True, allow_null=True,default='')
 
 class factoryMakeLineSerializer(serializers.Serializer):
     make_time = serializers.CharField(allow_blank=True, allow_null=True,default='')
