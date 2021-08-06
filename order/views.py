@@ -699,13 +699,14 @@ class machiningOneView(APIView):
             try:
                 order = PlanOrder.objects.get(id = nid)
                 orderline = PlanOrderLine.objects.filter(delete_time=None,order_id=nid)
+                factory_make_id = valObj.data['factory_make_id'] if valObj.data['factory_make_id'] is not None else 0
                 samplist=[]
                 for one in orderline:
                     samp={}
                     samp['order_custom'] = one.order_custom
                     samp['order_type'] = one.order_type
                     samp['order_line_id'] = one.id
-                    rObj = FactoryMakeLine.objects.filter(delete_time=None, order_line_id=one.id).order_by('color', 'specs')
+                    rObj = FactoryMakeLine.objects.filter(delete_time=None, order_line_id=one.id,factory_make_id=factory_make_id).order_by('color', 'specs')
                     if rObj.count()>0:
                         samp['machining_sub'] = rObj.values()
                     else:

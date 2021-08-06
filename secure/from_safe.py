@@ -561,7 +561,7 @@ class machiningLineSerializer(serializers.Serializer):
     id = serializers.IntegerField(default=0)
 
 class machiningGetOneSerializer(serializers.Serializer):
-    factory_make_id = serializers.IntegerField(error_messages={'required': '必须传入订单加工工厂方案'})
+    factory_make_id = serializers.IntegerField(allow_null=True,default=0)
 
 ######################订单管理--工厂方案
 class factoryMakeSerializer(serializers.Serializer):
