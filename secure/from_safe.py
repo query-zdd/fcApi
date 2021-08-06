@@ -548,7 +548,7 @@ class machiningSerializer(serializers.Serializer):
     order_line_id = serializers.IntegerField(error_messages={'required': '必须传入订单列表id'})
     short_overflow = serializers.IntegerField(error_messages={'required': '必须传入短溢装'})
     short_overflow_direct = serializers.IntegerField(error_messages={'required': '必须传入指示短溢装'})
-    factory_make_id = serializers.CharField(error_messages={'required': '必须传入加工工厂数据id'})
+    factory_make_id = serializers.IntegerField(allow_null=True,default=0)
 
 class machiningLineSerializer(serializers.Serializer):
     color = serializers.CharField(error_messages={'required': '必须传入面辅料颜色'})

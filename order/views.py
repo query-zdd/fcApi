@@ -371,9 +371,10 @@ class factoryMakeView(APIView):
                     inspect_company = valObjline.data['inspect_company'] if valObjline.data['inspect_company'] is not None else ""
                     order_admin = valObjline.data['order_admin'] if valObjline.data['order_admin'] is not None else ""
                     ticketing_custom = valObjline.data['ticketing_custom'] if valObjline.data['ticketing_custom'] is not None else ""
+                    subline = done["subline"]
                     try:
                         try:
-                            mid = done["factoryMake"]
+                            mid = done["factory_make_id"]
                             if mid:
                                 bObj = FactoryMake.objects.get(id=mid)
                                 bObj.update_time = dt
@@ -392,7 +393,6 @@ class factoryMakeView(APIView):
                         bObj.order_admin = order_admin
                         bObj.ticketing_custom = ticketing_custom
                         bObj.save()
-                        subline = done['subline']
                         if mid:
                             factory_make_id = mid
                         else:
@@ -400,9 +400,9 @@ class factoryMakeView(APIView):
                             factory_make_id = fmObj.id
                         for one in subline:
                             try:
-                                mlid = one["id"]
+                                mlid = one
                                 if mlid:
-                                    blObj = FactoryMakeLine.objects.get(id=mlid)
+                                    blObj = FactoryMakeLine.objects.get(id=one)
                                     blObj.update_time = dt
                                 else:
                                     blObj = FactoryMakeLine()
@@ -411,18 +411,21 @@ class factoryMakeView(APIView):
                             except:
                                 blObj = FactoryMakeLine()
                                 blObj.create_time = dt
-                            blObj.order_id = data['order_id']
-                            blObj.order_line_id = one['order_line_id']
-                            blObj.color = one['color']
-                            blObj.color_name = one['color_name']
-                            blObj.color_num = one['color_num']
-                            blObj.specs = one['specs']
-                            blObj.contract_num = one['contract_num']
-                            blObj.short_overflow = one['short_overflow']
-                            blObj.short_overflow_direct = one['short_overflow_direct']
-                            blObj.order_num = one['order_num']
-                            blObj.make_num = one['make_num']
                             blObj.factory_make_id = factory_make_id
+                            # try:
+                            #     blObj.color = one['color']
+                            #     blObj.color_name = one['color_name']
+                            #     blObj.color_num = one['color_num']
+                            #     blObj.specs = one['specs']
+                            #     blObj.contract_num = one['contract_num']
+                            #     blObj.short_overflow = one['short_overflow']
+                            #     blObj.short_overflow_direct = one['short_overflow_direct']
+                            #     blObj.order_num = one['order_num']
+                            #     blObj.make_num = one['make_num']
+                            #     blObj.order_id = data['order_id']
+                            #     blObj.order_line_id = one['order_line_id']
+                            # except:
+                            #     pass
                             blObj.save()
                     except:
                         msg = "参数错误"
@@ -594,7 +597,9 @@ class machiningView(APIView):
                     samp['key_num'] = d_num
                     l_msg.append(samp)
             #################校验数据################################
+            factory_make_id = valObj.data['factory_make_id'] if valObj.data['factory_make_id'] is not None else 0
             dt = datetime.now()
+            subline = []
             ##############保存出货方案#############################
             if d_flag == 0:
                 for done in dataone:
@@ -622,8 +627,13 @@ class machiningView(APIView):
                         bObj.short_overflow_direct = data['short_overflow_direct']
                         bObj.order_num = done['order_num']
                         bObj.make_num = done['make_num']
-                        bObj.factory_make_id = data['factory_make_id']
+                        bObj.factory_make_id = factory_make_id
                         bObj.save()
+                        if mid:
+                            subline.append(mid)
+                        else:
+                            fmObj = FactoryMakeLine.objects.latest('id')
+                            subline.append(fmObj.id)
                     except:
                         msg = "参数错误"
                         error_code = 10030
@@ -654,6 +664,7 @@ class machiningView(APIView):
                     "error_code": error_code,
                     "message": msg,
                     "request": request,
+                    "subline":subline,
                 }
                 return Response(post_result)
             else:
@@ -1924,7 +1935,7 @@ class shipmentOneView(APIView):
             try:
                 orderCloth = OrderCloth.objects.get(id=nid)
                 orderObj = PlanOrder.objects.get(delete_time=None, id=orderCloth.order_id)
-                orderClothShip = OrderClothShip.objects.filter(order_cloth_id=nid)
+                orderClothShip = OrderClothShip.objects.filter(delete_time=None,order_cloth_id=nid)
                 samplist=[]
                 for one in orderClothShip:
                     samp={}
