@@ -9380,7 +9380,7 @@ class planPriceSubView(APIView):
                     ppobj = Plan.objects.filter(id=plan_id)
                     if ppobj.count() > 0:
                         bObj.edition = ppobj[0].edition + 1
-                        if ppobj.status == 3:
+                        if ppobj[0].status == 3:
                             bObj.is_finish = 1
                         else:
                             bObj.is_finish = 0
@@ -9524,6 +9524,10 @@ class planPriceView(APIView):
                 planOne.edition = planOne.edition +1
                 if planOne.status !=3:
                     planOne.status = 0
+                    one.is_finish = 0
+                else:
+                    one.is_finish = 1
+
                 planOne.save()
                 msg = "创建在建企划"
                 error_code = 0
