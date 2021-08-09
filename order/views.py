@@ -711,7 +711,11 @@ class machiningOneView(APIView):
                         samp['machining_sub'] = rObj.values()
                     else:
                         rOne =OutStock.objects.filter(delete_time=None,order_id=nid,order_line_id=one.id).order_by('color','specs')
-                        samp['machining_sub'] = rOne.values()
+                        rOut =  rOne.values()
+                        for obj in rOut:
+                            obj['out_id'] = obj['id']
+                            obj['id'] = 0
+                        samp['machining_sub'] = rOut
 
                     samplist.append(samp)
 
