@@ -10002,9 +10002,9 @@ class planOrderView(APIView):
                 orderone =PlanOrder.objects.get(id=oid)
             else:
                 orderone = PlanOrder.objects.latest('id')
-                #企划成功
-                planObj.status = 3
-                planObj.save()
+                # #企划成功
+                # planObj.status = 3
+                # planObj.save()
             # 企划状态更改
             planObj.status = 3
             planObj.save()
