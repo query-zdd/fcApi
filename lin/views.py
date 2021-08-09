@@ -9088,13 +9088,23 @@ class planPlanerView(APIView):
                     ppobj = Plan.objects.get(id=plan_id)
                     if ppobj:
                         bObj.edition =ppobj.edition + 1
+                        if ppobj.status ==3:
+                            bObj.is_finish = 1
+                        else:
+                            bObj.is_finish = 0
+                            # 更改企划的状态
+                            ppobj.status = 1
+                            ppobj.save()
                     else:
                         bObj.flag = 1
+                        bObj.is_finish = 0
+                        # 更改企划的状态
+                        ppobj.status = 1
+                        ppobj.save()
+
                     bObj.create_time = dt
                     bObj.save()
-                    #更改企划的状态
-                    ppobj.status = 1
-                    ppobj.save()
+
                 except:
                     msg = l_msg
                     error_code = 10030
@@ -9244,12 +9254,23 @@ class planMaterialView(APIView):
                     ppobj = Plan.objects.get(id=plan_id)
                     if ppobj:
                         bObj.edition = ppobj.edition + 1
+                        if ppobj.status == 3:
+                            bObj.is_finish = 1
+                        else:
+
+                            bObj.is_finish = 0
+                            # 更改企划状态
+                            ppobj.status = 2
+                            ppobj.save()
+
                     else:
                         bObj.flag = 1
+                        bObj.is_finish = 0
+                        # 更改企划状态
+                        ppobj.status = 2
+                        ppobj.save()
                     bObj.save()
-                    #更改企划状态
-                    ppobj.status = 2
-                    ppobj.save()
+
                 except:
                     msg = l_msg
                     error_code = 10030
@@ -9359,9 +9380,13 @@ class planPriceSubView(APIView):
                     ppobj = Plan.objects.filter(id=plan_id)
                     if ppobj.count() > 0:
                         bObj.edition = ppobj[0].edition + 1
+                        if ppobj.status == 3:
+                            bObj.is_finish = 1
+                        else:
+                            bObj.is_finish = 0
                     else:
                         bObj.flag = 1
-
+                        bObj.is_finish=0
                     bObj.create_time = dt
                     bObj.save()
                 except:
@@ -9497,7 +9522,8 @@ class planPriceView(APIView):
                     c_l_one = PlanPriceSubCopy()
                     copyTable(one, c_l_one)
                 planOne.edition = planOne.edition +1
-                planOne.status = 0
+                if planOne.status !=3:
+                    planOne.status = 0
                 planOne.save()
                 msg = "创建在建企划"
                 error_code = 0

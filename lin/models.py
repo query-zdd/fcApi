@@ -396,6 +396,7 @@ class FactoryMakeLine(models.Model):
     short_overflow_direct = models.IntegerField(blank=True, null=True)
     order_num = models.IntegerField(blank=True, null=True)
     make_num = models.IntegerField(blank=True, null=True)
+    no_allocation_num = models.IntegerField(blank=True, null=True)
     factory_make_id = models.IntegerField(blank=True, null=True)
 
     class Meta:
@@ -928,6 +929,7 @@ class PlanMaterial(models.Model):
     plan_id = models.IntegerField(blank=True, null=True)
     status = models.IntegerField(blank=True, null=True)
     edition = models.IntegerField(blank=True, null=True)
+    is_finish = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -953,6 +955,7 @@ class PlanMaterialCopy(models.Model):
     status = models.IntegerField(blank=True, null=True)
     edition = models.IntegerField(blank=True, null=True)
     old_id = models.IntegerField(blank=True, null=True)
+    is_finish = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1042,6 +1045,7 @@ class PlanPrice(models.Model):
     status = models.IntegerField(blank=True, null=True)
     edition = models.IntegerField(blank=True, null=True)
     plan_id = models.IntegerField(blank=True, null=True)
+    is_finish = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1061,6 +1065,7 @@ class PlanPriceCopy(models.Model):
     edition = models.IntegerField(blank=True, null=True)
     plan_id = models.IntegerField(blank=True, null=True)
     old_id = models.IntegerField(blank=True, null=True)
+    is_finish = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1078,6 +1083,7 @@ class PlanPriceSub(models.Model):
     status = models.IntegerField(blank=True, null=True)
     edition = models.IntegerField(blank=True, null=True)
     plan_id = models.IntegerField(blank=True, null=True)
+    is_finish = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1096,6 +1102,7 @@ class PlanPriceSubCopy(models.Model):
     edition = models.IntegerField(blank=True, null=True)
     plan_id = models.IntegerField(blank=True, null=True)
     old_id = models.IntegerField(blank=True, null=True)
+    is_finish = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False

@@ -558,6 +558,7 @@ class machiningLineSerializer(serializers.Serializer):
     contract_num = serializers.IntegerField(error_messages={'required': '必须传入合同数量'})
     order_num = serializers.IntegerField(error_messages={'required': '必须传入订单数量'})
     make_num = serializers.IntegerField(error_messages={'required': '必须传入订单加工数量'})
+    no_allocation_num = serializers.IntegerField(allow_null=True,default=0)
     id = serializers.IntegerField(default=0)
 
 class machiningGetOneSerializer(serializers.Serializer):

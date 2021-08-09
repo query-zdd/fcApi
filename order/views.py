@@ -605,6 +605,10 @@ class machiningView(APIView):
                 for done in dataone:
                     try:
                         try:
+                            no_allocation_num = done['no_allocation_num'] if done['no_allocation_num'] is not None else 0
+                        except:
+                            no_allocation_num = 0
+                        try:
                             mid = done["id"]
                             if mid:
                                 bObj = FactoryMakeLine.objects.get(id=mid)
@@ -628,6 +632,7 @@ class machiningView(APIView):
                         bObj.order_num = done['order_num']
                         bObj.make_num = done['make_num']
                         bObj.factory_make_id = factory_make_id
+                        bObj.no_allocation_num = no_allocation_num
                         bObj.save()
                         if mid:
                             subline.append(mid)
