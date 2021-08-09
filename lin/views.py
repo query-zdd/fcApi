@@ -9525,8 +9525,10 @@ class planPriceView(APIView):
                 if planOne.status !=3:
                     planOne.status = 0
                     one.is_finish = 0
+                    one.save()
                 else:
                     one.is_finish = 1
+                    one.save()
 
                 planOne.save()
                 msg = "创建在建企划"
@@ -9598,8 +9600,14 @@ class planPriceOneView(APIView):
                 c_l_one = PlanPriceSubCopy()
                 copyTable(one, c_l_one)
             planOne.edition = planOne.edition + 1
-            planOne.status = 0
-            planOne.save()
+            if  planOne.status != 3:
+                planOne.status = 0
+                planOne.save()
+                one.is_finish = 0
+                one.save()
+            else:
+                one.is_finish = 1
+                one.save()
             # 返回数据
             request = request.method + '  ' + request.get_full_path()
             error_code = 0
