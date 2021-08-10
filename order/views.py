@@ -392,6 +392,7 @@ class factoryMakeView(APIView):
                         bObj.inspect_company = inspect_company
                         bObj.order_admin = order_admin
                         bObj.ticketing_custom = ticketing_custom
+                        bObj.flag = 1
                         bObj.save()
                         if mid:
                             factory_make_id = mid
@@ -523,9 +524,21 @@ class factoryMakeOneView(APIView):
         valObj = orderOutstockGetOneSerializer(data=request.query_params)
         if valObj.is_valid():
             try:
+                # 删除垃圾数据
+                try:
+                    xfmObj  = FactoryMake.objects.filter(flag=0)
+                    for one in xfmObj:
+                        xfmlObj = FactoryMakeLine.objects.filter(factory_make_id=one.id)
+                        for one1 in xfmlObj:
+                            one1.delete()
+                            one1.save()
+                        one.delete()
+                        one.save()
+                except:
+                    pass
                 sort_type = valObj.data['sort_type'] if valObj.data['sort_type'] is not None else 0
                 samplist = []
-                fmObj = FactoryMake.objects.filter(delete_time=None,order_id=nid)
+                fmObj = FactoryMake.objects.filter(delete_time=None, order_id=nid, flag=1)
                 orderObj = PlanOrder.objects.get(id=nid)
                 orderLineObj = PlanOrderLine.objects.filter(order_id=nid)
                 samplist=[]
@@ -598,6 +611,15 @@ class machiningView(APIView):
                     l_msg.append(samp)
             #################校验数据################################
             factory_make_id = valObj.data['factory_make_id'] if valObj.data['factory_make_id'] is not None else 0
+            dt = datetime.now()
+            # 如果没有factory_make_id新建factory_make
+            if not factory_make_id:
+                fmObj  = FactoryMake()
+                fmObj.flag = 0
+                fmObj.create_time = dt
+                fmObj.save()
+                fmone = FactoryMake.objects.latest('id')
+                factory_make_id = fmone.id
             dt = datetime.now()
             subline = []
             ##############保存出货方案#############################
@@ -675,6 +697,7 @@ class machiningView(APIView):
                     "message": msg,
                     "request": request,
                     "subline":subline,
+                    "factory_make_id":factory_make_id,
                 }
                 return Response(post_result)
             else:
@@ -2393,7 +2416,17 @@ class packingOneView(APIView):
                 orderObj = PlanOrder.objects.get(delete_time=None, id=nid)
                 orderLine = PlanOrderLine.objects.filter(order_id=nid)
                 samplist=[]
+                dis_list = []
                 for one in orderLine:
+                    # 获取出货方案
+                    outObj = OutStock.objects.filter(order_line_id=one.id)
+                    dis_temp = []
+                    for o in outObj:
+                        dis_temp_one = []
+                        dis_temp_one.append(o.color)
+                        dis_temp_one.append(o.specs)
+                        dis_temp.append(dis_temp_one)
+                    dis_list.append(dis_temp)
                     samp={}
                     o_pack = OrderLinePacking.objects.filter(order_line_id=one.id)
                     if o_pack.count()>0:
@@ -2408,10 +2441,17 @@ class packingOneView(APIView):
                         samp['order_line_id'] = one.id
                         samp['order_id'] = nid
                         samplist.append(samp)
-
+                for n in range(len(dis_list) - 1):
+                    if (dis_list[n] == dis_list[n + 1]):
+                        is_pack_all = 1
+                    else:
+                        is_pack_all = 0
+                        break
+                    print(n)
                 temp = {}
                 temp["data"] = samplist
                 temp["order_id"] = nid
+                temp["is_pack_all"] = is_pack_all
                 temp['error_code'] = 0
                 temp['message'] = "成功"
                 temp['request'] = request.method + '  ' + request.get_full_path()
