@@ -634,6 +634,11 @@ class machiningView(APIView):
                         bObj.factory_make_id = factory_make_id
                         bObj.no_allocation_num = no_allocation_num
                         bObj.save()
+                        # 修改其他方案的未分配数量
+                        fcObj = FactoryMakeLine.objects.filter(delete_time=None,order_line_id=data['order_line_id'],color=done['color'],specs=done['specs'])
+                        for one in fcObj:
+                            one.no_allocation_num = no_allocation_num
+                            one.save()
                         if mid:
                             subline.append(mid)
                         else:
@@ -718,6 +723,13 @@ class machiningOneView(APIView):
                         rOne =OutStock.objects.filter(delete_time=None,order_id=nid,order_line_id=one.id).order_by('color','specs')
                         rOut =  rOne.values()
                         for obj in rOut:
+                            fcObj = FactoryMakeLine.objects.filter(delete_time=None, order_line_id=one.id,color=obj['color'],specs=obj['specs'])
+                            order_num = obj['order_num']
+                            make_num = 0
+                            for one in fcObj:
+                                make_num = make_num + one.make_num
+                            obj['no_allocation_num'] = order_num - make_num
+                            obj['make_num'] = 0
                             obj['out_id'] = obj['id']
                             obj['id'] = 0
                         samp['machining_sub'] = rOut

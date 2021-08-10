@@ -9089,7 +9089,8 @@ class planPlanerView(APIView):
                     if ppobj:
                         bObj.edition =ppobj.edition + 1
                         if ppobj.status ==3:
-                            bObj.is_finish = 1
+                            if not mid:
+                                bObj.is_finish = 1
                         else:
                             bObj.is_finish = 0
                             # 更改企划的状态
@@ -9255,7 +9256,8 @@ class planMaterialView(APIView):
                     if ppobj:
                         bObj.edition = ppobj.edition + 1
                         if ppobj.status == 3:
-                            bObj.is_finish = 1
+                            if not mid:
+                                bObj.is_finish = 1
                         else:
 
                             bObj.is_finish = 0
@@ -9381,7 +9383,8 @@ class planPriceSubView(APIView):
                     if ppobj.count() > 0:
                         bObj.edition = ppobj[0].edition + 1
                         if ppobj[0].status == 3:
-                            bObj.is_finish = 1
+                            if not pid:
+                                bObj.is_finish = 1
                         else:
                             bObj.is_finish = 0
                     else:
