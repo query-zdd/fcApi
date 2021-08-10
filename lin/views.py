@@ -9077,6 +9077,7 @@ class planPlanerView(APIView):
                             bObj = PlanMaterial()
                             bObj.create_time = dt
                     except:
+                        mid = 0
                         bObj = PlanMaterial()
                         bObj.create_time = dt
                     bObj.status = 0
@@ -9237,6 +9238,7 @@ class planMaterialView(APIView):
                             bObj = PlanMaterial()
                             bObj.create_time = dt
                     except:
+                        mid = 0
                         bObj = PlanMaterial()
                         bObj.create_time = dt
                     bObj.status = 0
@@ -9264,7 +9266,6 @@ class planMaterialView(APIView):
                             # 更改企划状态
                             ppobj.status = 2
                             ppobj.save()
-
                     else:
                         bObj.flag = 1
                         bObj.is_finish = 0
