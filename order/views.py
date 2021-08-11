@@ -2646,7 +2646,6 @@ class packingLineOneView(APIView):
                     samp['contract_num'] = one.contract_num
                     samp['specs'] = one.specs
                     samp['out_stock_id'] = one.id
-                    samp['out_stock_id'] = one.pack_num
                     samp['order_num'] = one.order_num
                     samplist.append(samp)
 
