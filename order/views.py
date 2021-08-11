@@ -2633,7 +2633,7 @@ class packingLineOneView(APIView):
                 samplist=[]
                 for one in outObj:
                     samp={}
-                    o_pack = OrderLinePackingSub.objects.filter(order_line_id=one.id,out_stock_id=one.id)
+                    o_pack = OrderLinePackingSub.objects.filter(order_line_id=nid,out_stock_id=one.id)
                     if o_pack.count()>0:
                         samp = model_to_dict(o_pack[0])
                     else:
@@ -2646,6 +2646,7 @@ class packingLineOneView(APIView):
                     samp['contract_num'] = one.contract_num
                     samp['specs'] = one.specs
                     samp['out_stock_id'] = one.id
+                    samp['out_stock_id'] = one.pack_num
                     samp['order_num'] = one.order_num
                     samplist.append(samp)
 
