@@ -749,8 +749,8 @@ class machiningOneView(APIView):
                             fcObj = FactoryMakeLine.objects.filter(delete_time=None, order_line_id=one.id,color=obj['color'],specs=obj['specs'])
                             order_num = obj['order_num']
                             make_num = 0
-                            for one in fcObj:
-                                make_num = make_num + one.make_num
+                            for o in fcObj:
+                                make_num = make_num + o.make_num
                             obj['no_allocation_num'] = order_num - make_num
                             obj['make_num'] = 0
                             obj['out_id'] = obj['id']
