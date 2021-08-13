@@ -2842,7 +2842,6 @@ class shipmentSureOneView(APIView):
                         zamp['sample_send_time'] = one1.sample_send_time
                         zamp['sure_comment'] = one1.sure_comment
                         zamp['is_sure'] = one1.is_sure
-
                         time1 = datetime.now()
                         try:
                             zamp['down_time'] = downDay(one1.provide_time - time1)
@@ -2866,6 +2865,16 @@ class shipmentSureOneView(APIView):
                 temp = {}
                 temp["data"] = samplist
                 temp["orderObj"] = model_to_dict(orderObj)
+                # samp["notes_all_num"] = notes_all_num
+                # samp["notes_sure_num"] = notes_sure_num
+                # 确认入库
+                orderCloth = OrderCloth.objects.filter(order_id=nid)
+                temp["order_cloth_num"] = orderCloth.count()
+                order_cloth_sure_num = 0
+                for one4 in orderCloth:
+                    if one4.is_sure_in_store == 1:
+                        order_cloth_sure_num += 1
+                temp["order_cloth_sure_num"] = order_cloth_sure_num
                 temp['error_code'] = 0
                 temp['message'] = "成功"
                 temp['request'] = request.method + '  ' + request.get_full_path()
