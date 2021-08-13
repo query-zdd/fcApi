@@ -3272,7 +3272,7 @@ class productReadyView(APIView):
     @csrf_exempt
     def get(self, request):
         data = request.query_params
-        valObj = productReadySerializer(data=request.query_params)
+        valObj = productReadyoneSerializer(data=request.query_params)
         if valObj.is_valid():
             start, page_size, flag = zddpaginate(int(valObj.data['page']), int(valObj.data['page_size']))
             if not flag:
