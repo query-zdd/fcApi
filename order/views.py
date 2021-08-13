@@ -1080,6 +1080,8 @@ class orderClothOneView(APIView):
                 for one in orderCloth:
                     samp={}
                     samp['plan_material_id'] = one.plan_material_id
+                    planmobj = PlanMaterial.objects.get(id=one.plan_material_id)
+                    samp['is_finish'] = planmobj.is_finish
                     samp['cloth_type'] = one.cloth_type
                     samp['cloth_cat'] = one.cloth_cat
                     samp['cloth_name'] = one.cloth_name
