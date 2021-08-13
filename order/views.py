@@ -1077,7 +1077,10 @@ class orderClothOneView(APIView):
                     coop_mode +=o.coop_mode+'|'
                     ticketing_custom +=o.ticketing_custom+'|'
                 samplist=[]
+                order_cloth_num_sure = 0
                 for one in orderCloth:
+                    if one.is_sure_in_store == 1:
+                        order_cloth_num_sure +=1
                     samp={}
                     samp['plan_material_id'] = one.plan_material_id
                     planmobj = PlanMaterial.objects.get(id=one.plan_material_id)
@@ -1100,6 +1103,9 @@ class orderClothOneView(APIView):
                 temp["orderObj"] = model_to_dict(orderObj)
                 temp['coop_mode'] = coop_mode
                 temp['ticketing_custom'] = ticketing_custom
+                temp['order_cloth_num'] = orderCloth.count()
+                temp['order_cloth_num_sure'] = order_cloth_num_sure
+                temp['order_cloth_num_no'] = orderCloth.count()-order_cloth_num_sure
                 temp['error_code'] = 0
                 temp['message'] = "成功"
                 temp['request'] = request.method + '  ' + request.get_full_path()
