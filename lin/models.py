@@ -531,6 +531,7 @@ class OrderCloth(models.Model):
     loss_lv = models.IntegerField(blank=True, null=True)
     plan_id = models.IntegerField(blank=True, null=True)
     plan_material_id = models.IntegerField(blank=True, null=True)
+    is_sure_in_store = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False

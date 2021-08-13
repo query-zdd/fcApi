@@ -3300,16 +3300,67 @@ class productReadyView(APIView):
                     rObj = rObj.filter(dhkhao=dhkhao)
                 if make_factory:
                     mkObj = FactoryMake.objects.filter(make_factory=make_factory)
-                    oids = [one.id for one in mkObj]
+                    oids = [one.order_id for one in mkObj]
                     rObj = rObj.filter(id__in=oids)
                 total = rObj.count()
                 if rObj.count() > start:
                     rObj = rObj.all()[start:start + page_size]
-                    rObj = rObj.values()
+                    data = []
                     for one in rObj:
-                        one["sub_order_line"] = PlanOrderLine.objects.filter(order_id=one["id"]).values()
+                        samp = {}
+                        samp['order_id'] = one.id
+                        samp['create_time'] = one.create_time
+                        samp['price_code'] = one.price_code
+                        samp['dhkhao'] = one.dhkhao
+                        samp['work_type'] = one.work_type
+                        samp['leader'] = one.leader
+                        #发货倒计时
+                        try:
+                            orderlineObj = PlanOrderLine.objects.filter(order_id = one.id)
+                            time1 = datetime.now()
+                            send_time = orderlineObj[0].send_time
+                            for one1 in orderlineObj:
+                                if send_time > one1.send_time:
+                                    send_time = one1.send_time
+                            samp["send_time"] = downDay(time1, send_time)
+                        except:
+                            samp["send_time"] = 0
+                        # 上手日期处理
+                        fmObj = FactoryMake.objects.filter(order_id=one.id)
+                        zamp = {}
+                        zamp["fm_num"] = fmObj.count()
+                        sure_plan_num = 0
+                        sure_real_num = 0
+                        for one2 in fmObj:
+                            if one2.plan_start_date:
+                                sure_plan_num = sure_plan_num + 1
+                            if one2.real_start_date:
+                                sure_real_num = sure_real_num + 1
+                        zamp["sure_plan_num"] = sure_plan_num
+                        zamp["sure_real_num"] = sure_real_num
+                        zamp["fmObjLine"] = fmObj.values()
+                        samp["fmObj"] = zamp
+                        # 注意事项
+                        notes_sure_num = 0
+                        orderNotes = OrderNotes.objects.filter(order_id=one.id)
+                        notes_all_num = orderNotes.count()
+                        for one3 in orderNotes:
+                            if one3.is_sure == 1:
+                                notes_sure_num = notes_sure_num+1
+                        samp["notes_all_num"] = notes_all_num
+                        samp["notes_sure_num"] = notes_sure_num
+                        #确认入库
+                        orderCloth = OrderCloth.objects.filter(order_id = one.id)
+                        samp["order_cloth_num"] = orderCloth.count()
+                        order_cloth_sure_num = 0
+                        for one4 in orderCloth:
+                            if one4.is_sure_in_store==1:
+                                order_cloth_sure_num += 1
+                        samp["order_cloth_sure_num"] = order_cloth_sure_num
+                        # 装箱要求
+                        data.append(samp)
                     temp = {}
-                    temp["data"] = rObj
+                    temp["data"] = data
                     temp['page_size'] = page_size
                     temp['total'] = total
                     temp['error_code'] = 0
