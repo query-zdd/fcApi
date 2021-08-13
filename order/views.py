@@ -2827,9 +2827,40 @@ class shipmentSureOneView(APIView):
                     samp['buy_all_num'] = one.buy_all_num
                     samp['loss_lv'] = one.loss_lv
                     samp['supplier'] = one.supplier
-                    samp['id'] = one.id
+                    samp['order_cloth_ship_id'] = one.id
                     rObj = OrderClothLineShip.objects.filter(delete_time=None, order_cloth_id=one.order_cloth_id,order_cloth_ship_id=one.id).order_by('color', 'specs')
-                    samp['sub_data'] = rObj.values()
+                    sub_data = []
+                    for one1 in rObj:
+                        zamp = {}
+                        zamp["order_cloth_ship_line_id"] = one1.id
+                        zamp['color'] = one1.color
+                        zamp['color_num'] = one1.color_num
+                        zamp['guige'] = one1.guige
+                        zamp['specs'] = one1.specs
+                        zamp['buy_num'] = one1.buy_num
+                        zamp['provide_time'] = one1.provide_time
+                        zamp['sample_send_time'] = one1.sample_send_time
+                        zamp['sure_comment'] = one1.sure_comment
+                        zamp['is_sure'] = one1.is_sure
+
+                        time1 = datetime.now()
+                        try:
+                            zamp['down_time'] = downDay(one1.provide_time - time1)
+                            if zamp['down_time'] <1:
+                                zamp['down_time'] = 0
+                        except:
+                            zamp['down_time'] = 0
+                        sub_data.append(zamp)
+                    samp['sub_data'] = sub_data
+                    # 注意事项
+                    notes_sure_num = 0
+                    orderNotes = OrderNotes.objects.filter(order_id=nid)
+                    notes_all_num = orderNotes.count()
+                    for one3 in orderNotes:
+                        if one3.is_sure == 1:
+                            notes_sure_num = notes_sure_num + 1
+                    samp["notes_all_num"] = notes_all_num
+                    samp["notes_sure_num"] = notes_sure_num
                     samplist.append(samp)
 
                 temp = {}
