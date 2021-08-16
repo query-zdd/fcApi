@@ -3071,7 +3071,7 @@ class dropOneView(APIView):
                         else:
                             samp['is_inspect'] = one.is_inspect
                         samp['inspect_content'] = one1.inspect_content
-                        samp['drop_status'] = one1.drop_status
+                        samp['drop_status'] = orderObj.is_sure_drop_lable
                         samp['plan_start_date'] = plan_start_date
                         samp['down_day'] = down_day
                         samp['order_cloth_line_id'] = one1.id

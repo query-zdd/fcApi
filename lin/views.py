@@ -10227,6 +10227,33 @@ class planOrderOneView(APIView):
             return Response(post_result)
 
     @csrf_exempt
+    def put(self, request, nid):
+        try:
+            one = PlanOrder.objects.get(id=nid)
+            dt = datetime.now()
+            one.is_sure_drop_lable = 1
+            one.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "洗标吊牌状态更新成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "企划订单不存在!",
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+    @csrf_exempt
     def get(self, request, nid):
         data = request.query_params
         valObj = planOrderGetOneSerializer(data=request.query_params)

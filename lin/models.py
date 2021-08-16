@@ -996,6 +996,7 @@ class PlanOrder(models.Model):
     work_type = models.CharField(max_length=255, blank=True, null=True)
     plan_start_date = models.DateTimeField(blank=True, null=True)
     real_start_date = models.DateTimeField(blank=True, null=True)
+    is_sure_drop_lable = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
