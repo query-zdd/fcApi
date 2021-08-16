@@ -595,7 +595,7 @@ class orderClothLineSerializer(serializers.Serializer):
     cloth_name = serializers.CharField(error_messages={'required': '必须传入面辅料名称'})
     delivery_type = serializers.CharField(allow_blank=True, allow_null=True,default='')
     delivery_name = serializers.CharField(allow_blank=True, allow_null=True,default='')
-    is_inspect = serializers.IntegerField(error_messages={'required': '必须传入是否质检'})
+    is_inspect = serializers.IntegerField(allow_null=True,default=0)
     buy_all_num = serializers.IntegerField(error_messages={'required': '必须传入购买数量'})
     loss_lv = serializers.IntegerField(error_messages={'required': '必须传入订单损耗'})
     id = serializers.IntegerField(default=0)
@@ -603,6 +603,7 @@ class orderClothLineSerializer(serializers.Serializer):
 class orderClothLineSubSerializer(serializers.Serializer):
     guige = serializers.CharField(error_messages={'required': '必须传入面辅料规格'})
     buy_num = serializers.CharField(error_messages={'required': '必须传入面辅料采购数量'})
+    is_inspect = serializers.IntegerField(allow_null=True, default=0)
     color = serializers.CharField(default='')
     color_num = serializers.CharField(default='')
     specs = serializers.CharField(default='')

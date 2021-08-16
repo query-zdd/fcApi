@@ -860,7 +860,10 @@ class orderClothView(APIView):
                         bObj.cloth_name = done['cloth_name']
                         bObj.delivery_type = done['delivery_type']
                         bObj.delivery_name = done['delivery_name']
-                        bObj.is_inspect = done['is_inspect']
+                        try:
+                            bObj.is_inspect = done['is_inspect']
+                        except:
+                            bObj.is_inspect = 0
                         bObj.buy_all_num = done['buy_all_num']
                         bObj.loss_lv = done['loss_lv']
                         bObj.save()
@@ -871,24 +874,49 @@ class orderClothView(APIView):
                             order_cloth_id = ocOne.id
                         # 保存发货方案
                         try:
-                            nbObj = OrderClothShip()
-                            planmObj = PlanMaterial.objects.filter(id=done['plan_material_id'], delete_time=None)
-                            if planmObj.count() > 0:
-                                nbObj.supplier = planmObj[0].complayer
-                            nbObj.plan_material_id = done['plan_material_id']
-                            nbObj.create_time = dt
-                            nbObj.order_id = data['order_id']
-                            nbObj.plan_id = data['plan_id']
-                            nbObj.cloth_type = done['cloth_type']
-                            nbObj.cloth_cat = done['cloth_cat']
-                            nbObj.cloth_name = done['cloth_name']
-                            nbObj.delivery_type = done['delivery_type']
-                            nbObj.delivery_name = done['delivery_name']
-                            nbObj.is_inspect = done['is_inspect']
-                            nbObj.buy_all_num = done['buy_all_num']
-                            nbObj.loss_lv = done['loss_lv']
-                            nbObj.order_cloth_id = order_cloth_id
-                            nbObj.save()
+                            if not mid:
+                                nbObj = OrderClothShip()
+                                planmObj = PlanMaterial.objects.filter(id=done['plan_material_id'], delete_time=None)
+                                if planmObj.count() > 0:
+                                    nbObj.supplier = planmObj[0].complayer
+                                nbObj.plan_material_id = done['plan_material_id']
+                                nbObj.create_time = dt
+                                nbObj.order_id = data['order_id']
+                                nbObj.plan_id = data['plan_id']
+                                nbObj.cloth_type = done['cloth_type']
+                                nbObj.cloth_cat = done['cloth_cat']
+                                nbObj.cloth_name = done['cloth_name']
+                                nbObj.delivery_type = done['delivery_type']
+                                nbObj.delivery_name = done['delivery_name']
+                                try:
+                                    nbObj.is_inspect = done['is_inspect']
+                                except:
+                                    nbObj.is_inspect = 0
+                                nbObj.buy_all_num = done['buy_all_num']
+                                nbObj.loss_lv = done['loss_lv']
+                                nbObj.order_cloth_id = order_cloth_id
+                                nbObj.save()
+                            if mid:
+                                ocsObj = OrderClothShip.objects.filter(order_cloth_id=mid)
+                                for ocs in ocsObj:
+                                    planmObj = PlanMaterial.objects.filter(id=done['plan_material_id'],
+                                                                           delete_time=None)
+                                    if planmObj.count() > 0:
+                                        ocs.supplier = planmObj[0].complayer
+                                    ocs.plan_material_id = done['plan_material_id']
+                                    ocs.create_time = dt
+                                    ocs.order_id = data['order_id']
+                                    ocs.plan_id = data['plan_id']
+                                    ocs.cloth_type = done['cloth_type']
+                                    ocs.cloth_cat = done['cloth_cat']
+                                    ocs.cloth_name = done['cloth_name']
+                                    try:
+                                        ocs.is_inspect = done['is_inspect']
+                                    except:
+                                        ocs.is_inspect = 0
+                                    ocs.buy_all_num = done['buy_all_num']
+                                    ocs.loss_lv = done['loss_lv']
+                                    ocs.save()
                         except:
                             pass
                         # 保存面辅料的sku
@@ -938,6 +966,7 @@ class orderClothView(APIView):
                                 sbObj.order_num = orderOne.order_num
                             sbObj.guige = sub['guige']
                             sbObj.buy_num = sub['buy_num']
+                            sbObj.is_inspect = sub['is_inspect']
                             sbObj.save()
                             if s_id:
                                 order_cloth_line_id = s_id
@@ -945,31 +974,39 @@ class orderClothView(APIView):
                                 ocOne = OrderClothLine.objects.latest("id")
                                 order_cloth_line_id = ocOne.id
                             #保存发货方案的sku
-                            ncOne = OrderClothShip.objects.latest("id")
-                            try:
-                                nblObj = OrderClothLineShip()
-                                nblObj.create_time = dt
-                                nblObj.order_id = data['order_id']
-                                nblObj.order_cloth_id = order_cloth_id
-                                if done['cloth_type'] == 4:
-                                    nblObj.color = sub['color']
-                                    nblObj.color_num = sub['color_num']
-                                    nblObj.specs = sub['specs']
-                                if done['cloth_type'] == 3:
-                                    nblObj.specs = sub['specs']
-                                if done['cloth_type'] == 2:
-                                    nblObj.color = sub['color']
-                                    nblObj.color_num = sub['color_num']
-                                nblObj.guige = sub['guige']
-                                nblObj.buy_num = sub['buy_num']
-                                nblObj.order_cloth_line_id =order_cloth_line_id
-                                nblObj.order_cloth_ship_id =ncOne.id
-                                if planmObj.count() > 0:
-                                    nblObj.price = planmObj[0].price
-                                    nblObj.amount = planmObj[0].total
-                                nblObj.save()
-                            except:
-                                pass
+                            if not mid:
+                                ncOne = OrderClothShip.objects.latest("id")
+                                try:
+                                    nblObj = OrderClothLineShip()
+                                    nblObj.create_time = dt
+                                    nblObj.order_id = data['order_id']
+                                    nblObj.order_cloth_id = order_cloth_id
+                                    if done['cloth_type'] == 4:
+                                        nblObj.color = sub['color']
+                                        nblObj.color_num = sub['color_num']
+                                        nblObj.specs = sub['specs']
+                                    if done['cloth_type'] == 3:
+                                        nblObj.specs = sub['specs']
+                                    if done['cloth_type'] == 2:
+                                        nblObj.color = sub['color']
+                                        nblObj.color_num = sub['color_num']
+                                    nblObj.guige = sub['guige']
+                                    nblObj.buy_num = sub['buy_num']
+                                    nblObj.order_cloth_line_id =order_cloth_line_id
+                                    nblObj.order_cloth_ship_id =ncOne.id
+                                    if planmObj.count() > 0:
+                                        nblObj.price = planmObj[0].price
+                                        nblObj.amount = planmObj[0].total
+                                    nblObj.save()
+                                except:
+                                    pass
+                            if mid:
+                                if s_id:
+                                    ocslObj = OrderClothLineShip.objects.filter(order_cloth_line_id=s_id,order_cloth_id=order_cloth_id)
+                                    for ocsl in ocslObj:
+                                        ocsl.buy_num = sub['buy_num']
+                                        ocsl.guige = sub['guige']
+                                        ocsl.save()
                     except:
                         msg = "参数错误"
                         error_code = 10030
