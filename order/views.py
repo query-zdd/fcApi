@@ -3425,7 +3425,10 @@ class productReadyView(APIView):
                         zamp["sure_real_num"] = sure_real_num
                         zamp["fmObjLine"] = fmObj.values()
                         samp["fmObj"] = zamp
-                        samp["down_day"] = min(down_list)
+                        if down_list:
+                            samp["down_day"] = min(down_list)
+                        else:
+                            samp["down_day"] = None
                         # 注意事项
                         notes_sure_num = 0
                         orderNotes = OrderNotes.objects.filter(order_id=one.id)
@@ -3444,7 +3447,10 @@ class productReadyView(APIView):
                                 order_cloth_sure_num += 1
                         samp["order_cloth_sure_num"] = order_cloth_sure_num
                         # 装箱要求
-
+                        samp['pack_all_num'] = orderlineObj.count()
+                        samp['pack_sure_num'] =OrderLinePacking.objects.filter(order_id = one.id).count()
+                        # 订单状态
+                        samp['order_type'] = "生产中"
                         data.append(samp)
                     temp = {}
                     temp["data"] = data
