@@ -1068,7 +1068,7 @@ class orderClothOneView(APIView):
         if valObj.is_valid():
             try:
                 orderObj = PlanOrder.objects.get(delete_time=None, id=nid)
-                orderCloth = OrderCloth.objects.filter(order_id=nid)
+                orderCloth = OrderCloth.objects.filter(delete_time=None,order_id=nid)
                 planObj = Plan.objects.get(id=orderObj.plan_id)
                 fmObj = FactoryMake.objects.filter(order_id=nid)
                 coop_mode = ''
