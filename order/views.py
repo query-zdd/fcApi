@@ -837,15 +837,15 @@ class orderClothView(APIView):
                             if mid:
                                 bObj = OrderCloth.objects.get(id=mid)
                                 bObj.update_time = dt
-                                #编辑时，删除已有的sku数据
-                                nbObj = OrderClothShip.objects.filter(order_cloth_id=mid)
-                                for one in nbObj:
-                                    nbObjline = OrderClothLineShip.objects.filter(order_cloth_id=mid)
-                                    for sub in nbObjline:
-                                        sub.delete()
-                                        sub.save()
-                                    one.delete()
-                                    one.save()
+                                # #编辑时，删除已有的sku数据
+                                # nbObj = OrderClothShip.objects.filter(order_cloth_id=mid)
+                                # for one in nbObj:
+                                #     nbObjline = OrderClothLineShip.objects.filter(order_cloth_id=mid)
+                                #     for sub in nbObjline:
+                                #         sub.delete()
+                                #         sub.save()
+                                #     one.delete()
+                                #     one.save()
                             else:
                                 bObj = OrderCloth()
                                 bObj.create_time = dt
@@ -1073,6 +1073,14 @@ class orderClothView(APIView):
                 for one in subObj:
                     one.delete_time = dt
                     one.save()
+                sbObj = OrderClothShip.objects.filter(order_cloth_id=nid)
+                for one1 in sbObj:
+                    one1.delete_time = dt
+                    one1.save()
+                subsbObj = OrderClothLineShip.objects.filter(order_cloth_id=nid)
+                for one2 in subsbObj:
+                    one2.delete_time = dt
+                    one2.save()
                 bObj.delete_time = dt
                 bObj.save()
             # 返回数据
