@@ -1093,9 +1093,13 @@ class orderClothOneView(APIView):
                     samp['is_inspect'] = one.is_inspect
                     samp['buy_all_num'] = one.buy_all_num
                     samp['loss_lv'] = one.loss_lv
-                    samp['id'] = one.id
+                    samp['order_cloth_id'] = one.id
                     rObj = OrderClothLine.objects.filter(delete_time=None, order_cloth_id=one.id).order_by('color', 'specs')
-                    samp['sub_data'] = rObj.values()
+                    rObjList = rObj.values()
+                    for one1 in rObjList:
+                        one1["order_cloth_line_id"] = one1["id"]
+                        del one1["id"]
+                    samp['sub_data'] = rObjList
                     samplist.append(samp)
 
                 temp = {}
@@ -2002,9 +2006,13 @@ class shipmentOneView(APIView):
                     samp['loss_lv'] = one.loss_lv
                     samp['supplier'] = one.supplier
                     samp['all_amount'] = one.all_amount
-                    samp['id'] = one.id
+                    samp['order_cloth_ship_id'] = one.id
                     rObj = OrderClothLineShip.objects.filter(delete_time=None, order_cloth_id=nid,order_cloth_ship_id=one.id).order_by('color', 'specs')
-                    samp['sub_data'] = rObj.values()
+                    rObjList = rObj.values()
+                    for one1 in rObjList:
+                        one1["order_cloth_ship_line_id"] = one1["id"]
+                        del one1["id"]
+                    samp['sub_data'] = rObjList
                     samplist.append(samp)
 
                 temp = {}
