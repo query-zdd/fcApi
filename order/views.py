@@ -1098,6 +1098,8 @@ class orderClothOneView(APIView):
                     rObjList = rObj.values()
                     for one1 in rObjList:
                         one1["order_cloth_line_id"] = one1["id"]
+                        if not one1['is_inspect']:
+                            one1["is_inspect"] = one.is_inspect
                         del one1["id"]
                     samp['sub_data'] = rObjList
                     samplist.append(samp)
