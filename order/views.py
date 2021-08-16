@@ -3635,13 +3635,34 @@ class productReadyView(APIView):
                                 "request": request,
                             }
                             return Response(post_result)
-
-                        bObj.plan_start_date = done['plan_start_date']
+                        try:
+                            bObj.plan_start_date = done['plan_start_date']
+                        except:
+                            pass
                         try:
                             bObj.real_start_date = done['real_start_date']
                         except:
                             pass
                         bObj.save()
+                        # 保存order数据
+                        planOrderObj = PlanOrder.objects.get(id =bObj.order_id)
+                        bObjLine = FactoryMake.objects.filter(order_id = bObj.order_id)
+                        plan_start_date_list = []
+                        real_start_date_list = []
+                        real_flag = 1
+                        for fc1 in bObjLine:
+                            if fc1.plan_start_date:
+                                plan_start_date_list.append(fc1.plan_start_date)
+                            if fc1.real_start_date:
+                                real_start_date_list.append(fc1.real_start_date)
+                            else:
+                                real_flag = 0
+                        if plan_start_date_list:
+                            planOrderObj.plan_start_date = min(plan_start_date_list)
+                        if real_flag and real_start_date_list:
+                            planOrderObj.real_start_date = min(real_start_date_list)
+                        planOrderObj.save()
+
                     except:
                         msg = "参数错误"
                         error_code = 10030
@@ -3701,7 +3722,7 @@ class productReadyView(APIView):
                 return Response(post_result)
             result = []
             try:
-                rObj = PlanOrder.objects.filter(delete_time=None)
+                rObj = PlanOrder.objects.filter(delete_time=None,real_start_date=None)
                 make_factory = valObj.data['make_factory'] if valObj.data['make_factory'] is not None else ""
                 brand = valObj.data['brand'] if valObj.data['brand'] is not None else ""
                 price_code = valObj.data['price_code'] if valObj.data['price_code'] is not None else ""
@@ -3816,6 +3837,39 @@ class productReadyView(APIView):
                 return Response(post_result)
         else:
             msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+
+class productReadyOneView(APIView):
+    # 获取订单上手时间
+    @csrf_exempt
+    def get(self, request, nid):
+        try:
+            planOrder =PlanOrder.objects.get(id = nid)
+            fcObj = FactoryMake.objects.filter(order_id = nid)
+            samplist = []
+            for one in fcObj:
+                samp={}
+                samp["factory_make_id"] = one.id
+                samp['leader'] = planOrder.leader
+                samp['plan_start_date'] = one.plan_start_date
+                samp['real_start_date'] = one.real_start_date
+                samplist.append(samp)
+            temp = {}
+            temp["data"] = samplist
+            temp['error_code'] = 0
+            temp['message'] = "成功"
+            temp['request'] = request.method + '  ' + request.get_full_path()
+            return Response(temp)
+        except:
+            msg = "参数错误"
             error_code = 10030
             request = request.method + '  ' + request.get_full_path()
             post_result = {

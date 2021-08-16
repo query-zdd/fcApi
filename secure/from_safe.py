@@ -789,7 +789,8 @@ class orderDateSetOneSerializer(serializers.Serializer):
 class productReadySerializer(serializers.Serializer):
     factory_make_id = serializers.IntegerField(error_messages={'required': '必须传入加工工厂id'})
     # order_id = serializers.CharField(error_messages={'required': '必须传入订单的id'})
-    plan_start_date = serializers.CharField(error_messages={'required': '必须传入计划上手日期'})
+    plan_start_date = serializers.CharField(allow_blank=True,allow_null=True,default="")
+    plan_start_date = serializers.CharField(allow_blank=True,allow_null=True,default="")
 
 
 class productReadyoneSerializer(serializers.Serializer):

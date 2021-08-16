@@ -51,6 +51,7 @@ urlpatterns = [
     url('^shipmentInStock/(?P<nid>\d+)', views.shipmentInStockOneView.as_view()),
     #生产准备
     url('^productReady$', views.productReadyView.as_view()),
+    url('^productReady/(?P<nid>\d+)$', views.productReadyOneView.as_view()),
     url('^makeinReady$', views.makeinReadyView.as_view()),
 
     url('^submission$', views.submissionView.as_view()),
