@@ -2809,12 +2809,31 @@ class shipmentSureOneView(APIView):
     @csrf_exempt
     def get(self, request, nid):
         data = request.query_params
-        valObj = orderOutstockGetOneSerializer(data=request.query_params)
+        valObj = shipmentSureGetOneSerializer(data=request.query_params)
         if valObj.is_valid():
             try:
-
+                cloth_cat = valObj.data['cloth_cat'] if valObj.data['cloth_cat'] is not None else ""
+                cloth_name = valObj.data['cloth_name'] if valObj.data['cloth_name'] is not None else ""
+                supplier = valObj.data['supplier'] if valObj.data['supplier'] is not None else ""
                 orderObj = PlanOrder.objects.get(delete_time=None, id=nid)
+                fmObj = FactoryMake.objects.filter(order_id=nid)
+                str_time = datetime.now()
+                plan_start_date = None
+                for o1 in fmObj:
+                    try:
+                        if o1.plan_start_date < str_time:
+                            str_time = o1.plan_start_date
+                            plan_start_date = o1.plan_start_date
+
+                    except:
+                        str_time = datetime.now()
                 orderClothShip = OrderClothShip.objects.filter(delete_time=None,order_id=nid).order_by("order_cloth_id","supplier")
+                if cloth_cat:
+                    orderClothShip = orderClothShip.filter(cloth_cat = cloth_cat)
+                if cloth_name:
+                    orderClothShip = orderClothShip.filter(cloth_name=cloth_name)
+                if supplier:
+                    orderClothShip = orderClothShip.filter(supplier=supplier)
                 samplist=[]
                 for one in orderClothShip:
                     samp={}
@@ -2865,7 +2884,7 @@ class shipmentSureOneView(APIView):
                 temp = {}
                 temp["data"] = samplist
                 temp["orderObj"] = model_to_dict(orderObj)
-                # samp["notes_all_num"] = notes_all_num
+                samp["plan_start_date"] = plan_start_date
                 # samp["notes_sure_num"] = notes_sure_num
                 # 确认入库
                 orderCloth = OrderCloth.objects.filter(order_id=nid)
@@ -2875,6 +2894,7 @@ class shipmentSureOneView(APIView):
                     if one4.is_sure_in_store == 1:
                         order_cloth_sure_num += 1
                 temp["order_cloth_sure_num"] = order_cloth_sure_num
+                temp["plan_start_date"] = plan_start_date
                 temp['error_code'] = 0
                 temp['message'] = "成功"
                 temp['request'] = request.method + '  ' + request.get_full_path()
