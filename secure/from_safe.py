@@ -715,6 +715,18 @@ class shipmentSureLineShipSerializer(serializers.Serializer):
     is_sure = serializers.CharField(error_messages={'required': '必须传入面辅料确认操作'})
     sample_send_time = serializers.CharField(error_messages={'required': '必须传入面辅料样料寄送时间'})
 
+class dropSerializer(serializers.Serializer):
+    order_id = serializers.IntegerField(error_messages={'required': '必须传入订单id'})
+    cloth_name = serializers.CharField(allow_blank=True,allow_null=True,default="")
+    cloth_cat = serializers.CharField(allow_blank=True, allow_null=True, default="")
+    color = serializers.CharField(allow_blank=True, allow_null=True, default="")
+    color_num = serializers.CharField(allow_blank=True, allow_null=True, default="")
+    guige = serializers.CharField(allow_blank=True, allow_null=True, default="")
+    plan_start_data = serializers.CharField(allow_blank=True, allow_null=True, default="")
+    is_inspect = serializers.IntegerField(allow_null=True, default=0)
+    inspect_content = serializers.CharField(allow_blank=True,allow_null=True,default="")
+    status = serializers.IntegerField(allow_null=True, default=0)
+
 class purchasRecordsSerializer(serializers.Serializer):
     send_time = serializers.CharField(error_messages={'required': '必须传入发货日期'})
     up_short_send_num = serializers.IntegerField(error_messages={'required': '必须传入上期欠货数量'})

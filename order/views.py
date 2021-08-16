@@ -2932,6 +2932,255 @@ class shipmentSureOneView(APIView):
             }
             return Response(post_result)
 
+
+############################订单管理-面辅料确认--洗标吊牌###############################################
+
+
+class dropView(APIView):
+    # 添加/编辑 发货方案
+    @csrf_exempt
+    def post(self, request):
+        data = request.data
+        valObj = dropSerializer(data=request.data)
+        if valObj.is_valid():
+            #################校验数据################################
+            d_flag = 0
+            d_num = 0
+            l_msg = []
+            dataone = data['data']
+            for done in dataone:
+                d_num = d_num + 1
+                valObjline = shipmentSureSerializer(data=done)
+                if not valObjline.is_valid():
+                    d_flag = 1
+                    samp = {}
+                    samp['msg'] = valObjline.errors
+                    samp['key_num'] = d_num
+                    l_msg.append(samp)
+                subdata = done['sub_data']
+                s_flag = 0
+                s_num = 0
+                for sdone in subdata:
+                    s_num = s_num + 1
+                    valObjline = shipmentSureLineShipSerializer(data=sdone)
+                    if not valObjline.is_valid():
+                        s_flag = 1
+                        samp = {}
+                        samp['msg'] = valObjline.errors
+                        samp['key_num'] = s_num
+                        l_msg.append(samp)
+            #################校验数据################################
+            dt = datetime.now()
+            ##############保存出货方案#############################
+            if d_flag == 0 and s_flag == 0:
+                for done in dataone:
+                    try:
+                        try:
+                            bObj = OrderClothShip.objects.get(id=done['order_cloth_ship_id'])
+                        except:
+                            msg = "参数错误"
+                            error_code = 10030
+                            request = request.method + '  ' + request.get_full_path()
+                            post_result = {
+                                "error_code": error_code,
+                                "message": msg,
+                                "request": request,
+                            }
+                            return Response(post_result)
+
+                        bObj.supplier = done['supplier']
+                        bObj.save()
+                        # 保存面辅料的sku
+                        subdata = done['sub_data']
+                        for sub in subdata:
+                            try:
+                                sbObj = OrderClothLineShip.objects.get(id=sub["order_cloth_ship_line_id"])
+
+                            except:
+                                msg = "参数错误"
+                                error_code = 10030
+                                request = request.method + '  ' + request.get_full_path()
+                                post_result = {
+                                    "error_code": error_code,
+                                    "message": msg,
+                                    "request": request,
+                                }
+                                return Response(post_result)
+                            sbObj.sure_comment = sub['sure_comment']
+                            sbObj.is_sure = sub['is_sure']
+                            sbObj.sample_send_time = sub['sample_send_time']
+                            sbObj.save()
+
+                    except:
+                        msg = "参数错误"
+                        error_code = 10030
+                        request = request.method + '  ' + request.get_full_path()
+                        post_result = {
+                            "error_code": error_code,
+                            "message": msg,
+                            "request": request,
+                        }
+                        return Response(post_result)
+                msg = "创建/编辑面辅料采购"
+                error_code = 0
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+            else:
+                msg = l_msg
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+
+class dropOneView(APIView):
+    # 获取订单 发货方案
+    @csrf_exempt
+    def get(self, request, nid):
+        data = request.query_params
+        valObj = shipmentSureGetOneSerializer(data=request.query_params)
+        if valObj.is_valid():
+            try:
+                orderClothOne = OrderClothShip.objects.filter(order_id=nid,delete_time=None)
+                cloth_cat_list = []
+                cloth_name_list = []
+                supplier_list = []
+                for n1 in orderClothOne:
+                    cloth_cat_list.append(n1.cloth_cat)
+                    cloth_name_list.append(n1.cloth_name)
+                    supplier_list.append(n1.supplier)
+                cloth_cat = valObj.data['cloth_cat'] if valObj.data['cloth_cat'] is not None else ""
+                cloth_name = valObj.data['cloth_name'] if valObj.data['cloth_name'] is not None else ""
+                supplier = valObj.data['supplier'] if valObj.data['supplier'] is not None else ""
+                orderObj = PlanOrder.objects.get(delete_time=None, id=nid)
+                fmObj = FactoryMake.objects.filter(order_id=nid)
+                str_time = datetime.now()
+                plan_start_date = None
+                for o1 in fmObj:
+                    try:
+                        if o1.plan_start_date < str_time:
+                            str_time = o1.plan_start_date
+                            plan_start_date = o1.plan_start_date
+
+                    except:
+                        str_time = datetime.now()
+                orderClothShip = OrderClothShip.objects.filter(delete_time=None,order_id=nid).order_by("order_cloth_id","supplier")
+                if cloth_cat:
+                    orderClothShip = orderClothShip.filter(cloth_cat = cloth_cat)
+                if cloth_name:
+                    orderClothShip = orderClothShip.filter(cloth_name=cloth_name)
+                if supplier:
+                    orderClothShip = orderClothShip.filter(supplier=supplier)
+                samplist=[]
+                for one in orderClothShip:
+                    samp={}
+                    samp['cloth_type'] = one.cloth_type
+                    samp['cloth_cat'] = one.cloth_cat
+                    samp['cloth_name'] = one.cloth_name
+                    samp['delivery_type'] = one.delivery_type
+                    samp['delivery_name'] = one.delivery_name
+                    samp['is_inspect'] = one.is_inspect
+                    samp['buy_all_num'] = one.buy_all_num
+                    samp['loss_lv'] = one.loss_lv
+                    samp['supplier'] = one.supplier
+                    samp['order_cloth_ship_id'] = one.id
+                    rObj = OrderClothLineShip.objects.filter(delete_time=None, order_cloth_id=one.order_cloth_id,order_cloth_ship_id=one.id).order_by('color', 'specs')
+                    sub_data = []
+                    for one1 in rObj:
+                        zamp = {}
+                        zamp["order_cloth_ship_line_id"] = one1.id
+                        zamp['color'] = one1.color
+                        zamp['color_num'] = one1.color_num
+                        zamp['guige'] = one1.guige
+                        zamp['specs'] = one1.specs
+                        zamp['buy_num'] = one1.buy_num
+                        zamp['provide_time'] = one1.provide_time
+                        zamp['sample_send_time'] = one1.sample_send_time
+                        zamp['sure_comment'] = one1.sure_comment
+                        zamp['is_sure'] = one1.is_sure
+                        time1 = datetime.now()
+                        try:
+                            zamp['down_time'] = downDay(one1.provide_time - time1)
+                            if zamp['down_time'] <1:
+                                zamp['down_time'] = 0
+                        except:
+                            zamp['down_time'] = 0
+                        sub_data.append(zamp)
+                    samp['sub_data'] = sub_data
+                    # 注意事项
+                    notes_sure_num = 0
+                    orderNotes = OrderNotes.objects.filter(order_id=nid)
+                    notes_all_num = orderNotes.count()
+                    for one3 in orderNotes:
+                        if one3.is_sure == 1:
+                            notes_sure_num = notes_sure_num + 1
+                    samp["notes_all_num"] = notes_all_num
+                    samp["notes_sure_num"] = notes_sure_num
+                    samplist.append(samp)
+
+                temp = {}
+                temp["data"] = samplist
+                temp["orderObj"] = model_to_dict(orderObj)
+                samp["plan_start_date"] = plan_start_date
+                # samp["notes_sure_num"] = notes_sure_num
+                # 确认入库
+                orderCloth = OrderCloth.objects.filter(order_id=nid)
+                temp["order_cloth_num"] = orderCloth.count()
+                order_cloth_sure_num = 0
+                for one4 in orderCloth:
+                    if one4.is_sure_in_store == 1:
+                        order_cloth_sure_num += 1
+                temp["order_cloth_sure_num"] = order_cloth_sure_num
+                temp["order_cloth_no_num"] = orderCloth.count()-order_cloth_sure_num
+                temp["plan_start_date"] = plan_start_date
+                temp["cloth_cat_list"] = list(set(cloth_cat_list))
+                temp["cloth_name_list"] =  list(set(cloth_name_list))
+                temp["supplier_list"] = list(set(supplier_list))
+                temp['error_code'] = 0
+                temp['message'] = "成功"
+                temp['request'] = request.method + '  ' + request.get_full_path()
+                return Response(temp)
+            except:
+                msg = "未找到对应的发货方案"
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+
 ############################订单管理-采购管理###############################################
 
 class purchasRecordsView(APIView):
@@ -3389,6 +3638,7 @@ class productReadyView(APIView):
                     for one in rObj:
                         samp = {}
                         samp['order_id'] = one.id
+                        samp['plan_id'] = one.plan_id
                         samp['create_time'] = one.create_time
                         samp['price_code'] = one.price_code
                         samp['dhkhao'] = one.dhkhao
