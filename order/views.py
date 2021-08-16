@@ -3858,6 +3858,7 @@ class productReadyOneView(APIView):
             for one in fcObj:
                 samp={}
                 samp["factory_make_id"] = one.id
+                samp["make_factory"] = one.make_factory
                 samp['leader'] = planOrder.leader
                 samp['plan_start_date'] = one.plan_start_date
                 samp['real_start_date'] = one.real_start_date
