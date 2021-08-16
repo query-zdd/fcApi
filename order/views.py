@@ -3773,7 +3773,7 @@ class productReadyView(APIView):
                         for one2 in fmObj:
                             if one2.plan_start_date:
                                 sure_plan_num = sure_plan_num + 1
-                                down_data = downDay(one2.plan_start_date-dtnow)
+                                down_data = downDay(one2.plan_start_date,dtnow)
                                 down_list.append(down_data)
                             if one2.real_start_date:
                                 sure_real_num = sure_real_num + 1
