@@ -14,7 +14,7 @@ from lin.exception import Error
 from secure.upload.upload_image.config import  access_key,secret_key,base_url
 from secure.serializers import zddpaginate
 import math
-
+from order.utils import *
 # Create your views here.
 ############################订单管理-出货方案###############################################
 
@@ -1150,7 +1150,14 @@ class orderClothOneView(APIView):
                         del one1["id"]
                     samp['sub_data'] = rObjList
                     samplist.append(samp)
-
+                # 备注
+                orderline = PlanOrderLine.objects.filter(delete_time=None, order_id=nid)
+                comments = ""
+                for po1 in orderline:
+                    if po1.comments:
+                        comments += po1.comments
+                # 注意事项
+                notes_all_num, notes_sure_num = getNotesNum(plan_id=orderObj.plan_id)
                 temp = {}
                 temp["data"] = samplist
                 temp["orderObj"] = model_to_dict(orderObj)
@@ -1160,6 +1167,9 @@ class orderClothOneView(APIView):
                 temp['order_cloth_num_sure'] = order_cloth_num_sure
                 temp['order_cloth_num_no'] = orderCloth.count()-order_cloth_num_sure
                 temp['make_factory'] = make_factory
+                temp['comments'] = comments
+                temp['notes_all_num'] = notes_all_num
+                temp['notes_sure_num'] = notes_sure_num
                 temp['error_code'] = 0
                 temp['message'] = "成功"
                 temp['request'] = request.method + '  ' + request.get_full_path()
@@ -2882,17 +2892,6 @@ class shipmentSureOneView(APIView):
                 cloth_name = valObj.data['cloth_name'] if valObj.data['cloth_name'] is not None else ""
                 supplier = valObj.data['supplier'] if valObj.data['supplier'] is not None else ""
                 orderObj = PlanOrder.objects.get(delete_time=None, id=nid)
-                fmObj = FactoryMake.objects.filter(order_id=nid)
-                str_time = datetime.now()
-                plan_start_date = None
-                for o1 in fmObj:
-                    try:
-                        if o1.plan_start_date < str_time:
-                            str_time = o1.plan_start_date
-                            plan_start_date = o1.plan_start_date
-
-                    except:
-                        str_time = datetime.now()
                 orderClothShip = OrderClothShip.objects.filter(delete_time=None,order_id=nid).order_by("order_cloth_id","supplier")
                 if cloth_cat:
                     orderClothShip = orderClothShip.filter(cloth_cat = cloth_cat)
@@ -2923,13 +2922,14 @@ class shipmentSureOneView(APIView):
                         zamp['guige'] = one1.guige
                         zamp['specs'] = one1.specs
                         zamp['buy_num'] = one1.buy_num
+                        zamp['provide_num'] = one1.provide_num
                         zamp['provide_time'] = one1.provide_time
                         zamp['sample_send_time'] = one1.sample_send_time
                         zamp['sure_comment'] = one1.sure_comment
                         zamp['is_sure'] = one1.is_sure
                         time1 = datetime.now()
                         try:
-                            zamp['down_time'] = downDay(one1.provide_time - time1)
+                            zamp['down_time'] = downDay(time1,one1.provide_time)
                             if zamp['down_time'] <1:
                                 zamp['down_time'] = 0
                         except:
@@ -2950,6 +2950,7 @@ class shipmentSureOneView(APIView):
                 temp = {}
                 temp["data"] = samplist
                 temp["orderObj"] = model_to_dict(orderObj)
+                plan_start_date, down_day = getPlanStartdate(nid)
                 samp["plan_start_date"] = plan_start_date
                 # samp["notes_sure_num"] = notes_sure_num
                 # 确认入库
@@ -3379,6 +3380,10 @@ class purchasRecordsView(APIView):
                     bObj.take_over_time = done['take_over_time']
                     bObj.take_over_num = done['take_over_num']
                     bObj.save()
+                    ocslObj = OrderClothLineShip.objects.get(id=order_cloth_line_ship_id)
+                    ocslObj.add_up_num = done['add_up_num']
+                    ocslObj.short_send_num = done['short_send_num']
+                    ocslObj.save()
                 except:
                     msg = l_msg
                     error_code = 10030
@@ -3447,7 +3452,15 @@ class purchasRecordsOneView(APIView):
             purchasObj = PurchasingRecords.objects.filter(delete_time=None,order_cloth_line_ship_id=nid)
             temp = {}
             temp["data"] = purchasObj.values()
-            temp["lineShipObj"] = model_to_dict(lineShipObj)
+            lineshipdic = model_to_dict(lineShipObj)
+            if not lineshipdic["add_up_num"]:
+                lineshipdic["add_up_num"] = 0
+            if not lineshipdic['short_send_num']:
+                lineshipdic['short_send_num'] = lineshipdic['provide_num'] - lineshipdic["add_up_num"]
+            temp["lineShipObj"] = lineshipdic
+            short_overflow_num, short_overflow = getOverflow(lineShipObj.order_id)
+            temp['short_overflow_num'] = short_overflow_num
+            temp['short_overflow'] = short_overflow * 100
             temp['error_code'] = 0
             temp['message'] = "成功"
             temp['request'] = request.method + '  ' + request.get_full_path()
@@ -3611,20 +3624,31 @@ class shipmentInStockOneView(APIView):
                     rObj = OrderClothLineShip.objects.filter(delete_time=None, order_cloth_id=one.order_cloth_id,order_cloth_ship_id=one.id).order_by('color', 'specs')
                     sure_num = 0
                     no_sure_num = 0
-                    for one in rObj:
-                        if one.is_sure == 1:
+                    rObjList = rObj.values()
+                    for one in rObjList:
+                        if one["is_sure"] == 1:
                             sure_num = sure_num + 1
                         else:
                             no_sure_num = no_sure_num + 1
+                        time1 = datetime.now()
+                        try:
+                            one['down_time'] = downDay(time1,one["provide_time"])
+                            if one['down_time'] < 1:
+                                one['down_time'] = 0
+                        except:
+                            one['down_time'] = 0
                     samp['sure_num'] = sure_num
                     samp['no_sure_num'] = no_sure_num
-                    samp['sub_data'] = rObj.values()
+                    samp['sub_data'] = rObjList
 
                     samplist.append(samp)
-
+                # 上手倒计时
+                plan_start_date,down_day = getPlanStartdate(nid)
                 temp = {}
                 temp["data"] = samplist
                 temp["orderObj"] = model_to_dict(orderObj)
+                temp["plan_start_date"] = plan_start_date
+                temp["down_day"] = down_day
                 temp['error_code'] = 0
                 temp['message'] = "成功"
                 temp['request'] = request.method + '  ' + request.get_full_path()
