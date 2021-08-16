@@ -2894,6 +2894,7 @@ class shipmentSureOneView(APIView):
                     if one4.is_sure_in_store == 1:
                         order_cloth_sure_num += 1
                 temp["order_cloth_sure_num"] = order_cloth_sure_num
+                temp["order_cloth_no_num"] = orderCloth.count()-order_cloth_sure_num
                 temp["plan_start_date"] = plan_start_date
                 temp['error_code'] = 0
                 temp['message'] = "成功"
