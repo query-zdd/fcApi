@@ -2812,6 +2812,14 @@ class shipmentSureOneView(APIView):
         valObj = shipmentSureGetOneSerializer(data=request.query_params)
         if valObj.is_valid():
             try:
+                orderClothOne = OrderClothShip.objects.filter(order_id=nid,delete_time=None)
+                cloth_cat_list = []
+                cloth_name_list = []
+                supplier_list = []
+                for n1 in orderClothOne:
+                    cloth_cat_list.append(n1.cloth_cat)
+                    cloth_name_list.append(n1.cloth_name)
+                    supplier_list.append(n1.supplier)
                 cloth_cat = valObj.data['cloth_cat'] if valObj.data['cloth_cat'] is not None else ""
                 cloth_name = valObj.data['cloth_name'] if valObj.data['cloth_name'] is not None else ""
                 supplier = valObj.data['supplier'] if valObj.data['supplier'] is not None else ""
@@ -2896,6 +2904,9 @@ class shipmentSureOneView(APIView):
                 temp["order_cloth_sure_num"] = order_cloth_sure_num
                 temp["order_cloth_no_num"] = orderCloth.count()-order_cloth_sure_num
                 temp["plan_start_date"] = plan_start_date
+                temp["cloth_cat_list"] = list(set(cloth_cat_list))
+                temp["cloth_name_list"] =  list(set(cloth_name_list))
+                temp["supplier_list"] = list(set(supplier_list))
                 temp['error_code'] = 0
                 temp['message'] = "成功"
                 temp['request'] = request.method + '  ' + request.get_full_path()
@@ -3395,6 +3406,9 @@ class productReadyView(APIView):
                         except:
                             samp["send_time"] = 0
                         # 上手日期处理
+                        down_data=0
+                        down_list = []
+                        dtnow = datetime.now()
                         fmObj = FactoryMake.objects.filter(order_id=one.id)
                         zamp = {}
                         zamp["fm_num"] = fmObj.count()
@@ -3403,12 +3417,15 @@ class productReadyView(APIView):
                         for one2 in fmObj:
                             if one2.plan_start_date:
                                 sure_plan_num = sure_plan_num + 1
+                                down_data = downDay(one2.plan_start_date-dtnow)
+                                down_list.append(down_data)
                             if one2.real_start_date:
                                 sure_real_num = sure_real_num + 1
                         zamp["sure_plan_num"] = sure_plan_num
                         zamp["sure_real_num"] = sure_real_num
                         zamp["fmObjLine"] = fmObj.values()
                         samp["fmObj"] = zamp
+                        samp["down_day"] = min(down_list)
                         # 注意事项
                         notes_sure_num = 0
                         orderNotes = OrderNotes.objects.filter(order_id=one.id)
@@ -3427,6 +3444,7 @@ class productReadyView(APIView):
                                 order_cloth_sure_num += 1
                         samp["order_cloth_sure_num"] = order_cloth_sure_num
                         # 装箱要求
+
                         data.append(samp)
                     temp = {}
                     temp["data"] = data
