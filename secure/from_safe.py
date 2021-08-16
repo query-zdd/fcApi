@@ -717,6 +717,9 @@ class shipmentSureLineShipSerializer(serializers.Serializer):
 
 class dropSerializer(serializers.Serializer):
     order_id = serializers.IntegerField(error_messages={'required': '必须传入订单id'})
+
+class dropOneSerializer(serializers.Serializer):
+    order_cloth_line_id = serializers.IntegerField(error_messages={'required': '必须传入面辅料单条id'})
     cloth_name = serializers.CharField(allow_blank=True,allow_null=True,default="")
     cloth_cat = serializers.CharField(allow_blank=True, allow_null=True, default="")
     color = serializers.CharField(allow_blank=True, allow_null=True, default="")
@@ -725,7 +728,16 @@ class dropSerializer(serializers.Serializer):
     plan_start_data = serializers.CharField(allow_blank=True, allow_null=True, default="")
     is_inspect = serializers.IntegerField(allow_null=True, default=0)
     inspect_content = serializers.CharField(allow_blank=True,allow_null=True,default="")
-    status = serializers.IntegerField(allow_null=True, default=0)
+    drop_status = serializers.IntegerField(allow_null=True, default=0)
+
+class dropLableOneSerializer(serializers.Serializer):
+    order_line_id = serializers.IntegerField(error_messages={'required': '必须传入面辅料单条id'})
+    drop_url = serializers.CharField(allow_blank=True,allow_null=True,default="")
+    lable_url = serializers.CharField(allow_blank=True, allow_null=True, default="")
+
+class dropGetOneSerializer(serializers.Serializer):
+    cloth_name = serializers.CharField(allow_blank=True,allow_null=True,default="")
+    cloth_cat = serializers.CharField(allow_blank=True, allow_null=True, default="")
 
 class purchasRecordsSerializer(serializers.Serializer):
     send_time = serializers.CharField(error_messages={'required': '必须传入发货日期'})

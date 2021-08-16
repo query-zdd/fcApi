@@ -41,6 +41,9 @@ urlpatterns = [
     url('^shipmentSure/drop$', views.dropView.as_view()),
     url('^shipmentSure/drop/(?P<nid>\d+)', views.dropOneView.as_view()),
 
+    url('^shipmentSure/dropLable$', views.dropLableView.as_view()),
+    url('^shipmentSure/dropLable/(?P<nid>\d+)', views.dropLableOneView.as_view()),
+
     url('^purchasRecords$', views.purchasRecordsView.as_view()),
     url('^purchasRecords/(?P<nid>\d+)', views.purchasRecordsOneView.as_view()),
 

@@ -553,6 +553,9 @@ class OrderClothLine(models.Model):
     order_num = models.IntegerField(blank=True, null=True)
     suo_lv = models.IntegerField(blank=True, null=True)
     buy_num = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    is_inspect = models.IntegerField(blank=True, null=True)
+    inspect_content = models.CharField(max_length=255, blank=True, null=True)
+    drop_status = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1029,6 +1032,8 @@ class PlanOrderLine(models.Model):
     order_num = models.IntegerField(blank=True, null=True)
     indicate_time = models.DateTimeField(blank=True, null=True)
     reight_space_id = models.IntegerField(blank=True, null=True)
+    drop_url = models.CharField(max_length=255, blank=True, null=True)
+    lable_url = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         managed = False
