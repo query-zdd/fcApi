@@ -1073,7 +1073,9 @@ class orderClothOneView(APIView):
                 fmObj = FactoryMake.objects.filter(order_id=nid)
                 coop_mode = ''
                 ticketing_custom = ''
+                make_factory = []
                 for o in fmObj:
+                    make_factory.append(o.make_factory)
                     coop_mode +=o.coop_mode+'|'
                     ticketing_custom +=o.ticketing_custom+'|'
                 samplist=[]
@@ -1112,6 +1114,7 @@ class orderClothOneView(APIView):
                 temp['order_cloth_num'] = orderCloth.count()
                 temp['order_cloth_num_sure'] = order_cloth_num_sure
                 temp['order_cloth_num_no'] = orderCloth.count()-order_cloth_num_sure
+                temp['make_factory'] = make_factory
                 temp['error_code'] = 0
                 temp['message'] = "成功"
                 temp['request'] = request.method + '  ' + request.get_full_path()
