@@ -604,9 +604,9 @@ class orderClothLineSubSerializer(serializers.Serializer):
     guige = serializers.CharField(error_messages={'required': '必须传入面辅料规格'})
     buy_num = serializers.CharField(error_messages={'required': '必须传入面辅料采购数量'})
     is_inspect = serializers.IntegerField(allow_null=True, default=0)
-    color = serializers.CharField(default='')
-    color_num = serializers.CharField(default='')
-    specs = serializers.CharField(default='')
+    color = serializers.CharField(allow_null=True,allow_blank=True,default='')
+    color_num = serializers.CharField(allow_null=True,allow_blank=True,default='')
+    specs = serializers.CharField(allow_null=True,allow_blank=True,default='')
     id = serializers.IntegerField(default=0)
 
 ######################发货方案###################################
