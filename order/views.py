@@ -2971,7 +2971,7 @@ class shipmentSureOneView(APIView):
                 temp['request'] = request.method + '  ' + request.get_full_path()
                 return Response(temp)
             except:
-                msg = "未找到对应的发货方案"
+                msg = "未找到对应的面辅料采购"
                 error_code = 10030
                 request = request.method + '  ' + request.get_full_path()
                 post_result = {
