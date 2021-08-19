@@ -632,9 +632,9 @@ class orderClothLineSubShipSerializer(serializers.Serializer):
     provide_time = serializers.CharField(error_messages={'required': '必须传入交货日期'})
     delivery_type = serializers.CharField(error_messages={'required': '必须传入收货方式'})
     delivery_name = serializers.CharField(error_messages={'required': '必须传入收货方'})
-    color = serializers.CharField(default='')
-    color_num = serializers.CharField(default='')
-    specs = serializers.CharField(default='')
+    color = serializers.CharField(allow_blank=True,allow_null=True,default='')
+    color_num = serializers.CharField(allow_blank=True, allow_null=True, default='')
+    specs = serializers.CharField(allow_blank=True, allow_null=True, default='')
     id = serializers.IntegerField(default=0)
 
 ##########面辅料注意事项
