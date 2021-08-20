@@ -665,9 +665,26 @@ class setWarmSerializer(serializers.Serializer):
 class orderNotesOneSerializer(serializers.Serializer):
     plan_id = serializers.IntegerField(allow_null=True,default=0)
     order_id = serializers.IntegerField(allow_null=True,default=0)
+    category_id = serializers.IntegerField(allow_null=True, default=0)
+    cloth_id = serializers.IntegerField(allow_null=True, default=0)
+    cloth_class_id = serializers.IntegerField(allow_null=True, default=0)
+    is_sure = serializers.IntegerField(allow_null=True, default=0)
 
 class orderNotesOne1Serializer(serializers.Serializer):
-    order_id = serializers.IntegerField(default=0)
+    plan_id = serializers.IntegerField(allow_null=True, default=0)
+    order_id = serializers.IntegerField(allow_null=True, default=0)
+    category_id = serializers.IntegerField(allow_null=True, default=0)
+    cloth_id = serializers.IntegerField(allow_null=True, default=0)
+    cloth_class_id = serializers.IntegerField(allow_null=True, default=0)
+    is_sure = serializers.IntegerField(allow_null=True, default=0)
+
+class orderNotesOtherSerializer(serializers.Serializer):
+    plan_id = serializers.IntegerField(allow_null=True, default=0)
+    order_id = serializers.IntegerField(allow_null=True, default=0)
+    other_category_id = serializers.IntegerField(allow_null=True, default=0)
+    other_sub_category_id = serializers.IntegerField(allow_null=True, default=0)
+    other_category_setting_id = serializers.IntegerField(allow_null=True, default=0)
+    is_sure = serializers.IntegerField(allow_null=True, default=0)
 
 
 class packingSerializer(serializers.Serializer):

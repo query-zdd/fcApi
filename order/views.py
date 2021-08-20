@@ -1364,7 +1364,52 @@ class orderNotesView(APIView):
         valObj = orderNotesOneSerializer(data=request.query_params)
         if valObj.is_valid():
             try:
+                searchData = []
+                lclothClass = ClothClass.objects.filter(delete_time=None)
+                for l0 in lclothClass:
+                    samp = {}
+                    lcloth = Cloth.objects.filter(delete_time=None, class_id=l0.id)
+                    list2 = []
+                    for l1 in lcloth:
+                        tamp = {}
+                        lcat = ClothCategory.objects.filter(delete_time=None, cloth_id=l1.id)
+                        list3 = []
+                        for l2 in lcat:
+                            zamp = {}
+                            zamp['category_id'] = l2.id
+                            zamp['category_name'] = l2.category_name
+                            list3.append(zamp)
+                        tamp['cloth_id'] = l1.id
+                        tamp['cloth'] = l1.cloth
+                        tamp['zub'] = list3
+                        list2.append(tamp)
+                    samp['cloth_class_id'] = l0.id
+                    samp['cloth_class_name'] = l0.cloth_class_name
+                    samp['sub'] = list2
+                    searchData.append(samp)
+                # 检索参数
+                cloth_class_id = valObj.data['cloth_class_id'] if valObj.data['cloth_class_id'] else 0
+                cloth_id = valObj.data['cloth_id'] if valObj.data['cloth_id'] else 0
+                category_id = valObj.data['category_id'] if valObj.data['category_id'] else 0
+                is_sure = valObj.data['is_sure'] if valObj.data['is_sure'] else 0
+                # 查询数据
                 notesAll = ClothNotes.objects.filter(delete_time=None).order_by('category_id', 'weight')
+                if category_id:
+                    notesAll = notesAll.filter(category_id = category_id)
+
+                else:
+                    if cloth_id:
+                        clothCatObj = ClothCategory.objects.filter(cloth_id = cloth_id)
+                        cat_id_lst =  [one.id for one in clothCatObj]
+                        notesAll = notesAll.filter(category_id__in=cat_id_lst)
+                    else:
+                        if cloth_class_id:
+                            clothObj = Cloth.objects.filter(class_id=cloth_class_id)
+                            cloth_id_list = [one.id for one in clothObj]
+                            clothCatObj = ClothCategory.objects.filter(cloth_id__in=cloth_id_list)
+                            cat_id_lst = [one.id for one in clothCatObj]
+                            notesAll = notesAll.filter(category_id__in=cat_id_lst)
+
                 noteslist = notesAll.values()
                 notes_all_num = 0
                 notes_sure_num = 0
@@ -1413,6 +1458,7 @@ class orderNotesView(APIView):
                 temp['notes_nosure_num'] = notes_nosure_num
                 temp['notes_sure_num'] = notes_sure_num
                 temp['notes_all_num'] = notes_all_num
+                temp['searchData'] = searchData
                 temp['error_code'] = 0
                 temp['message'] = "成功"
                 temp['request'] = request.method + '  ' + request.get_full_path()
@@ -1447,12 +1493,65 @@ class orderNotesOneView(APIView):
         valObj = orderNotesOne1Serializer(data=request.query_params)
         if valObj.is_valid():
             try:
+                searchData = []
+                lclothClass = ClothClass.objects.filter(delete_time=None)
+                for l0 in lclothClass:
+                    samp = {}
+                    lcloth = Cloth.objects.filter(delete_time=None,class_id=l0.id)
+                    list2 = []
+                    for l1 in lcloth:
+                        tamp = {}
+                        lcat = ClothCategory.objects.filter(delete_time=None,cloth_id=l1.id)
+                        list3 = []
+                        for l2 in lcat:
+                            zamp={}
+                            zamp['category_id'] = l2.id
+                            zamp['category_name'] = l2.category_name
+                            list3.append(zamp)
+                        tamp['cloth_id'] = l1.id
+                        tamp['cloth'] = l1.cloth
+                        tamp['zub'] = list3
+                        list2.append(tamp)
+                    samp['cloth_class_id'] = l0.id
+                    samp['cloth_class_name'] = l0.cloth_class_name
+                    samp['sub'] = list2
+                    searchData.append(samp)
+
+                # 检索参数
+                cloth_class_id = valObj.data['cloth_class_id'] if valObj.data['cloth_class_id']  else 0
+                cloth_id = valObj.data['cloth_id'] if valObj.data['cloth_id']  else 0
+                category_id = valObj.data['category_id'] if valObj.data['category_id']  else 0
+                is_sure = valObj.data['is_sure'] if valObj.data['is_sure']  else 0
+                #统计数据
                 notes_all_num = 0
                 notes_sure_num = 0
                 notes_nosure_num = 0
-                orderNote = OrderNotes.objects.filter(plan_id=nid)
+                # 订单注意事项
+                orderNote = OrderNotes.objects.filter(delete_time=None,plan_id=nid)
+
+
+                # 检索
+                if is_sure:
+                    orderNote = orderNote.filter(is_sure=is_sure)
                 note_id_list = [one.notes_id for one in orderNote]
-                notesAll = ClothNotes.objects.filter(delete_time=None, id__in=note_id_list).order_by('category_id','weight')
+                notesAll = ClothNotes.objects.filter(delete_time=None, id__in=note_id_list).order_by('category_id',
+                                                                                                     'weight')
+                if category_id:
+                    notesAll = notesAll.filter(category_id = category_id)
+
+                else:
+                    if cloth_id:
+                        clothCatObj = ClothCategory.objects.filter(cloth_id = cloth_id)
+                        cat_id_lst =  [one.id for one in clothCatObj]
+                        notesAll = notesAll.filter(category_id__in=cat_id_lst)
+                    else:
+                        if cloth_class_id:
+                            clothObj = Cloth.objects.filter(class_id=cloth_class_id)
+                            cloth_id_list = [one.id for one in clothObj]
+                            clothCatObj = ClothCategory.objects.filter(cloth_id__in=cloth_id_list)
+                            cat_id_lst = [one.id for one in clothCatObj]
+                            notesAll = notesAll.filter(category_id__in=cat_id_lst)
+
                 noteslist  = notesAll.values()
                 for one in noteslist:
                     noteCat = ClothCategory.objects.get(delete_time=None, id=one["category_id"])
@@ -1494,11 +1593,13 @@ class orderNotesOneView(APIView):
                     else:
                         one['is_active'] = 0
                         one['id'] = None
+                # 检索元数据
                 temp = {}
                 temp["data"] =noteslist
                 temp['notes_nosure_num'] = notes_nosure_num
                 temp['notes_sure_num'] = notes_sure_num
                 temp['notes_all_num'] = notes_all_num
+                temp['searchData'] = searchData
                 temp['error_code'] = 0
                 temp['message'] = "成功"
                 temp['request'] = request.method + '  ' + request.get_full_path()
@@ -1699,10 +1800,53 @@ class orderNotesOtherView(APIView):
     @csrf_exempt
     def get(self, request):
         data = request.query_params
-        valObj = orderNotesOneSerializer(data=request.query_params)
+        valObj = orderNotesOtherSerializer(data=request.query_params)
         if valObj.is_valid():
             try:
+                searchData = []
+                lclothClass = OtherCategory.objects.filter(delete_time=None)
+                for l0 in lclothClass:
+                    samp = {}
+                    lcloth = OtherSubCategory.objects.filter(delete_time=None, category_id=l0.id)
+                    list2 = []
+                    for l1 in lcloth:
+                        tamp = {}
+                        lcat = OtherCategorySetting.objects.filter(delete_time=None, sub_category_id=l1.id)
+                        list3 = []
+                        for l2 in lcat:
+                            zamp = {}
+                            zamp['other_category_setting_id'] = l2.id
+                            zamp['category_set_name'] = l2.category_set_name
+                            list3.append(zamp)
+                        tamp['other_sub_category_id'] = l1.id
+                        tamp['sub_name'] = l1.sub_name
+                        tamp['zub'] = list3
+                        list2.append(tamp)
+                    samp['other_category_id'] = l0.id
+                    samp['category_name'] = l0.category_name
+                    samp['sub'] = list2
+                    searchData.append(samp)
+                # 检索
+                other_category_id = valObj.data['other_category_id'] if valObj.data['other_category_id'] else 0
+                other_sub_category_id = valObj.data['other_sub_category_id'] if valObj.data['other_sub_category_id'] else 0
+                other_category_setting_id = valObj.data['other_category_setting_id'] if valObj.data['other_category_setting_id'] else 0
+
                 notesAll = OtherNotes.objects.filter(delete_time=None).order_by('category_setting_id', 'weight')
+                if other_category_setting_id:
+                    notesAll = notesAll.filter(category_setting_id = other_category_setting_id)
+
+                else:
+                    if other_sub_category_id:
+                        clothCatObj = OtherCategorySetting.objects.filter(sub_category_id = other_sub_category_id)
+                        cat_id_lst =  [one.id for one in clothCatObj]
+                        notesAll = notesAll.filter(category_setting_id__in=cat_id_lst)
+                    else:
+                        if other_category_id:
+                            clothObj = OtherSubCategory.objects.filter(category_id=other_category_id)
+                            cloth_id_list = [one.id for one in clothObj]
+                            clothCatObj = ClothCategory.objects.filter(sub_category_id__in=cloth_id_list)
+                            cat_id_lst = [one.id for one in clothCatObj]
+                            notesAll = notesAll.filter(category_setting_id__in=cat_id_lst)
                 noteslist = notesAll.values()
                 notes_all_num = 0
                 notes_sure_num = 0
@@ -1751,6 +1895,7 @@ class orderNotesOtherView(APIView):
                 temp['notes_nosure_num'] = notes_nosure_num
                 temp['notes_sure_num'] = notes_sure_num
                 temp['notes_all_num'] = notes_all_num
+                temp['searchData'] = searchData
                 temp['error_code'] = 0
                 temp['message'] = "成功"
                 temp['request'] = request.method + '  ' + request.get_full_path()
@@ -1782,16 +1927,64 @@ class orderNotesOtherOneView(APIView):
     @csrf_exempt
     def get(self, request, nid):
         data = request.query_params
-        valObj = orderNotesOne1Serializer(data=request.query_params)
+        valObj = orderNotesOtherSerializer(data=request.query_params)
         if valObj.is_valid():
             try:
+                searchData = []
+                lclothClass = OtherCategory.objects.filter(delete_time=None)
+                for l0 in lclothClass:
+                    samp = {}
+                    lcloth = OtherSubCategory.objects.filter(delete_time=None, category_id=l0.id)
+                    list2 = []
+                    for l1 in lcloth:
+                        tamp = {}
+                        lcat = OtherCategorySetting.objects.filter(delete_time=None, sub_category_id=l1.id)
+                        list3 = []
+                        for l2 in lcat:
+                            zamp = {}
+                            zamp['other_category_setting_id'] = l2.id
+                            zamp['category_set_name'] = l2.category_set_name
+                            list3.append(zamp)
+                        tamp['other_sub_category_id'] = l1.id
+                        tamp['sub_name'] = l1.sub_name
+                        tamp['zub'] = list3
+                        list2.append(tamp)
+                    samp['other_category_id'] = l0.id
+                    samp['category_name'] = l0.category_name
+                    samp['sub'] = list2
+                    searchData.append(samp)
+                # 检索
+                other_category_id = valObj.data['other_category_id'] if valObj.data['other_category_id'] else 0
+                other_sub_category_id = valObj.data['other_sub_category_id'] if valObj.data[
+                    'other_sub_category_id'] else 0
+                other_category_setting_id = valObj.data['other_category_setting_id'] if valObj.data[
+                    'other_category_setting_id'] else 0
+                is_sure = valObj.data['is_sure'] if valObj.data['is_sure'] else 0
                 notes_all_num = 0
                 notes_sure_num = 0
                 notes_nosure_num = 0
                 orderNote = OrderNotesOther.objects.filter(plan_id=nid)
+                if is_sure:
+                    orderNote = orderNote.filter(is_sure=is_sure)
                 note_id_list = [one.notes_id for one in orderNote]
                 notesAll = OtherNotes.objects.filter(delete_time=None, id__in=note_id_list).order_by('category_setting_id','weight')
+                if other_category_setting_id:
+                    notesAll = notesAll.filter(category_setting_id = other_category_setting_id)
+
+                else:
+                    if other_sub_category_id:
+                        clothCatObj = OtherCategorySetting.objects.filter(sub_category_id = other_sub_category_id)
+                        cat_id_lst =  [one.id for one in clothCatObj]
+                        notesAll = notesAll.filter(category_setting_id__in=cat_id_lst)
+                    else:
+                        if other_category_id:
+                            clothObj = OtherSubCategory.objects.filter(category_id=other_category_id)
+                            cloth_id_list = [one.id for one in clothObj]
+                            clothCatObj = ClothCategory.objects.filter(sub_category_id__in=cloth_id_list)
+                            cat_id_lst = [one.id for one in clothCatObj]
+                            notesAll = notesAll.filter(category_setting_id__in=cat_id_lst)
                 noteslist  = notesAll.values()
+                # other_category其他面辅料类别，other_sub_category,其他注意事项名称，other_cat_setting其他注意事项类别,other_notes,其他注意事项
                 for one in noteslist:
                     noteCat = OtherCategorySetting.objects.get(delete_time=None, id=one["category_setting_id"])
                     noteCloth = OtherSubCategory.objects.get(id=noteCat.sub_category_id, delete_time=None)
@@ -1837,6 +2030,7 @@ class orderNotesOtherOneView(APIView):
                 temp['notes_nosure_num'] = notes_nosure_num
                 temp['notes_sure_num'] = notes_sure_num
                 temp['notes_all_num'] = notes_all_num
+                temp['searchData'] = searchData
                 temp['error_code'] = 0
                 temp['message'] = "成功"
                 temp['request'] = request.method + '  ' + request.get_full_path()
