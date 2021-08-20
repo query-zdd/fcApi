@@ -1521,7 +1521,7 @@ class orderNotesOneView(APIView):
                 cloth_class_id = valObj.data['cloth_class_id'] if valObj.data['cloth_class_id']  else 0
                 cloth_id = valObj.data['cloth_id'] if valObj.data['cloth_id']  else 0
                 category_id = valObj.data['category_id'] if valObj.data['category_id']  else 0
-                is_sure = valObj.data['is_sure'] if valObj.data['is_sure']  else 0
+                is_sure = valObj.data['is_sure'] if valObj.data['is_sure'] is not None else 2
                 #统计数据
                 notes_all_num = 0
                 notes_sure_num = 0
@@ -1531,7 +1531,7 @@ class orderNotesOneView(APIView):
 
 
                 # 检索
-                if is_sure:
+                if is_sure !=2:
                     orderNote = orderNote.filter(is_sure=is_sure)
                 note_id_list = [one.notes_id for one in orderNote]
                 notesAll = ClothNotes.objects.filter(delete_time=None, id__in=note_id_list).order_by('category_id',
@@ -1959,12 +1959,12 @@ class orderNotesOtherOneView(APIView):
                     'other_sub_category_id'] else 0
                 other_category_setting_id = valObj.data['other_category_setting_id'] if valObj.data[
                     'other_category_setting_id'] else 0
-                is_sure = valObj.data['is_sure'] if valObj.data['is_sure'] else 0
+                is_sure = valObj.data['is_sure'] if valObj.data['is_sure'] is not None else 2
                 notes_all_num = 0
                 notes_sure_num = 0
                 notes_nosure_num = 0
                 orderNote = OrderNotesOther.objects.filter(plan_id=nid)
-                if is_sure:
+                if is_sure !=2:
                     orderNote = orderNote.filter(is_sure=is_sure)
                 note_id_list = [one.notes_id for one in orderNote]
                 notesAll = OtherNotes.objects.filter(delete_time=None, id__in=note_id_list).order_by('category_setting_id','weight')
