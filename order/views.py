@@ -529,11 +529,9 @@ class factoryMakeOneView(APIView):
                     xfmObj  = FactoryMake.objects.filter(flag=0)
                     for one in xfmObj:
                         xfmlObj = FactoryMakeLine.objects.filter(factory_make_id=one.id)
-                        for one1 in xfmlObj:
-                            one1.delete()
-                            one1.save()
+                        for onesub in xfmlObj:
+                            onesub.delete()
                         one.delete()
-                        one.save()
                 except:
                     pass
                 sort_type = valObj.data['sort_type'] if valObj.data['sort_type'] is not None else 0
