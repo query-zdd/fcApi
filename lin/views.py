@@ -9889,10 +9889,10 @@ class planOrderView(APIView):
                                 order_cloth_store_num, order_cloth_store_sure_num = getClothInStore(p_one["id"])
                                 p_one["order_cloth_store_num"] = order_cloth_store_num
                                 p_one["order_cloth_store_sure_num"] = order_cloth_store_sure_num
-                                # 成衣样品
-                                sample_num, sample_sure_num = getPlanSampleNum(p_one["id"])
-                                p_one["sample_num"] = sample_num
-                                p_one["sample_sure_num"] = sample_sure_num
+                                # 洗标吊牌
+                                drop_lable_num,drop_lable_sure_num = getDropLableNum(p_one["id"])
+                                p_one["drop_lable_num"] = drop_lable_num
+                                p_one["drop_lable_sure_num"] = drop_lable_sure_num
                         temp["data"] = data_n
                         temp['page_size'] = page_size
                         temp['total'] = total

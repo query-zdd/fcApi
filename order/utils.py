@@ -109,8 +109,16 @@ def getPlanSampleNum(order_id):
             sample_sure_num +=1
     return sample_num, sample_sure_num
 
+# 洗标吊牌数据
+def getDropLableNum(order_id):
+    orderLineObj = PlanOrderLine.objects.filter(order_id=order_id)
+    drop_lable_num = orderLineObj.count()
+    drop_lable_sure_num = 0
+    for one in orderLineObj:
+        if one.lable_url and one.drop_url:
+            drop_lable_sure_num += 1
 
-
+    return  drop_lable_num,drop_lable_sure_num
 # 日期之差
 def downDay(d1,d2):
     if d1 and d2:
