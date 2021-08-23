@@ -4,6 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from order.utils import *
 import requests
 from datetime import *
 
@@ -9852,20 +9853,46 @@ class planOrderView(APIView):
                     total = rObj.count()
                     if rObj.count() > start:
                         rObj = rObj.all()[start:start+page_size]
-                        if is_manage:
-                            for o_one in rObj:
-                                num = OrderLinePacking.objects.filter(order_id = o_one.id).count()
-                                o_one.pack_num = num
-                        if is_cloth_sure:
-                            for o_one in rObj:
-                                num = OrderLinePacking.objects.filter(order_id = o_one.id).count()
-                                o_one.pack_num = num
                         result = []
                         temp = {}
                         data_n = rObj.values()
                         for p_one in data_n:
                             planObj = Plan.objects.get(id=p_one["plan_id"])
                             p_one["customer_name_id"] = planObj.customer_name_id
+                            if is_manage:
+                                # 包装
+                                pack_num, pack_sure_num = getpackNum(p_one["id"])
+                                p_one["pack_num"] = pack_num
+                                p_one["pack_sure_num"] = pack_sure_num
+                                # 面辅料确认
+                                order_cloth_num, order_cloth_sure_num = getClothSureNum(p_one["id"])
+                                p_one["order_cloth_num"] = order_cloth_num
+                                p_one["order_cloth_sure_num"] = order_cloth_sure_num
+                                # 面辅料入库
+                                order_cloth_store_num, order_cloth_store_sure_num = getClothInStore(p_one["id"])
+                                p_one["order_cloth_store_num"] = order_cloth_store_num
+                                p_one["order_cloth_store_sure_num"] = order_cloth_store_sure_num
+                                # 成衣样品
+                                sample_num, sample_sure_num = getPlanSampleNum(p_one["id"])
+                                p_one["sample_num"] = sample_num
+                                p_one["sample_sure_num"]= sample_sure_num
+                            if is_cloth_sure:
+                                # 包装
+                                pack_num, pack_sure_num = getpackNum(p_one["id"])
+                                p_one["pack_num"] = pack_num
+                                p_one["pack_sure_num"] = pack_sure_num
+                                # 面辅料确认
+                                order_cloth_num, order_cloth_sure_num = getClothSureNum(p_one["id"])
+                                p_one["order_cloth_num"] = order_cloth_num
+                                p_one["order_cloth_sure_num"] = order_cloth_sure_num
+                                # 面辅料入库
+                                order_cloth_store_num, order_cloth_store_sure_num = getClothInStore(p_one["id"])
+                                p_one["order_cloth_store_num"] = order_cloth_store_num
+                                p_one["order_cloth_store_sure_num"] = order_cloth_store_sure_num
+                                # 成衣样品
+                                sample_num, sample_sure_num = getPlanSampleNum(p_one["id"])
+                                p_one["sample_num"] = sample_num
+                                p_one["sample_sure_num"] = sample_sure_num
                         temp["data"] = data_n
                         temp['page_size'] = page_size
                         temp['total'] = total

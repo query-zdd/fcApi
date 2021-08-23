@@ -2949,7 +2949,7 @@ class packingLineOneView(APIView):
 
 
 class shipmentSureView(APIView):
-    # 添加/编辑 发货方案
+    # 添加/编辑 面辅料确认
     @csrf_exempt
     def post(self, request):
         data = request.data
@@ -2983,7 +2983,7 @@ class shipmentSureView(APIView):
                         l_msg.append(samp)
             #################校验数据################################
             dt = datetime.now()
-            ##############保存出货方案#############################
+            ##############保存 面辅料确认#############################
             if d_flag == 0 and s_flag == 0:
                 for done in dataone:
                     try:

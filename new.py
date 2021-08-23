@@ -532,6 +532,7 @@ class OrderCloth(models.Model):
     plan_id = models.IntegerField(blank=True, null=True)
     plan_material_id = models.IntegerField(blank=True, null=True)
     is_sure_in_store = models.IntegerField(blank=True, null=True)
+    is_sure = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -893,6 +894,7 @@ class PlanClothSampleLine(models.Model):
     member = models.CharField(max_length=255, blank=True, null=True)
     custom_type = models.CharField(max_length=255, blank=True, null=True)
     custom = models.CharField(max_length=255, blank=True, null=True)
+    is_sure = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
