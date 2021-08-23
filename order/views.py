@@ -3146,6 +3146,10 @@ class shipmentSureOneView(APIView):
                 temp["order_cloth_sure_num"] = order_cloth_sure_num
                 temp["order_cloth_no_num"] = order_cloth_num-order_cloth_sure_num
                 temp["plan_start_date"] = plan_start_date
+                # 洗标吊牌数
+                drop_lable_num, drop_lable_sure_num = getDropLableNum(nid)
+                temp["drop_lable_num"] = drop_lable_num
+                temp["drop_lable_sure_num"] = drop_lable_sure_num
                 temp["cloth_cat_list"] = list(set(cloth_cat_list))
                 temp["cloth_name_list"] =  list(set(cloth_name_list))
                 temp["supplier_list"] = list(set(supplier_list))

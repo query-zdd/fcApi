@@ -9893,6 +9893,14 @@ class planOrderView(APIView):
                                 drop_lable_num,drop_lable_sure_num = getDropLableNum(p_one["id"])
                                 p_one["drop_lable_num"] = drop_lable_num
                                 p_one["drop_lable_sure_num"] = drop_lable_sure_num
+                                # 注意事项
+                                notes_all_num, notes_sure_num = getNotesNum(p_one["id"])
+                                p_one["notes_all_num"] = notes_all_num
+                                p_one["notes_sure_num"] = notes_sure_num
+                                # 上手倒计时
+                                plan_start_date, down_day = getPlanStartdate(p_one["id"])
+                                p_one["plan_start_date"] = plan_start_date
+                                p_one["down_day"] = down_day
                         temp["data"] = data_n
                         temp['page_size'] = page_size
                         temp['total'] = total

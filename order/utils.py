@@ -49,7 +49,7 @@ def getPlanStartdate(order_id):
             plan_start_date_list.append(o1.plan_start_date)
     if plan_start_date_list:
         plan_start_date = min(plan_start_date_list)
-        down_day = downDay(plan_start_date ,str_time)
+        down_day = downDay(str_time,plan_start_date)
     else:
         plan_start_date = None
         down_day = None
