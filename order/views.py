@@ -3836,6 +3836,14 @@ class shipmentInStockOneView(APIView):
                 temp["orderObj"] = model_to_dict(orderObj)
                 temp["plan_start_date"] = plan_start_date
                 temp["down_day"] = down_day
+                # 面辅料确认
+                order_cloth_num, order_cloth_sure_num = getClothSureNum(nid)
+                temp["order_cloth_num"] = order_cloth_num
+                temp["order_cloth_sure_num"] = order_cloth_sure_num
+                # 面辅料入库
+                order_cloth_store_num, order_cloth_store_sure_num = getClothInStore(nid)
+                temp["order_cloth_store_num"] = order_cloth_store_num
+                temp["order_cloth_store_sure_num"] = order_cloth_store_sure_num
                 temp['error_code'] = 0
                 temp['message'] = "成功"
                 temp['request'] = request.method + '  ' + request.get_full_path()
