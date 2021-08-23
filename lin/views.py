@@ -9876,6 +9876,10 @@ class planOrderView(APIView):
                                 sample_num, sample_sure_num = getPlanSampleNum(p_one["id"])
                                 p_one["sample_num"] = sample_num
                                 p_one["sample_sure_num"]= sample_sure_num
+                                # 上手倒计时
+                                plan_start_date, down_day = getPlanStartdate(p_one["id"])
+                                p_one["plan_start_date"] = plan_start_date
+                                p_one["down_day"] = down_day
                             if is_cloth_sure:
                                 # 包装
                                 pack_num, pack_sure_num = getpackNum(p_one["id"])
