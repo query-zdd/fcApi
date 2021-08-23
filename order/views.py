@@ -3129,12 +3129,7 @@ class shipmentSureOneView(APIView):
                         sub_data.append(zamp)
                     samp['sub_data'] = sub_data
                     # 注意事项
-                    notes_sure_num = 0
-                    orderNotes = OrderNotes.objects.filter(order_id=nid)
-                    notes_all_num = orderNotes.count()
-                    for one3 in orderNotes:
-                        if one3.is_sure == 1:
-                            notes_sure_num = notes_sure_num + 1
+                    notes_all_num, notes_sure_num = getNotesNum(order_id=nid)
                     samp["notes_all_num"] = notes_all_num
                     samp["notes_sure_num"] = notes_sure_num
                     samplist.append(samp)
@@ -3145,15 +3140,11 @@ class shipmentSureOneView(APIView):
                 plan_start_date, down_day = getPlanStartdate(nid)
                 samp["plan_start_date"] = plan_start_date
                 # samp["notes_sure_num"] = notes_sure_num
-                # 确认入库
-                orderCloth = OrderCloth.objects.filter(order_id=nid)
-                temp["order_cloth_num"] = orderCloth.count()
-                order_cloth_sure_num = 0
-                for one4 in orderCloth:
-                    if one4.is_sure_in_store == 1:
-                        order_cloth_sure_num += 1
+                # 面辅料缺认
+                order_cloth_num, order_cloth_sure_num = getClothSureNum(nid)
+                temp["order_cloth_num"] = order_cloth_num
                 temp["order_cloth_sure_num"] = order_cloth_sure_num
-                temp["order_cloth_no_num"] = orderCloth.count()-order_cloth_sure_num
+                temp["order_cloth_no_num"] = order_cloth_num-order_cloth_sure_num
                 temp["plan_start_date"] = plan_start_date
                 temp["cloth_cat_list"] = list(set(cloth_cat_list))
                 temp["cloth_name_list"] =  list(set(cloth_name_list))
