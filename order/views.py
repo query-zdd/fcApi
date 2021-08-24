@@ -2235,7 +2235,7 @@ class shipmentView(APIView):
 
 
 class shipmentOneView(APIView):
-    # 获取订单 发货方案
+    # 获取订单 面辅料采购入库
     @csrf_exempt
     def get(self, request, nid):
         data = request.query_params
@@ -2295,6 +2295,51 @@ class shipmentOneView(APIView):
                 "request": request,
             }
             return Response(post_result)
+
+    # 面辅料采购入库
+    @csrf_exempt
+    def put(self, request, nid):
+        try:
+            orderClothlineShip = OrderClothLineShip.objects.get(id=nid)
+            orderClothlineShip.is_sure_in_store = 1
+            orderClothlineShip.save()
+            orderClothShip = OrderClothShip.objects.get(id=orderClothlineShip.order_cloth_ship_id)
+            clothShipObj = OrderClothLineShip.objects.filter(order_cloth_ship_id=orderClothlineShip.order_cloth_ship_id)
+            flag0 = 1
+            for one in clothShipObj:
+                if one.is_sure_in_store !=1:
+                    flag0 = 0
+                    break
+            if flag0==1:
+                orderClothShip.is_sure_in_store = 1
+                orderClothShip.save()
+            #
+            orderCloth = OrderCloth.objects.get(id=orderClothlineShip.order_cloth_id)
+            orderClothShipObj = OrderClothShip.objects.filter(order_cloth_id=orderClothlineShip.order_cloth_id)
+            flag1 = 1
+            for one in orderClothShipObj:
+                if one.is_sure_in_store != 1:
+                    flag1 = 0
+                    break
+            if flag1 == 1:
+                orderCloth.is_sure_in_store = 1
+                orderCloth.save()
+            temp = {}
+            temp['error_code'] = 0
+            temp['message'] = "确认收发货全部完成"
+            temp['request'] = request.method + '  ' + request.get_full_path()
+            return Response(temp)
+        except:
+            msg = "未找到对应的面辅料采购项"
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
 
 ############################订单管理-业务组织管理###############################################
 
@@ -3033,6 +3078,8 @@ class shipmentSureView(APIView):
                             "request": request,
                         }
                         return Response(post_result)
+                # 处理面辅料确认入库状态呢
+                sureClothInfo = clothSure(data['order_id'])
                 msg = "创建/编辑面辅料采购"
                 error_code = 0
                 request = request.method + '  ' + request.get_full_path()

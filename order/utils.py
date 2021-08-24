@@ -119,6 +119,43 @@ def getDropLableNum(order_id):
             drop_lable_sure_num += 1
 
     return  drop_lable_num,drop_lable_sure_num
+
+# 面辅料确认接口
+def clothSure(order_id):
+    try:
+        flag10 = 1
+        flag11 = 1
+        flag20 = 1
+        flag21 = 1
+        orderCloth = OrderCloth.objects.filter(order_id=order_id)
+        for one in orderCloth:
+            orderClothShip = OrderClothShip.objects.filter(order_cloth_id=one.id)
+            for one1 in orderClothShip:
+                # 子类类别处理
+                orderClothShipLine = OrderClothLineShip.objects.filter(order_cloth_ship_id=one1.id)
+                for one2 in orderClothShipLine:
+                    if one2.is_sure !=1:
+                        flag10 = 0
+                    if one2.is_sure_in_store !=1:
+                        flag20 = 0
+                if flag10 == 1:
+                    one1.is_sure = 1
+                if flag20 == 1:
+                    one1.is_sure_in_store = 1
+                one1.save()
+                #父类列别处理
+                if one1.is_sure != 1:
+                    flag11 = 0
+                if one1.is_sure_in_store != 1:
+                    flag21 = 0
+            if flag11 == 1:
+                one.is_sure = 1
+            if flag21 == 1:
+                one.is_sure_in_store = 1
+        return 1
+    except:
+        return 0
+
 # 日期之差
 def downDay(d1,d2):
     if d1 and d2:
