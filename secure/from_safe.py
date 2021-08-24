@@ -889,3 +889,7 @@ class reightSpaceLineSerializer(serializers.Serializer):
 
 class reightSpaceOneSerializer(serializers.Serializer):
     info_url = serializers.CharField(error_messages={'required': '必须传入确认仓位信息'})
+
+class purchasRecordsUploadSerializer(serializers.Serializer):
+    file_url = serializers.CharField(error_messages={'required': '必须传入文件路径'})
+    file_type = serializers.IntegerField(error_messages={'required': '必须传入收发货类型'})

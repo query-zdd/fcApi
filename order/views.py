@@ -3684,6 +3684,7 @@ class purchasRecordsOneView(APIView):
         try:
             lineShipObj = OrderClothLineShip.objects.get(id=nid)
             purchasObj = PurchasingRecords.objects.filter(delete_time=None,order_cloth_line_ship_id=nid)
+            orderObj = PlanOrder.objects.get(id=lineShipObj.order_id)
             temp = {}
             temp["data"] = purchasObj.values()
             lineshipdic = model_to_dict(lineShipObj)
@@ -3695,12 +3696,52 @@ class purchasRecordsOneView(APIView):
             short_overflow_num, short_overflow = getOverflow(lineShipObj.order_id)
             temp['short_overflow_num'] = short_overflow_num
             temp['short_overflow'] = short_overflow * 100
+            temp['order_custom'] = orderObj.custom
             temp['error_code'] = 0
             temp['message'] = "成功"
             temp['request'] = request.method + '  ' + request.get_full_path()
             return Response(temp)
         except:
-            msg = "未找到对应的发货方案"
+            msg = "未找到对应的收发货记录"
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+    @csrf_exempt
+    def put(self, request, nid):
+        try:
+            data = request.query_params
+            valObj = purchasRecordsUploadSerializer(data=request.query_params)
+            if valObj.is_valid():
+                purchasObj = PurchasingRecords.objects.get(id=nid)
+                file_tye = int(data['file_type'])
+                if file_tye == 1:
+                    purchasObj.take_over_url = data['file_url']
+                if file_tye == 2:
+                    purchasObj.send_over_url = data['file_url']
+                purchasObj.save()
+                temp = {}
+                temp['error_code'] = 0
+                temp['message'] = "成功"
+                temp['request'] = request.method + '  ' + request.get_full_path()
+                return Response(temp)
+            else:
+                msg = valObj.errors
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+        except:
+            msg = "未找到对应的收发货记录"
             error_code = 10030
             request = request.method + '  ' + request.get_full_path()
             post_result = {
