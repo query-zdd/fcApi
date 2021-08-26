@@ -156,6 +156,46 @@ def clothSure(order_id):
     except:
         return 0
 
+# 获取面辅料分类列表
+def getClothCat(order_id):
+    orderCloth = OrderCloth.objects.filter(order_id = order_id)
+    cloth_cat_list = []
+    supplier_list = []
+    delivery_name_list = []
+    for one in orderCloth:
+        # 分类
+        cloth_cat = one.cloth_cat
+        cloth_name = one.cloth_name
+        clothClass = ClothClass.objects.filter(cloth_class_name=cloth_cat)
+        if clothClass.count()>0:
+            flag = 0
+            for one1 in cloth_cat_list:
+                if one1.cloth_cat == cloth_cat:
+                    one1['cloth_name_list'].append(cloth_name)
+                    flag = 1
+            if flag == 0:
+                samp = {}
+                rilt = []
+                rilt.append(cloth_name)
+                samp['cloth_cat'] = clothClass[0].cloth_class_name
+                samp['cloth_cat_id'] = clothClass[0].id
+                samp['cloth_name_list'] = rilt
+                cloth_cat_list.append(samp)
+    #供应商
+    orderClothship = OrderClothShip.objects.filter(order_id = order_id)
+    for one2 in orderClothship:
+        if one2.supplier not in supplier_list:
+            supplier_list.append(one2.supplier)
+    # 收货方
+    orderClothshipLine = OrderClothLineShip.objects.filter(order_id=order_id)
+    for one3 in orderClothshipLine:
+        if one3.delivery_name not in delivery_name_list:
+            delivery_name_list.append(one3.delivery_name)
+
+    return cloth_cat_list,supplier_list,delivery_name_list
+
+
+
 # 日期之差
 def downDay(d1,d2):
     if d1 and d2:

@@ -3939,8 +3939,17 @@ class shipmentInStockOneView(APIView):
         valObj = orderOutstockGetOneSerializer(data=request.query_params)
         if valObj.is_valid():
             try:
+                cloth_cat = valObj.data['cloth_cat'] if valObj.data['cloth_cat'] is not None else ""
+                cloth_name = valObj.data['cloth_name'] if valObj.data['cloth_name'] is not None else ""
+                supplier = valObj.data['supplier'] if valObj.data['supplier'] is not None else ""
                 orderObj = PlanOrder.objects.get(delete_time=None, id=nid)
                 orderClothShip = OrderClothShip.objects.filter(delete_time=None,order_id=nid).order_by("order_cloth_id","supplier")
+                if cloth_cat:
+                    orderClothShip = orderClothShip.filter(cloth_cat = cloth_cat)
+                if cloth_name:
+                    orderClothShip = orderClothShip.filter(cloth_name=cloth_name)
+                if supplier:
+                    orderClothShip = orderClothShip.filter(supplier=supplier)
                 samplist=[]
                 for one in orderClothShip:
                     samp={}
@@ -3992,6 +4001,11 @@ class shipmentInStockOneView(APIView):
                 order_cloth_store_num, order_cloth_store_sure_num = getClothInStore(nid)
                 temp["order_cloth_store_num"] = order_cloth_store_num
                 temp["order_cloth_store_sure_num"] = order_cloth_store_sure_num
+                # 检索类别
+                cloth_cat_list, supplier_list, delivery_name_list = getClothCat(nid)
+                temp["cloth_cat_list"] = cloth_cat_list
+                temp["supplier_list"] = supplier_list
+                temp["delivery_name_list"] = delivery_name_list
                 temp['error_code'] = 0
                 temp['message'] = "成功"
                 temp['request'] = request.method + '  ' + request.get_full_path()

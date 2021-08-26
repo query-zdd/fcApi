@@ -534,6 +534,9 @@ class orderOutstockLineSerializer(serializers.Serializer):
 
 class orderOutstockGetOneSerializer(serializers.Serializer):
     sort_type = serializers.IntegerField(default=0)
+    cloth_cat = serializers.CharField(allow_blank=True, allow_null=True, default="")
+    cloth_name = serializers.CharField(allow_blank=True, allow_null=True, default="")
+    supplier = serializers.CharField(allow_blank=True, allow_null=True, default="")
 
 class orderOutstockDeleteOneSerializer(serializers.Serializer):
     order_line_id = serializers.IntegerField(default=0)
