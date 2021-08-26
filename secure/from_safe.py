@@ -722,6 +722,10 @@ class shipmentSureSerializer(serializers.Serializer):
     order_cloth_ship_id = serializers.IntegerField(error_messages={'required': '必须传入面辅料采购id'})
     supplier = serializers.CharField(error_messages={'required': '必须传入面辅料的供应商'})
 
+class shipmentSurePostOneSerializer(serializers.Serializer):
+    order_cloth_ship_line_id = serializers.IntegerField(error_messages={'required': '必须传入面辅料采购id'})
+    is_sure = serializers.IntegerField(allow_null=True,default="")
+
 class shipmentSureGetOneSerializer(serializers.Serializer):
     cloth_cat = serializers.CharField(allow_blank=True,allow_null=True,default="")
     cloth_name = serializers.CharField(allow_blank=True,allow_null=True,default="")

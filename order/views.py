@@ -3225,6 +3225,66 @@ class shipmentSureOneView(APIView):
             }
             return Response(post_result)
 
+        # 添加/编辑 面辅料确认
+
+    @csrf_exempt
+    def post(self, request, nid):
+        data = request.data
+        dataone = data['data']
+        l_msg = []
+        d_num=0
+        d_flag = 0
+        for done in dataone:
+            d_num = d_num + 1
+            valObjline = shipmentSurePostOneSerializer(data=done)
+            if not valObjline.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObjline.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
+        dt = datetime.now()
+        ##############保存 面辅料确认#############################
+        if d_flag == 0:
+            for done in dataone:
+                try:
+                    sbObj = OrderClothLineShip.objects.get(id=done["order_cloth_ship_line_id"])
+
+                except:
+                    msg = "参数错误"
+                    error_code = 10030
+                    request = request.method + '  ' + request.get_full_path()
+                    post_result = {
+                        "error_code": error_code,
+                        "message": msg,
+                        "request": request,
+                    }
+                    return Response(post_result)
+                sbObj.is_sure = done['is_sure']
+                sbObj.save()
+            # 处理面辅料确认入库状态呢
+            sureClothInfo = clothSure(nid)
+            msg = "创建/编辑面辅料采购"
+            error_code = 0
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+        else:
+            msg = l_msg
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
 
 ############################订单管理-面辅料确认--洗标吊牌###############################################
 
