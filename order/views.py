@@ -3775,15 +3775,19 @@ class purchasRecordsOneView(APIView):
     @csrf_exempt
     def put(self, request, nid):
         try:
-            data = request.query_params
-            valObj = purchasRecordsUploadSerializer(data=request.query_params)
+            data = request.data
+            valObj = purchasRecordsUploadSerializer(data=request.data)
             if valObj.is_valid():
                 purchasObj = PurchasingRecords.objects.get(id=nid)
                 file_tye = int(data['file_type'])
+                num1 = len(data['file_url'])
                 if file_tye == 1:
+
                     purchasObj.take_over_url = data['file_url']
+                    purchasObj.take_over_url_num = num1
                 if file_tye == 2:
                     purchasObj.send_over_url = data['file_url']
+                    purchasObj.send_over_url_num = num1
                 purchasObj.save()
                 temp = {}
                 temp['error_code'] = 0

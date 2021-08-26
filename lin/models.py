@@ -1169,8 +1169,10 @@ class PurchasingRecords(models.Model):
     take_over_time = models.DateTimeField(blank=True, null=True)
     take_over_num = models.IntegerField(blank=True, null=True)
     order_cloth_line_ship_id = models.IntegerField(blank=True, null=True)
-    take_over_url = models.CharField(max_length=255, blank=True, null=True)
-    send_over_url = models.CharField(max_length=255, blank=True, null=True)
+    take_over_url = models.TextField(blank=True, null=True)
+    send_over_url = models.TextField(blank=True, null=True)
+    take_over_url_num = models.IntegerField(blank=True, null=True)
+    send_over_url_num = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
