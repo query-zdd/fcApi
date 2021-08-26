@@ -3742,11 +3742,24 @@ class purchasRecordsOneView(APIView):
     @csrf_exempt
     def get(self, request, nid):
         try:
+            try:
+                purch_records_id = request.query_params['purch_records_id']
+            except:
+                purch_records_id = 0
             lineShipObj = OrderClothLineShip.objects.get(id=nid)
             purchasObj = PurchasingRecords.objects.filter(delete_time=None,order_cloth_line_ship_id=nid)
+            if purch_records_id:
+                purchasObj = purchasObj.filter(id=purch_records_id)
+            cObj = purchasObj.values()
+            for one in cObj:
+                if one["take_over_url"]:
+                    one["take_over_url"] = eval(one["take_over_url"])
+                if one["send_over_url"]:
+                    one["send_over_url"] = eval(one["send_over_url"])
+
             orderObj = PlanOrder.objects.get(id=lineShipObj.order_id)
             temp = {}
-            temp["data"] = purchasObj.values()
+            temp["data"] = cObj
             lineshipdic = model_to_dict(lineShipObj)
             if not lineshipdic["add_up_num"]:
                 lineshipdic["add_up_num"] = 0
