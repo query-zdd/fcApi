@@ -4223,7 +4223,7 @@ class productReadyView(APIView):
                         dtnow = datetime.now()
                         fmObj = FactoryMake.objects.filter(order_id=one.id)
                         zamp = {}
-                        zamp["fm_num"] = fmObj.count()
+                        samp["fm_num"] = fmObj.count()
                         sure_plan_num = 0
                         sure_real_num = 0
                         for one2 in fmObj:
@@ -4233,10 +4233,10 @@ class productReadyView(APIView):
                                 down_list.append(down_data)
                             if one2.real_start_date:
                                 sure_real_num = sure_real_num + 1
-                        zamp["sure_plan_num"] = sure_plan_num
-                        zamp["sure_real_num"] = sure_real_num
-                        zamp["fmObjLine"] = fmObj.values()
-                        samp["fmObj"] = zamp
+                        samp["sure_plan_num"] = sure_plan_num
+                        samp["sure_real_num"] = sure_real_num
+                        # zamp["fmObjLine"] = fmObj.values()
+                        # samp["fmObj"] = zamp
                         if down_list:
                             samp["down_day"] = min(down_list)
                         else:
