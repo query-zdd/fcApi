@@ -170,7 +170,7 @@ def getClothCat(order_id):
         if clothClass.count()>0:
             flag = 0
             for one1 in cloth_cat_list:
-                if one1.cloth_cat == cloth_cat:
+                if one1['cloth_cat'] == cloth_cat:
                     one1['cloth_name_list'].append(cloth_name)
                     flag = 1
             if flag == 0:
