@@ -819,12 +819,12 @@ class productReadySerializer(serializers.Serializer):
 
 
 class productReadyoneSerializer(serializers.Serializer):
-    brand = serializers.CharField(default="")
-    price_code = serializers.CharField(default="")
-    dhkhao = serializers.CharField(default="")
+    brand = serializers.CharField(allow_blank=True,allow_null=True,default="")
+    price_code = serializers.CharField(allow_blank=True,allow_null=True,default="")
+    dhkhao = serializers.CharField(allow_blank=True,allow_null=True,default="")
     page_size = serializers.IntegerField(default=10)
     page = serializers.IntegerField(default=1)
-    make_factory = serializers.CharField(default="")
+    make_factory = serializers.CharField(allow_blank=True,allow_null=True,default="")
 
 class subMissionSerializer(serializers.Serializer):
     kuan_hao = serializers.CharField(error_messages={'required': '必须传入款号'})
