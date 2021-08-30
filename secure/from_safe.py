@@ -944,3 +944,7 @@ class PackInfoSerializer(serializers.Serializer):
     box_rough_weight = serializers.CharField(error_messages={'required': '必须传入单箱毛重'})
     order_net_weight = serializers.CharField(error_messages={'required': '必须传入本订单出货毛重'})
     order_rough_weight = serializers.CharField(error_messages={'required': '必须传入本订单出货净重'})
+
+class inspectinfoUrlSerializer(serializers.Serializer):
+    file_url = serializers.CharField(allow_blank=True, allow_null=True,default='')
+    type = serializers.IntegerField(allow_null=True,default=1)

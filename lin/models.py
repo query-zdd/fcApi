@@ -377,6 +377,7 @@ class FactoryMake(models.Model):
     real_start_date = models.DateTimeField(blank=True, null=True)
     flag = models.IntegerField(blank=True, null=True)
     inspect_name = models.CharField(max_length=255, blank=True, null=True)
+    inspect_url = models.TextField(blank=True, null=True)
 
     class Meta:
         managed = False

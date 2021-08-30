@@ -5452,7 +5452,7 @@ class makeFactoryInspectView(APIView):
             return Response(post_result)
 
 class makeFactoryInspectOneView(APIView):
-    # 获取预定仓位
+    # 获取录入工厂送检情况
     @csrf_exempt
     def get(self, request, nid):
         try:
@@ -5460,6 +5460,7 @@ class makeFactoryInspectOneView(APIView):
             orderLine = PlanOrderLine.objects.filter(order_id=nid)
             factoryObj = FactoryMake.objects.filter(order_id=nid)
             custom_list = []
+            comments=""
             # 检品数据
             fm_list = []
             for one in factoryObj:
@@ -5470,6 +5471,7 @@ class makeFactoryInspectOneView(APIView):
                 order_line_list = []
                 # 订单项数据
                 for one1 in orderLine:
+                    comments += one1.comments
                     custom_list.append(one1.order_custom)
                     order_line_dic = {}
                     order_line_dic['order_custom'] = one1.order_custom
@@ -5488,14 +5490,14 @@ class makeFactoryInspectOneView(APIView):
                     #装箱信息
                     orderPackInfo = OrderPackInfo.objects.filter(order_line_id = one1.id)
                     if orderPackInfo.count()>0:
-                        order_line_dic['num'] = None
-                        order_line_dic['total'] = None
-                        order_line_dic['gw'] = None
-                        order_line_dic['nw'] = None
-                        order_line_dic['meas'] = None
+                        order_line_dic['num'] = orderPackInfo[0].box_pack_num
+                        # order_line_dic['total'] = None
+                        order_line_dic['gw'] = orderPackInfo[0].box_rough_weight
+                        order_line_dic['nw'] = orderPackInfo[0].box_rough_weight-orderPackInfo[0].pack_weight
+                        order_line_dic['meas'] = orderPackInfo[0].volume
                     else:
                         order_line_dic['num'] = None
-                        order_line_dic['total'] = None
+                        # order_line_dic['total'] = None
                         order_line_dic['gw'] = None
                         order_line_dic['nw'] = None
                         order_line_dic['meas'] = None
@@ -5507,6 +5509,7 @@ class makeFactoryInspectOneView(APIView):
                 fm_list.append(fm_dic)
             temp = {}
             temp["data"] = fm_list
+            temp['comments'] = comments
             temp['orderObj'] = model_to_dict(order)
             temp['custom_list'] = custom_list
             temp['error_code'] = 0
@@ -5529,21 +5532,19 @@ class makeFactoryInspectOneView(APIView):
     @csrf_exempt
     def delete(self, request, nid):
         try:
-            bObj = ReightSpace.objects.get(id=nid)
-            dt = datetime.now()
-            bObj.delete_time = dt
-            bObj.save()
+            bObj = MakeFatoryInspect.objects.get(id=nid)
+            bObj.delete()
             # 返回数据
             request = request.method + '  ' + request.get_full_path()
             error_code = 0
             post_result = {
                 "error_code": error_code,
-                "message": "仓位信息删除成功!",
+                "message": "工厂送检情况删除成功!",
                 "request": request,
             }
             return Response(post_result)
         except:
-            msg = "仓位信息不存在!",
+            msg = "工厂送检情况不存在!",
             error_code = 10020
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -5555,37 +5556,39 @@ class makeFactoryInspectOneView(APIView):
 
     @csrf_exempt
     def post(self, request, nid):
-        valObj = reightSpaceOneSerializer(data=request.query_params)
+        valObj = inspectinfoUrlSerializer(data=request.query_params)
         if valObj.is_valid():
-            try:
-                dt = datetime.now()
-                bObj = ReightSpace.objects.get(id=nid)
-                bObj.reight_s_time = dt
-                bObj.info_url =request.query_params["info_url"]
-                bObj.status = 1
-                bObj.save()
-                msg = "确认预定仓位"
+            type = valObj.data['type'] if valObj.data['type'] is not None else 1
+            file_url = valObj.data['file_url'] if valObj.data['file_url'] is not None else ""
+            if type ==1:
+                bObj = FactoryMake.objects.get(id=nid)
+                # 返回数据
+                request = request.method + '  ' + request.get_full_path()
                 error_code = 0
-                request = request.method + '  ' + request.get_full_path()
                 post_result = {
+                    "data":model_to_dict(bObj),
                     "error_code": error_code,
-                    "message": msg,
+                    "message": "工厂送检明细单保存成功!",
                     "request": request,
                 }
                 return Response(post_result)
-            except:
-                msg = "id参数错误"
-                error_code = 10030
+            else:
+                bObj = FactoryMake.objects.get(id=nid)
+                bObj.inspect_url = file_url
+                bObj.save()
+                # 返回数据
                 request = request.method + '  ' + request.get_full_path()
+                error_code = 0
                 post_result = {
                     "error_code": error_code,
-                    "message": msg,
+                    "message": "工厂送检明细单保存成功!",
                     "request": request,
                 }
                 return Response(post_result)
+
         else:
-            msg = valObj.errors
-            error_code = 10030
+            msg = "工厂送检情况不存在!",
+            error_code = 10020
             request = request.method + '  ' + request.get_full_path()
             post_result = {
                 "error_code": error_code,
