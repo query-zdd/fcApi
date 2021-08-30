@@ -2754,6 +2754,7 @@ class packingOneView(APIView):
                         samp['order_line_id'] = one.id
                         samp['order_id'] = nid
                         samplist.append(samp)
+                is_pack_all = 0
                 for n in range(len(dis_list) - 1):
                     if (dis_list[n] == dis_list[n + 1]):
                         is_pack_all = 1
