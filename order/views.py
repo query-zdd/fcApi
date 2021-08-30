@@ -5350,10 +5350,28 @@ class makeFactoryInspectView(APIView):
                     samp['msg'] = valObjline.errors
                     samp['key_num'] = d_num
                     l_msg.append(samp)
+            datains = data['inspect_name_list']
+            d_i_flag = 0
+            d_i_num = 0
+            l_i_msg = []
+            dataone = data['data']
+            for dione in datains:
+                d_num = d_num + 1
+                valObjiline = inspectInOneSerializer(data=dione)
+                if not valObjline.is_valid():
+                    d_i_flag = 1
+                    samp = {}
+                    samp['msg'] = valObjiline.errors
+                    samp['key_i_num'] = d_i_num
+                    l_i_msg.append(samp)
             #################校验数据################################
             dt = datetime.now()
             ##############保存出货方案#############################
-            if d_flag == 0:
+            if d_flag == 0 and d_i_flag ==0:
+                for dione in datains:
+                    mfObj = FactoryMake.objects.get(id=dione['make_factory_id'])
+                    mfObj.inspect_name = dione['inspect_name']
+                    mfObj.save()
                 for done in dataone:
                     try:
                         try:
@@ -5377,7 +5395,7 @@ class makeFactoryInspectView(APIView):
                         bObj.box_hao_end = done["box_hao_end"]
                         bObj.box_num = done["box_num"]
                         bObj.color = done["color"]
-                        bObj.specs = done["specs"]
+                        bObj.specs = done["specs_list"]
                         bObj.num = done["num"]
                         bObj.total = done["total"]
                         bObj.gw = done["gw"]
@@ -5412,11 +5430,13 @@ class makeFactoryInspectView(APIView):
                 return Response(post_result)
             else:
                 msg = l_msg
+                msg1 = l_i_msg
                 error_code = 10030
                 request = request.method + '  ' + request.get_full_path()
                 post_result = {
                     "error_code": error_code,
                     "message": msg,
+                    "message1": msg1,
                     "request": request,
                 }
                 return Response(post_result)
@@ -5436,34 +5456,66 @@ class makeFactoryInspectOneView(APIView):
     @csrf_exempt
     def get(self, request, nid):
         try:
-            custom_list = []
-            color_list = []
-            zamp = []
             order = PlanOrder.objects.get(id=nid)
             orderLine = PlanOrderLine.objects.filter(order_id=nid)
             factoryObj = FactoryMake.objects.filter(order_id=nid)
-            ousStock = OutStock.objects.filter(order_id=nid)
+            custom_list = []
+            # 检品数据
+            fm_list = []
             for one in factoryObj:
+                fm_dic = {}
+                fm_dic['make_factory_id'] = one.id
+                fm_dic['make_factory'] = one.make_factory
+                fm_dic['inspect_name'] = one.inspect_name
+                order_line_list = []
+                # 订单项数据
                 for one1 in orderLine:
-                    samp = {}
-                    samp["make_factory"] = one.make_factory
-                    samp['make_factory_id'] = one.id
-                    samp['dhkh'] = order.dhkhao
-                    samp['color'] = one.color
-
-
+                    custom_list.append(one1.order_custom)
+                    order_line_dic = {}
+                    order_line_dic['order_custom'] = one1.order_custom
+                    order_line_dic['order_line_id'] = one1.id
+                    #颜色尺码数据
+                    color_list = []
+                    specs_list = []
+                    ousStock = OutStock.objects.filter(order_id=nid,order_line_id=one1.id)
+                    for one2 in ousStock:
+                        if one2.color not in color_list:
+                            color_list.append(one2.color)
+                        if one2.specs not in specs_list:
+                            specs_list.append(one2.specs)
+                    order_line_dic['color_list'] =color_list
+                    order_line_dic['specs_list'] = specs_list
+                    #装箱信息
+                    orderPackInfo = OrderPackInfo.objects.filter(order_line_id = one1.id)
+                    if orderPackInfo.count()>0:
+                        order_line_dic['num'] = None
+                        order_line_dic['total'] = None
+                        order_line_dic['gw'] = None
+                        order_line_dic['nw'] = None
+                        order_line_dic['meas'] = None
+                    else:
+                        order_line_dic['num'] = None
+                        order_line_dic['total'] = None
+                        order_line_dic['gw'] = None
+                        order_line_dic['nw'] = None
+                        order_line_dic['meas'] = None
+                    # 已保存数据
+                    mkfacObj = MakeFatoryInspect.objects.filter(order_id=nid,make_factory_id=one.id,order_line_id=one1.id).order_by("color")
+                    order_line_dic["inspect_info"]= mkfacObj.values()
+                    order_line_list.append(order_line_dic)
+                fm_dic['order_line_info'] = order_line_list
+                fm_list.append(fm_dic)
             temp = {}
-            temp["data"] = orderLine.values()
-            temp['shou_huo_term_name'] = rObj.shou_huo_term_name
-            temp['space_name'] = rObj.space_name
-            temp['exporter_way'] = rObj.exporter_way
+            temp["data"] = fm_list
+            temp['orderObj'] = model_to_dict(order)
+            temp['custom_list'] = custom_list
             temp['error_code'] = 0
             temp['message'] = "成功"
             temp['request'] = request.method + '  ' + request.get_full_path()
             return Response(temp)
 
         except:
-            msg = "未找到对应的仓位信息"
+            msg = "未找到对应的厂送检情况"
             error_code = 10030
             request = request.method + '  ' + request.get_full_path()
             post_result = {

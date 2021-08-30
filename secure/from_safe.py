@@ -905,7 +905,10 @@ class purchasRecordsUploadSerializer(serializers.Serializer):
 ######################订单管理--工厂方案
 class inspectSerializer(serializers.Serializer):
     order_id = serializers.IntegerField(error_messages={'required': '必须传入订单id'})
-    inspect_name = serializers.CharField(error_messages={'required': '送检录入人员'})
+
+class inspectInOneSerializer(serializers.Serializer):
+    inspect_name = serializers.CharField(error_messages={'required': '必须传入送检录入人员'})
+    make_factory_id = serializers.CharField(error_messages={'required': '必须传入加工工厂id'})
 
 class inspectOneSerializer(serializers.Serializer):
     dhkh = serializers.CharField(allow_blank=True, allow_null=True,default='')
@@ -917,9 +920,7 @@ class inspectOneSerializer(serializers.Serializer):
     box_hao_end = serializers.IntegerField(allow_null=True,default=0)
     box_num = serializers.IntegerField(error_messages={'required': '必须传入箱数'})
     color = serializers.CharField(error_messages={'required': '必须传入颜色'})
-    specs_x = serializers.CharField(error_messages={'required': '必须传入尺码'})
-    specs_y = serializers.CharField(allow_blank=True, allow_null=True, default='')
-    specs_z = serializers.CharField(allow_blank=True, allow_null=True, default='')
+    # specs_list= serializers.CharField(error_messages={'required': '必须传入尺码'})
     num = serializers.IntegerField(error_messages={'required': '必须传入数量'})
     total = serializers.IntegerField(error_messages={'required': '必须传入小计'})
     gw = serializers.CharField(error_messages={'required': '必须传入毛重'})
