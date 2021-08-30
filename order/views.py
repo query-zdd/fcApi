@@ -4224,6 +4224,10 @@ class productReadyView(APIView):
                         fmObj = FactoryMake.objects.filter(order_id=one.id)
                         zamp = {}
                         samp["fm_num"] = fmObj.count()
+                        if fmObj.count()>0:
+                            samp['factory_make_id'] = fmObj[0].id
+                        else:
+                            samp['factory_make_id'] = None
                         sure_plan_num = 0
                         sure_real_num = 0
                         for one2 in fmObj:
@@ -4247,6 +4251,7 @@ class productReadyView(APIView):
                         real_start_date, down_day = getRealStartdate(one.id)
                         samp['plan_start_date'] = plan_start_date
                         samp['real_start_date'] = real_start_date
+
                         # 注意事项
                         notes_sure_num = 0
                         orderNotes = OrderNotes.objects.filter(order_id=one.id)
@@ -5372,9 +5377,7 @@ class makeFactoryInspectView(APIView):
                         bObj.box_hao_end = done["box_hao_end"]
                         bObj.box_num = done["box_num"]
                         bObj.color = done["color"]
-                        bObj.specs_x = done["specs_x"]
-                        bObj.specs_y = done["specs_y"]
-                        bObj.specs_z = done['specs_z']
+                        bObj.specs = done["specs"]
                         bObj.num = done["num"]
                         bObj.total = done["total"]
                         bObj.gw = done["gw"]
