@@ -4241,6 +4241,12 @@ class productReadyView(APIView):
                             samp["down_day"] = min(down_list)
                         else:
                             samp["down_day"] = None
+
+                        # 上手倒计时
+                        plan_start_date, down_day = getPlanStartdate(one.id)
+                        real_start_date, down_day = getRealStartdate(one.id)
+                        samp['plan_start_date'] = plan_start_date
+                        samp['real_start_date'] = real_start_date
                         # 注意事项
                         notes_sure_num = 0
                         orderNotes = OrderNotes.objects.filter(order_id=one.id)
@@ -4458,13 +4464,63 @@ class makeinReadyView(APIView):
                     oids = [one.id for one in mkObj]
                     rObj = rObj.filter(id__in=oids)
                 total = rObj.count()
+                zlist = []
                 if rObj.count() > start:
                     rObj = rObj.all()[start:start + page_size]
-                    rObj = rObj.values()
                     for one in rObj:
-                        one["sub_order_line"] = PlanOrderLine.objects.filter(order_id=one["id"]).values()
+                        samp = {}
+                        samp['create_time'] = one.create_time
+                        samp['order_id'] = one.id
+                        samp['plan_id'] = one.plan_id
+                        samp['dhkhao'] = one.dhkhao
+                        samp['price_code'] = one.price_code
+                        samp['work_type'] = one.work_type
+                        samp['leader'] = one.leader
+                        samp['real_start_date'] = one.real_start_date
+                        samp['inspect_time'] = 3
+                        # 发货倒计时
+                        try:
+                            orderlineObj = PlanOrderLine.objects.filter(order_id=one.id)
+                            time1 = datetime.now()
+                            send_time = orderlineObj[0].send_time
+                            for one1 in orderlineObj:
+                                if send_time > one1.send_time:
+                                    send_time = one1.send_time
+                            samp["send_time"] = downDay(time1, send_time)
+                        except:
+                            samp["send_time"] = 0
+                        #注意事项
+                        notes_all_num, notes_sure_num = getNotesNum(order_id=one.id)
+                        samp["notes_all_num"] = notes_all_num
+                        samp["notes_sure_num"] = notes_sure_num
+                        #装箱情况
+                        pack_num, pack_sure_num = getpackNum(one.id)
+                        samp["pack_num"] = pack_num
+                        samp["pack_sure_num"] = pack_sure_num
+                        # 面辅料确认
+                        order_cloth_num, order_cloth_sure_num = getClothSureNum(one.id)
+                        samp["order_cloth_num"] = order_cloth_num
+                        samp["order_cloth_sure_num"] = order_cloth_sure_num
+                        # 面辅料入库
+                        order_cloth_store_num, order_cloth_store_sure_num = getClothInStore(one.id)
+                        samp["order_cloth_store_num"] = order_cloth_store_num
+                        samp["order_cloth_store_sure_num"] = order_cloth_store_sure_num
+                        # 成衣样品
+                        sample_num, sample_sure_num = getPlanSampleNum(one.id)
+                        samp["sample_num"] = sample_num
+                        samp["sample_sure_num"] = sample_sure_num
+                        # 送检情况
+                        samp['inspect_num'] = 1
+                        samp['inspect_sure_num'] = 1
+                        # B品情况
+                        samp['b_goods_num'] = 1
+
+                        samp['order_type'] = "生产准备中"
+
+                        zlist.append(samp)
+
                     temp = {}
-                    temp["data"] = rObj
+                    temp["data"] = zlist
                     temp['page_size'] = page_size
                     temp['total'] = total
                     temp['error_code'] = 0
@@ -5263,3 +5319,333 @@ class reightSpaceOneView(APIView):
                 "request": request,
             }
             return Response(post_result)
+
+
+
+############################生产管理-录入工厂送检情况###############################################
+
+class makeFactoryInspectView(APIView):
+    # 添加/编辑 录入工厂送检情况
+    @csrf_exempt
+    def post(self, request):
+        data = request.data
+        valObj = inspectSerializer(data=request.data)
+        if valObj.is_valid():
+            #################校验数据################################
+            d_flag = 0
+            d_num = 0
+            l_msg = []
+            dataone = data['data']
+            for done in dataone:
+                d_num = d_num + 1
+                valObjline = inspectOneSerializer(data=done)
+                if not valObjline.is_valid():
+                    d_flag = 1
+                    samp = {}
+                    samp['msg'] = valObjline.errors
+                    samp['key_num'] = d_num
+                    l_msg.append(samp)
+            #################校验数据################################
+            dt = datetime.now()
+            ##############保存出货方案#############################
+            if d_flag == 0:
+                for done in dataone:
+                    try:
+                        try:
+                            mid = done["id"]
+                            if mid:
+                                bObj = MakeFatoryInspect.objects.get(id=mid)
+                                bObj.update_time = dt
+                            else:
+                                bObj = MakeFatoryInspect()
+                                bObj.create_time = dt
+                        except:
+                            bObj = MakeFatoryInspect()
+                            bObj.create_time = dt
+                        bObj.order_id = data['order_id']
+                        bObj.dhkh = done["dhkh"]
+                        bObj.custom = done["custom"]
+                        bObj.order_line_id = done["order_line_id"]
+                        bObj.make_factory_id =done["make_factory_id"]
+                        bObj.make_factory = done["make_factory"]
+                        bObj.box_hao_start = done['box_hao_start']
+                        bObj.box_hao_end = done["box_hao_end"]
+                        bObj.box_num = done["box_num"]
+                        bObj.color = done["color"]
+                        bObj.specs_x = done["specs_x"]
+                        bObj.specs_y = done["specs_y"]
+                        bObj.specs_z = done['specs_z']
+                        bObj.num = done["num"]
+                        bObj.total = done["total"]
+                        bObj.gw = done["gw"]
+                        bObj.nw = done["nw"]
+                        bObj.meas = done["meas"]
+                        bObj.save()
+                    except:
+                        msg = "参数错误"
+                        error_code = 10030
+                        request = request.method + '  ' + request.get_full_path()
+                        post_result = {
+                            "error_code": error_code,
+                            "message": msg,
+                            "request": request,
+                        }
+                        return Response(post_result)
+                try:
+                    # 更新order
+                    order = PlanOrder.objects.get(id=data['order_id'])
+                    order.inspect_name = data['inspect_name']
+                    order.save()
+                except:
+                    pass
+                msg = "创建/编辑工厂送检成功"
+                error_code = 0
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+            else:
+                msg = l_msg
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+class makeFactoryInspectOneView(APIView):
+    # 获取预定仓位
+    @csrf_exempt
+    def get(self, request, nid):
+        try:
+            custom_list = []
+            color_list = []
+            zamp = []
+            order = PlanOrder.objects.get(id=nid)
+            orderLine = PlanOrderLine.objects.filter(order_id=nid)
+            factoryObj = FactoryMake.objects.filter(order_id=nid)
+            ousStock = OutStock.objects.filter(order_id=nid)
+            for one in factoryObj:
+                for one1 in orderLine:
+                    samp = {}
+                    samp["make_factory"] = one.make_factory
+                    samp['make_factory_id'] = one.id
+                    samp['dhkh'] = order.dhkhao
+                    samp['color'] = one.color
+
+
+            temp = {}
+            temp["data"] = orderLine.values()
+            temp['shou_huo_term_name'] = rObj.shou_huo_term_name
+            temp['space_name'] = rObj.space_name
+            temp['exporter_way'] = rObj.exporter_way
+            temp['error_code'] = 0
+            temp['message'] = "成功"
+            temp['request'] = request.method + '  ' + request.get_full_path()
+            return Response(temp)
+
+        except:
+            msg = "未找到对应的仓位信息"
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+    # 批量删除 订单出货方案showOutStock
+    @csrf_exempt
+    def delete(self, request, nid):
+        try:
+            bObj = ReightSpace.objects.get(id=nid)
+            dt = datetime.now()
+            bObj.delete_time = dt
+            bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "仓位信息删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "仓位信息不存在!",
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+    @csrf_exempt
+    def post(self, request, nid):
+        valObj = reightSpaceOneSerializer(data=request.query_params)
+        if valObj.is_valid():
+            try:
+                dt = datetime.now()
+                bObj = ReightSpace.objects.get(id=nid)
+                bObj.reight_s_time = dt
+                bObj.info_url =request.query_params["info_url"]
+                bObj.status = 1
+                bObj.save()
+                msg = "确认预定仓位"
+                error_code = 0
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+            except:
+                msg = "id参数错误"
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+
+
+############################生产管理-包箱信息###############################################
+
+class PackInfoView(APIView):
+    # 添加/编辑 包箱信息
+    @csrf_exempt
+    def post(self, request):
+        data = request.data
+        valObj = PackInfoSerializer(data=request.data)
+        if valObj.is_valid():
+            #################校验数据################################
+            dt = datetime.now()
+            ##############保存出货方案#############################
+            try:
+                try:
+                    mid = data["order_line_id"]
+                    orderPackInfo = OrderPackInfo.objects.filter(order_line_id=mid)
+                    if orderPackInfo.count()>0:
+                        bObj = orderPackInfo[0]
+                        bObj.update_time = dt
+                    else:
+                        bObj = OrderPackInfo()
+                        bObj.create_time = dt
+                except:
+                    bObj = OrderPackInfo()
+                    bObj.create_time = dt
+                bObj.lenght = data['lenght']
+                bObj.height = data['height']
+                bObj.width = data['width']
+                bObj.volume = data['volume']
+                bObj.order_num = data['order_num']
+                bObj.box_num = data['box_num']
+                bObj.box_pack_num = data['box_pack_num']
+                bObj.predict_volume = data['predict_volume']
+                bObj.pack_weight = data['pack_weight']
+                bObj.unit_weight = data['unit_weight']
+                bObj.box_rough_weight = data['box_rough_weight']
+                bObj.order_net_weight = data['order_net_weight']
+                bObj.order_rough_weight = data['order_rough_weight']
+                bObj.order_line_id = data['order_line_id']
+                bObj.save()
+            except:
+                msg = "参数错误"
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+            try:
+                # 更新order
+                order = PlanOrder.objects.get(id=data['order_id'])
+                order.inspect_name = data['inspect_name']
+                order.save()
+            except:
+                pass
+            msg = "创建/编辑包装规格重量、装箱信息"
+            error_code = 0
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+class PackInfoOneView(APIView):
+    # 包箱信息
+    @csrf_exempt
+    def get(self, request, nid):
+        try:
+            orderLine = PlanOrderLine.objects.get(id=nid)
+            orderPackInfo = OrderPackInfo.objects.filter(order_line_id = nid)
+            packlineOne = OrderLinePacking.objects.filter(order_line_id = nid)
+            temp = {}
+            temp["data"] = orderPackInfo.values()
+            temp['order_num'] = orderLine.order_num
+            temp['orderLine'] = model_to_dict(orderLine)
+            if packlineOne.count()>0:
+                temp['scale'] = packlineOne[0].scale
+            else:
+                temp['scale'] = 0
+            temp['error_code'] = 0
+            temp['message'] = "成功"
+            temp['request'] = request.method + '  ' + request.get_full_path()
+            return Response(temp)
+        except:
+            msg = "未找到对应包箱信息"
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+

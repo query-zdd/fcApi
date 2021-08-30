@@ -68,6 +68,12 @@ urlpatterns = [
     url('^reightSpace$', views.reightSpaceView.as_view()),
     url('^reightSpace/(?P<nid>\d+)', views.reightSpaceOneView.as_view()),
 
+    url('^makeFactoryInspect$', views.makeFactoryInspectView.as_view()),
+    url('^makeFactoryInspect/(?P<nid>\d+)', views.makeFactoryInspectOneView.as_view()),
+
+    url('^PackInfo$', views.PackInfoView.as_view()),
+    url('^PackInfo/(?P<nid>\d+)', views.PackInfoOneView.as_view()),
+
 
 
 

@@ -55,6 +55,22 @@ def getPlanStartdate(order_id):
         down_day = None
     return plan_start_date, down_day
 
+#获取实际计划上手时间
+def getRealStartdate(order_id):
+    fmObj = FactoryMake.objects.filter(order_id=order_id)
+    str_time = datetime.now()
+    plan_real_date_list= []
+    for o1 in fmObj:
+        if o1.real_start_date:
+            plan_real_date_list.append(o1.real_start_date)
+    if plan_real_date_list:
+        real_start_date = min(plan_real_date_list)
+        down_day = downDay(str_time,real_start_date)
+    else:
+        real_start_date = None
+        down_day = None
+    return real_start_date, down_day
+
 # 获取短溢装和短溢装数量
 def getOverflow(order_id):
     orderLine = PlanOrderLine.objects.filter(order_id=order_id)

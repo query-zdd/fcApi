@@ -501,6 +501,31 @@ class JobNumber(models.Model):
         db_table = 'job_number'
 
 
+class MakeFatoryInspect(models.Model):
+    dhkh = models.CharField(max_length=255, blank=True, null=True)
+    custom = models.CharField(max_length=255, blank=True, null=True)
+    order_id = models.IntegerField(blank=True, null=True)
+    make_factory_id = models.IntegerField(blank=True, null=True)
+    order_line_id = models.IntegerField(blank=True, null=True)
+    box_hao_start = models.IntegerField(blank=True, null=True)
+    box_hao_end = models.IntegerField(blank=True, null=True)
+    box_num = models.IntegerField(blank=True, null=True)
+    color = models.CharField(max_length=255, blank=True, null=True)
+    specs_x = models.CharField(max_length=255, blank=True, null=True)
+    specs_y = models.CharField(max_length=255, blank=True, null=True)
+    specs_z = models.CharField(max_length=255, blank=True, null=True)
+    num = models.IntegerField(blank=True, null=True)
+    total = models.IntegerField(blank=True, null=True)
+    gw = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    nw = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    meas = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    make_factory = models.CharField(max_length=255, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'make_fatory_inspect'
+
+
 class Marks(models.Model):
     create_time = models.DateTimeField(blank=True, null=True)
     update_time = models.DateTimeField(blank=True, null=True)
@@ -739,6 +764,30 @@ class OrderNotesOther(models.Model):
     class Meta:
         managed = False
         db_table = 'order_notes_other'
+
+
+class OrderPackInfo(models.Model):
+    create_time = models.DateTimeField(blank=True, null=True)
+    update_time = models.DateTimeField(blank=True, null=True)
+    delete_time = models.DateTimeField(blank=True, null=True)
+    lenght = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    width = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    height = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    volume = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    order_num = models.IntegerField(blank=True, null=True)
+    box_num = models.IntegerField(blank=True, null=True)
+    box_pack_num = models.IntegerField(blank=True, null=True)
+    predict_volume = models.DecimalField(max_digits=11, decimal_places=0, blank=True, null=True)
+    pack_weight = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    unit_weight = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    box_rough_weight = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    order_net_weight = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    order_rough_weight = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    order_line_id = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'order_pack_info'
 
 
 class OtherCategory(models.Model):
@@ -1004,6 +1053,7 @@ class PlanOrder(models.Model):
     plan_start_date = models.DateTimeField(blank=True, null=True)
     real_start_date = models.DateTimeField(blank=True, null=True)
     is_sure_drop_lable = models.IntegerField(blank=True, null=True)
+    inspect_name = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         managed = False

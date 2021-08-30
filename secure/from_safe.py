@@ -900,3 +900,46 @@ class reightSpaceOneSerializer(serializers.Serializer):
 class purchasRecordsUploadSerializer(serializers.Serializer):
     file_url = serializers.ListField(error_messages={'required': '必须传入文件路径'})
     file_type = serializers.IntegerField(error_messages={'required': '必须传入收发货类型'})
+
+
+######################订单管理--工厂方案
+class inspectSerializer(serializers.Serializer):
+    order_id = serializers.IntegerField(error_messages={'required': '必须传入订单id'})
+    inspect_name = serializers.CharField(error_messages={'required': '送检录入人员'})
+
+class inspectOneSerializer(serializers.Serializer):
+    dhkh = serializers.CharField(allow_blank=True, allow_null=True,default='')
+    custom = serializers.CharField(allow_blank=True, allow_null=True,default='')
+    order_line_id = serializers.IntegerField(error_messages={'required': '必须传入订单项id'})
+    make_factory_id = serializers.IntegerField(error_messages={'required': '必须传入加工工厂id'})
+    make_factory = serializers.CharField(error_messages={'required': '必须传入加工工厂'})
+    box_hao_start = serializers.IntegerField(error_messages={'required': '必须传入开始箱号'})
+    box_hao_end = serializers.IntegerField(allow_null=True,default=0)
+    box_num = serializers.IntegerField(error_messages={'required': '必须传入箱数'})
+    color = serializers.CharField(error_messages={'required': '必须传入颜色'})
+    specs_x = serializers.CharField(error_messages={'required': '必须传入尺码'})
+    specs_y = serializers.CharField(allow_blank=True, allow_null=True, default='')
+    specs_z = serializers.CharField(allow_blank=True, allow_null=True, default='')
+    num = serializers.IntegerField(error_messages={'required': '必须传入数量'})
+    total = serializers.IntegerField(error_messages={'required': '必须传入小计'})
+    gw = serializers.CharField(error_messages={'required': '必须传入毛重'})
+    nw = serializers.CharField(error_messages={'required': '必须传入净重'})
+    meas = serializers.CharField(error_messages={'required': '必须传入体积'})
+    id = serializers.IntegerField(allow_null=True, default=0)
+
+
+class PackInfoSerializer(serializers.Serializer):
+    order_line_id = serializers.IntegerField(error_messages={'required': '必须传入订单项id'})
+    lenght = serializers.CharField(error_messages={'required': '必须传入长'})
+    width = serializers.CharField(error_messages={'required': '必须传入宽'})
+    height = serializers.CharField(error_messages={'required': '必须传入高'})
+    volume = serializers.CharField(error_messages={'required': '必须传入体积'})
+    order_num = serializers.IntegerField(error_messages={'required': '必须传入订单数量'})
+    box_num = serializers.IntegerField(error_messages={'required': '必须传入箱数'})
+    box_pack_num = serializers.IntegerField(error_messages={'required': '必须传入装箱件数'})
+    predict_volume = serializers.CharField(error_messages={'required': '必须传入预估体积'})
+    pack_weight = serializers.CharField(error_messages={'required': '必须传入包装重量'})
+    unit_weight = serializers.CharField(error_messages={'required': '必须传入单件衣服重量'})
+    box_rough_weight = serializers.CharField(error_messages={'required': '必须传入单箱毛重'})
+    order_net_weight = serializers.CharField(error_messages={'required': '必须传入本订单出货毛重'})
+    order_rough_weight = serializers.CharField(error_messages={'required': '必须传入本订单出货净重'})
