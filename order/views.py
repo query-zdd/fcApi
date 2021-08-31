@@ -5460,6 +5460,8 @@ class makeFactoryInspectOneView(APIView):
             order = PlanOrder.objects.get(id=nid)
             orderLine = PlanOrderLine.objects.filter(order_id=nid)
             factoryObj = FactoryMake.objects.filter(order_id=nid)
+            order_color_list = []
+            order_specs_list = []
             custom_list = []
             comments=""
             # 检品数据
@@ -5486,6 +5488,10 @@ class makeFactoryInspectOneView(APIView):
                             color_list.append(one2.color)
                         if one2.specs not in specs_list:
                             specs_list.append(one2.specs)
+                        if one2.color not in order_color_list:
+                            order_color_list.append(one2.color)
+                        if one2.specs not in order_specs_list:
+                            order_specs_list.append(one2.specs)
                     order_line_dic['color_list'] =color_list
                     order_line_dic['specs_list'] = specs_list
                     #装箱信息
@@ -5513,6 +5519,8 @@ class makeFactoryInspectOneView(APIView):
             temp['comments'] = comments
             temp['orderObj'] = model_to_dict(order)
             temp['custom_list'] = custom_list
+            temp['order_color_list'] = order_color_list
+            temp['order_specs_list'] = order_specs_list
             temp['error_code'] = 0
             temp['message'] = "成功"
             temp['request'] = request.method + '  ' + request.get_full_path()
