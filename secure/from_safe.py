@@ -931,7 +931,7 @@ class inspectOneSerializer(serializers.Serializer):
 
 class PackInfoSerializer(serializers.Serializer):
     order_line_id = serializers.IntegerField(error_messages={'required': '必须传入订单项id'})
-    lenght = serializers.CharField(error_messages={'required': '必须传入长'})
+    extent = serializers.CharField(error_messages={'required': '必须传入长'})
     width = serializers.CharField(error_messages={'required': '必须传入宽'})
     height = serializers.CharField(error_messages={'required': '必须传入高'})
     volume = serializers.CharField(error_messages={'required': '必须传入体积'})

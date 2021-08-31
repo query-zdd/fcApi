@@ -5633,7 +5633,7 @@ class PackInfoView(APIView):
                 except:
                     bObj = OrderPackInfo()
                     bObj.create_time = dt
-                bObj.lenght = data['lenght']
+                bObj.extent = data['extent']
                 bObj.height = data['height']
                 bObj.width = data['width']
                 bObj.volume = data['volume']
@@ -5694,13 +5694,18 @@ class PackInfoOneView(APIView):
             orderPackInfo = OrderPackInfo.objects.filter(order_line_id = nid)
             packlineOne = OrderLinePacking.objects.filter(order_line_id = nid)
             temp = {}
-            temp["data"] = orderPackInfo.values()
+            if orderPackInfo.count()>0:
+                temp["data"] = model_to_dict(orderPackInfo[0])
+            else:
+                temp["data"] = {}
             temp['order_num'] = orderLine.order_num
             temp['orderLine'] = model_to_dict(orderLine)
             if packlineOne.count()>0:
+                temp['specs'] = packlineOne[0].specs
                 temp['scale'] = packlineOne[0].scale
             else:
-                temp['scale'] = 0
+                temp['specs'] =None
+                temp['scale'] = None
             temp['error_code'] = 0
             temp['message'] = "成功"
             temp['request'] = request.method + '  ' + request.get_full_path()

@@ -770,7 +770,7 @@ class OrderPackInfo(models.Model):
     create_time = models.DateTimeField(blank=True, null=True)
     update_time = models.DateTimeField(blank=True, null=True)
     delete_time = models.DateTimeField(blank=True, null=True)
-    lenght = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    extent = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     width = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     height = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     volume = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
