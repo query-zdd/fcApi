@@ -5396,7 +5396,12 @@ class makeFactoryInspectView(APIView):
                         bObj.box_hao_end = done["box_hao_end"]
                         bObj.box_num = done["box_num"]
                         bObj.color = done["color"]
-                        bObj.specs = done["specs_list"]
+                        temp = []
+                        for o in done["specs_list"]:
+                            smap = {}
+                            smap[o] = o
+                            temp.append(smap)
+                        bObj.specs = temp
                         bObj.num = done["num"]
                         bObj.total = done["total"]
                         bObj.gw = done["gw"]
@@ -5497,20 +5502,22 @@ class makeFactoryInspectOneView(APIView):
                     #装箱信息
                     orderPackInfo = OrderPackInfo.objects.filter(order_line_id = one1.id)
                     if orderPackInfo.count()>0:
-                        order_line_dic['num'] = orderPackInfo[0].box_pack_num
-                        # order_line_dic['total'] = None
-                        order_line_dic['gw'] = orderPackInfo[0].box_rough_weight
-                        order_line_dic['nw'] = orderPackInfo[0].box_rough_weight-orderPackInfo[0].pack_weight
-                        order_line_dic['meas'] = orderPackInfo[0].volume
+                        order_line_dic['box_rough_weight'] = orderPackInfo[0].box_rough_weight
+                        order_line_dic['box_pack_num'] = orderPackInfo[0].box_pack_num
+                        order_line_dic['pack_weight'] = orderPackInfo[0].pack_weight
+                        order_line_dic['unit_weight'] = orderPackInfo[0].unit_weight
+                        order_line_dic['volume'] = orderPackInfo[0].volume
+
                     else:
-                        order_line_dic['num'] = None
-                        # order_line_dic['total'] = None
-                        order_line_dic['gw'] = None
-                        order_line_dic['nw'] = None
-                        order_line_dic['meas'] = None
+                        order_line_dic['box_rough_weight'] =None
+                        order_line_dic['box_pack_num'] = None
+                        order_line_dic['pack_weight'] = None
+                        order_line_dic['unit_weight'] = None
+                        order_line_dic['volume'] = None
                     # 已保存数据
                     mkfacObj = MakeFatoryInspect.objects.filter(order_id=nid,make_factory_id=one.id,order_line_id=one1.id).order_by("color")
                     order_line_dic["inspect_info"]= mkfacObj.values()
+
                     order_line_list.append(order_line_dic)
                 fm_dic['order_line_info'] = order_line_list
                 fm_list.append(fm_dic)
@@ -5521,6 +5528,7 @@ class makeFactoryInspectOneView(APIView):
             temp['custom_list'] = custom_list
             temp['order_color_list'] = order_color_list
             temp['order_specs_list'] = order_specs_list
+            temp['order_specs_list_num'] = len(order_specs_list)
             temp['error_code'] = 0
             temp['message'] = "成功"
             temp['request'] = request.method + '  ' + request.get_full_path()
