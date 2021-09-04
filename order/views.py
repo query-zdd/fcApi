@@ -5395,13 +5395,10 @@ class makeFactoryInspectView(APIView):
                         bObj.box_hao_start = done['box_hao_start']
                         bObj.box_hao_end = done["box_hao_end"]
                         bObj.box_num = done["box_num"]
+                        bObj.box_hao_type = done["box_hao_type"]
                         bObj.color = done["color"]
                         temp = []
-                        for o in done["specs_list"]:
-                            smap = {}
-                            smap[o] = o
-                            temp.append(smap)
-                        bObj.specs = temp
+                        bObj.specs = done["specs_list"]
                         bObj.num = done["num"]
                         bObj.total = done["total"]
                         bObj.gw = done["gw"]

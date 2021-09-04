@@ -920,7 +920,7 @@ class inspectOneSerializer(serializers.Serializer):
     box_hao_end = serializers.IntegerField(allow_null=True,default=0)
     box_num = serializers.IntegerField(error_messages={'required': '必须传入箱数'})
     color = serializers.CharField(error_messages={'required': '必须传入颜色'})
-    # specs_list= serializers.CharField(error_messages={'required': '必须传入尺码'})
+    box_hao_type= serializers.CharField(error_messages={'required': '必须传入箱号标识'})
     num = serializers.IntegerField(error_messages={'required': '必须传入数量'})
     total = serializers.IntegerField(error_messages={'required': '必须传入小计'})
     gw = serializers.CharField(error_messages={'required': '必须传入毛重'})

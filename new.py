@@ -511,6 +511,7 @@ class MakeFatoryInspect(models.Model):
     order_line_id = models.IntegerField(blank=True, null=True)
     box_hao_start = models.IntegerField(blank=True, null=True)
     box_hao_end = models.IntegerField(blank=True, null=True)
+    box_hao_type = models.CharField(max_length=255, blank=True, null=True)
     box_num = models.IntegerField(blank=True, null=True)
     color = models.CharField(max_length=255, blank=True, null=True)
     specs = models.TextField(blank=True, null=True)
