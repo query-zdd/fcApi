@@ -74,6 +74,9 @@ urlpatterns = [
     url('^PackInfo$', views.PackInfoView.as_view()),
     url('^PackInfo/(?P<nid>\d+)', views.PackInfoOneView.as_view()),
 
+    url('^Bquality$', views.BqualityView.as_view()),
+    url('^Bquality/(?P<nid>\d+)', views.BqualityOneView.as_view()),
+
 
 
 

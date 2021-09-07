@@ -948,3 +948,7 @@ class PackInfoSerializer(serializers.Serializer):
 class inspectinfoUrlSerializer(serializers.Serializer):
     file_url = serializers.CharField(allow_blank=True, allow_null=True,default='')
     type = serializers.IntegerField(allow_null=True,default=1)
+
+class BqualitySerializer(serializers.Serializer):
+    order_id = serializers.IntegerField(error_messages={'required': '必须传入订单id'})
+    type = serializers.IntegerField(allow_null=True,default=1)

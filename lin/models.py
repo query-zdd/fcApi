@@ -861,6 +861,7 @@ class OutStock(models.Model):
     short_overflow = models.IntegerField(blank=True, null=True)
     short_overflow_direct = models.IntegerField(blank=True, null=True)
     order_num = models.IntegerField(blank=True, null=True)
+    b_num = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False

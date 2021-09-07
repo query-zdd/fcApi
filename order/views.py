@@ -5513,16 +5513,16 @@ class makeFactoryInspectOneView(APIView):
                         order_line_dic['volume'] = None
                     # 已保存数据
                     mkfacObj = MakeFatoryInspect.objects.filter(order_id=nid,make_factory_id=one.id,order_line_id=one1.id).order_by("color")
-                    if mkfacObj.count()>0:
-                        order_line_dic["inspect_info"]= mkfacObj.values()
-                    else:
-                        zamp = {}
-                        zamp['id'] = 0
-                        zamp['custom'] = one1.order_custom
-                        zamp['order_id'] = order.id
-                        zamp['make_factory_id'] = one.id
-                        zamp['order_line_id'] = one1.id
-                        zamp['make_factory'] = one.make_factory
+                    # if mkfacObj.count()>0:
+                    order_line_dic["inspect_info"]= mkfacObj.values()
+                    # else:
+                    #     zamp = {}
+                    #     zamp['id'] = 0
+                    #     zamp['custom'] = one1.order_custom
+                    #     zamp['order_id'] = order.id
+                    #     zamp['make_factory_id'] = one.id
+                    #     zamp['order_line_id'] = one1.id
+                    #     zamp['make_factory'] = one.make_factory
 
 
                     order_line_list.append(order_line_dic)
@@ -5721,6 +5721,107 @@ class PackInfoOneView(APIView):
             else:
                 temp['specs'] =None
                 temp['scale'] = None
+            temp['error_code'] = 0
+            temp['message'] = "成功"
+            temp['request'] = request.method + '  ' + request.get_full_path()
+            return Response(temp)
+        except:
+            msg = "未找到对应包箱信息"
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+
+############################生产管理-B品管理###############################################
+
+class BqualityView(APIView):
+    # 添加/编辑 包箱信息
+    @csrf_exempt
+    def post(self, request):
+        data = request.data
+        valObj = BqualitySerializer(data=request.data)
+        if valObj.is_valid():
+            #################校验数据################################
+            dt = datetime.now()
+            ##############保存出货方案#############################
+            type = data['type']
+            order_id = data['order_id']
+            if type == 1:
+                outObj = OutStock.objects.filter(order_id = order_id)
+                for one in outObj:
+                    one.b_num = 0
+                    one.save()
+            elif type == 0:
+                try:
+                    for done in data['data']:
+                        outOne = OutStock.objects.get(id=done['id'])
+                        outOne.b_num = done['b_num']
+                        outOne.save()
+                except:
+                    msg = "参数错误"
+                    error_code = 10030
+                    request = request.method + '  ' + request.get_full_path()
+                    post_result = {
+                        "error_code": error_code,
+                        "message": msg,
+                        "request": request,
+                    }
+                    return Response(post_result)
+            else:
+                msg = "type取值为0，1"
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+
+
+            msg = "录入工厂B品回收数量"
+            error_code = 0
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+class BqualityOneView(APIView):
+    # 包箱信息
+    @csrf_exempt
+    def get(self, request, nid):
+        try:
+            outObj = OutStock.objects.filter(order_id = nid,delete_time=None).order_by("color_name","color_num","specs")
+            temp = {}
+            zamp = []
+            for one in outObj:
+                samp = {}
+                samp['id'] = one.id
+                samp['color_name'] = one.color_name
+                samp['color_num'] = one.color_num
+                samp['specs'] = one.specs
+                samp['b_num'] = one.b_num
+                zamp.append(samp)
+            temp['bObj'] = zamp
+            temp['order_id'] = nid
             temp['error_code'] = 0
             temp['message'] = "成功"
             temp['request'] = request.method + '  ' + request.get_full_path()
