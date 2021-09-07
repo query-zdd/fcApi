@@ -4194,88 +4194,128 @@ class productReadyView(APIView):
                     mkObj = FactoryMake.objects.filter(make_factory=make_factory)
                     oids = [one.order_id for one in mkObj]
                     rObj = rObj.filter(id__in=oids)
+                # 根据实际上手日期检索
                 total = rObj.count()
                 if rObj.count() > start:
-                    rObj = rObj.all()[start:start + page_size]
+                    rObj = rObj.all()[start:]
                     data = []
+                    i = 0
                     for one in rObj:
-                        samp = {}
-                        samp['order_id'] = one.id
-                        samp['plan_id'] = one.plan_id
-                        samp['create_time'] = one.create_time
-                        samp['price_code'] = one.price_code
-                        samp['dhkhao'] = one.dhkhao
-                        samp['work_type'] = one.work_type
-                        samp['leader'] = one.leader
-                        #发货倒计时
-                        try:
-                            orderlineObj = PlanOrderLine.objects.filter(order_id = one.id)
-                            time1 = datetime.now()
-                            send_time = orderlineObj[0].send_time
-                            for one1 in orderlineObj:
-                                if send_time > one1.send_time:
-                                    send_time = one1.send_time
-                            samp["send_time"] = downDay(time1, send_time)
-                        except:
-                            samp["send_time"] = 0
-                        # 上手日期处理
-                        down_data=0
-                        down_list = []
-                        dtnow = datetime.now()
-                        fmObj = FactoryMake.objects.filter(order_id=one.id)
-                        zamp = {}
-                        samp["fm_num"] = fmObj.count()
-                        if fmObj.count()>0:
-                            samp['factory_make_id'] = fmObj[0].id
-                        else:
-                            samp['factory_make_id'] = None
-                        sure_plan_num = 0
-                        sure_real_num = 0
-                        for one2 in fmObj:
-                            if one2.plan_start_date:
-                                sure_plan_num = sure_plan_num + 1
-                                down_data = downDay(one2.plan_start_date,dtnow)
-                                down_list.append(down_data)
-                            if one2.real_start_date:
-                                sure_real_num = sure_real_num + 1
-                        samp["sure_plan_num"] = sure_plan_num
-                        samp["sure_real_num"] = sure_real_num
-                        # zamp["fmObjLine"] = fmObj.values()
-                        # samp["fmObj"] = zamp
-                        if down_list:
-                            samp["down_day"] = min(down_list)
-                        else:
-                            samp["down_day"] = None
+                        if i!=page_size:
+                            samp = {}
+                            # 发货倒计时
+                            try:
+                                orderlineObj = PlanOrderLine.objects.filter(order_id=one.id)
+                                time1 = datetime.now()
+                                send_time = orderlineObj[0].send_time
+                                for one1 in orderlineObj:
+                                    if send_time > one1.send_time:
+                                        send_time = one1.send_time
+                                samp["send_time"] = downDay(time1, send_time)
+                            except:
+                                samp["send_time"] = 0
+                            # 上手日期处理
+                            down_data = 0
+                            down_list = []
+                            dtnow = datetime.now()
+                            fmObj = FactoryMake.objects.filter(order_id=one.id)
+                            zamp = {}
+                            samp["fm_num"] = fmObj.count()
+                            if fmObj.count() > 0:
+                                samp['factory_make_id'] = fmObj[0].id
+                            else:
+                                samp['factory_make_id'] = None
+                            sure_plan_num = 0
+                            sure_real_num = 0
+                            for one2 in fmObj:
+                                if one2.plan_start_date:
+                                    sure_plan_num = sure_plan_num + 1
+                                    down_data = downDay(one2.plan_start_date, dtnow)
+                                    down_list.append(down_data)
+                                if one2.real_start_date:
+                                    sure_real_num = sure_real_num + 1
+                            if sure_real_num != fmObj.count() or sure_plan_num != fmObj.count():
+                                samp["sure_plan_num"] = sure_plan_num
+                                samp["sure_real_num"] = sure_real_num
+                                samp['order_id'] = one.id
+                                samp['plan_id'] = one.plan_id
+                                samp['create_time'] = one.create_time
+                                samp['price_code'] = one.price_code
+                                samp['dhkhao'] = one.dhkhao
+                                samp['work_type'] = one.work_type
+                                samp['leader'] = one.leader
+                                #发货倒计时
+                                try:
+                                    orderlineObj = PlanOrderLine.objects.filter(order_id = one.id)
+                                    time1 = datetime.now()
+                                    send_time = orderlineObj[0].send_time
+                                    for one1 in orderlineObj:
+                                        if send_time > one1.send_time:
+                                            send_time = one1.send_time
+                                    samp["send_time"] = downDay(time1, send_time)
+                                except:
+                                    samp["send_time"] = 0
+                                # 上手日期处理
+                                down_data=0
+                                down_list = []
+                                dtnow = datetime.now()
+                                fmObj = FactoryMake.objects.filter(order_id=one.id)
+                                zamp = {}
+                                samp["fm_num"] = fmObj.count()
+                                if fmObj.count()>0:
+                                    samp['factory_make_id'] = fmObj[0].id
+                                else:
+                                    samp['factory_make_id'] = None
+                                sure_plan_num = 0
+                                sure_real_num = 0
+                                for one2 in fmObj:
+                                    if one2.plan_start_date:
+                                        sure_plan_num = sure_plan_num + 1
+                                        down_data = downDay(one2.plan_start_date,dtnow)
+                                        down_list.append(down_data)
+                                    if one2.real_start_date:
+                                        sure_real_num = sure_real_num + 1
+                                samp["sure_plan_num"] = sure_plan_num
+                                samp["sure_real_num"] = sure_real_num
+                                # zamp["fmObjLine"] = fmObj.values()
+                                # samp["fmObj"] = zamp
+                                if down_list:
+                                    samp["down_day"] = min(down_list)
+                                else:
+                                    samp["down_day"] = None
 
-                        # 上手倒计时
-                        plan_start_date, down_day = getPlanStartdate(one.id)
-                        real_start_date, down_day = getRealStartdate(one.id)
-                        samp['plan_start_date'] = plan_start_date
-                        samp['real_start_date'] = real_start_date
+                                # 上手倒计时
+                                plan_start_date, down_day = getPlanStartdate(one.id)
+                                real_start_date, down_day = getRealStartdate(one.id)
+                                samp['plan_start_date'] = plan_start_date
+                                samp['real_start_date'] = real_start_date
 
-                        # 注意事项
-                        notes_sure_num = 0
-                        orderNotes = OrderNotes.objects.filter(order_id=one.id)
-                        notes_all_num = orderNotes.count()
-                        for one3 in orderNotes:
-                            if one3.is_sure == 1:
-                                notes_sure_num = notes_sure_num+1
-                        samp["notes_all_num"] = notes_all_num
-                        samp["notes_sure_num"] = notes_sure_num
-                        #确认入库
-                        orderCloth = OrderCloth.objects.filter(order_id = one.id)
-                        samp["order_cloth_num"] = orderCloth.count()
-                        order_cloth_sure_num = 0
-                        for one4 in orderCloth:
-                            if one4.is_sure_in_store==1:
-                                order_cloth_sure_num += 1
-                        samp["order_cloth_sure_num"] = order_cloth_sure_num
-                        # 装箱要求
-                        samp['pack_all_num'] = orderlineObj.count()
-                        samp['pack_sure_num'] =OrderLinePacking.objects.filter(order_id = one.id).count()
-                        # 订单状态
-                        samp['order_type'] = "生产中"
-                        data.append(samp)
+                                # 注意事项
+                                notes_sure_num = 0
+                                orderNotes = OrderNotes.objects.filter(order_id=one.id)
+                                notes_all_num = orderNotes.count()
+                                for one3 in orderNotes:
+                                    if one3.is_sure == 1:
+                                        notes_sure_num = notes_sure_num+1
+                                samp["notes_all_num"] = notes_all_num
+                                samp["notes_sure_num"] = notes_sure_num
+                                #确认入库
+                                orderCloth = OrderCloth.objects.filter(order_id = one.id)
+                                samp["order_cloth_num"] = orderCloth.count()
+                                order_cloth_sure_num = 0
+                                for one4 in orderCloth:
+                                    if one4.is_sure_in_store==1:
+                                        order_cloth_sure_num += 1
+                                samp["order_cloth_sure_num"] = order_cloth_sure_num
+                                # 装箱要求
+                                samp['pack_all_num'] = orderlineObj.count()
+                                samp['pack_sure_num'] =OrderLinePacking.objects.filter(order_id = one.id).count()
+                                # 订单状态
+                                samp['order_type'] = "生产中"
+                                data.append(samp)
+                                i = i+1
+                        else:
+                            break
                     temp = {}
                     temp["data"] = data
                     temp['page_size'] = page_size
@@ -4472,59 +4512,72 @@ class makeinReadyView(APIView):
                 total = rObj.count()
                 zlist = []
                 if rObj.count() > start:
-                    rObj = rObj.all()[start:start + page_size]
+                    rObj = rObj.all()[start:]
+                    i = 0
                     for one in rObj:
-                        samp = {}
-                        samp['create_time'] = one.create_time
-                        samp['order_id'] = one.id
-                        samp['plan_id'] = one.plan_id
-                        samp['dhkhao'] = one.dhkhao
-                        samp['price_code'] = one.price_code
-                        samp['work_type'] = one.work_type
-                        samp['leader'] = one.leader
-                        samp['real_start_date'] = one.real_start_date
-                        samp['inspect_time'] = 3
-                        # 发货倒计时
-                        try:
-                            orderlineObj = PlanOrderLine.objects.filter(order_id=one.id)
-                            time1 = datetime.now()
-                            send_time = orderlineObj[0].send_time
-                            for one1 in orderlineObj:
-                                if send_time > one1.send_time:
-                                    send_time = one1.send_time
-                            samp["send_time"] = downDay(time1, send_time)
-                        except:
-                            samp["send_time"] = 0
-                        #注意事项
-                        notes_all_num, notes_sure_num = getNotesNum(order_id=one.id)
-                        samp["notes_all_num"] = notes_all_num
-                        samp["notes_sure_num"] = notes_sure_num
-                        #装箱情况
-                        pack_num, pack_sure_num = getpackNum(one.id)
-                        samp["pack_num"] = pack_num
-                        samp["pack_sure_num"] = pack_sure_num
-                        # 面辅料确认
-                        order_cloth_num, order_cloth_sure_num = getClothSureNum(one.id)
-                        samp["order_cloth_num"] = order_cloth_num
-                        samp["order_cloth_sure_num"] = order_cloth_sure_num
-                        # 面辅料入库
-                        order_cloth_store_num, order_cloth_store_sure_num = getClothInStore(one.id)
-                        samp["order_cloth_store_num"] = order_cloth_store_num
-                        samp["order_cloth_store_sure_num"] = order_cloth_store_sure_num
-                        # 成衣样品
-                        sample_num, sample_sure_num = getPlanSampleNum(one.id)
-                        samp["sample_num"] = sample_num
-                        samp["sample_sure_num"] = sample_sure_num
-                        # 送检情况
-                        samp['inspect_num'] = 1
-                        samp['inspect_sure_num'] = 1
-                        # B品情况
-                        samp['b_goods_num'] = 1
+                        if i >= page_size:
+                            fmObj = FactoryMake.objects.filter(order_id=one.id)
+                            fm_num = fmObj.count()
+                            sure_plan_num = 0
+                            sure_real_num = 0
+                            for one2 in fmObj:
+                                if one2.plan_start_date:
+                                    sure_plan_num = sure_plan_num + 1
+                                if one2.real_start_date:
+                                    sure_real_num = sure_real_num + 1
+                            if sure_real_num == fmObj.count() and sure_plan_num == fmObj.count():
+                                samp = {}
+                                samp['create_time'] = one.create_time
+                                samp['order_id'] = one.id
+                                samp['plan_id'] = one.plan_id
+                                samp['dhkhao'] = one.dhkhao
+                                samp['price_code'] = one.price_code
+                                samp['work_type'] = one.work_type
+                                samp['leader'] = one.leader
+                                samp['real_start_date'] = one.real_start_date
+                                samp['inspect_time'] = 3
+                                # 发货倒计时
+                                try:
+                                    orderlineObj = PlanOrderLine.objects.filter(order_id=one.id)
+                                    time1 = datetime.now()
+                                    send_time = orderlineObj[0].send_time
+                                    for one1 in orderlineObj:
+                                        if send_time > one1.send_time:
+                                            send_time = one1.send_time
+                                    samp["send_time"] = downDay(time1, send_time)
+                                except:
+                                    samp["send_time"] = 0
+                                #注意事项
+                                notes_all_num, notes_sure_num = getNotesNum(order_id=one.id)
+                                samp["notes_all_num"] = notes_all_num
+                                samp["notes_sure_num"] = notes_sure_num
+                                #装箱情况
+                                pack_num, pack_sure_num = getpackNum(one.id)
+                                samp["pack_num"] = pack_num
+                                samp["pack_sure_num"] = pack_sure_num
+                                # 面辅料确认
+                                order_cloth_num, order_cloth_sure_num = getClothSureNum(one.id)
+                                samp["order_cloth_num"] = order_cloth_num
+                                samp["order_cloth_sure_num"] = order_cloth_sure_num
+                                # 面辅料入库
+                                order_cloth_store_num, order_cloth_store_sure_num = getClothInStore(one.id)
+                                samp["order_cloth_store_num"] = order_cloth_store_num
+                                samp["order_cloth_store_sure_num"] = order_cloth_store_sure_num
+                                # 成衣样品
+                                sample_num, sample_sure_num = getPlanSampleNum(one.id)
+                                samp["sample_num"] = sample_num
+                                samp["sample_sure_num"] = sample_sure_num
+                                # 送检情况
+                                samp['inspect_num'] = 1
+                                samp['inspect_sure_num'] = 1
+                                # B品情况
+                                samp['b_goods_num'] = 1
 
-                        samp['order_type'] = "生产准备中"
+                                samp['order_type'] = "生产准备中"
 
-                        zlist.append(samp)
-
+                                zlist.append(samp)
+                        else:
+                            break
                     temp = {}
                     temp["data"] = zlist
                     temp['page_size'] = page_size
