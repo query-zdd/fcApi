@@ -2856,7 +2856,7 @@ class packingLineView(APIView):
                             bObj.save()
                             #更改装箱要求的状态
                             try:
-                                ppObj = OrderLinePacking.objects.get(id=done['parent_id'])
+                                ppObj = OrderLinePacking.objects.get(order_line_id = subOne['order_line_id'])
                                 ppObj.status = 1
                                 ppObj.save()
                             except:
