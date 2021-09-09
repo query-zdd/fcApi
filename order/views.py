@@ -2753,6 +2753,10 @@ class packingOneView(APIView):
                         samp['id'] = 0
                         samp['order_line_id'] = one.id
                         samp['order_id'] = nid
+                        samp['specs'] = ""
+                        samp['scale'] = ""
+                        samp['cuttle'] = ""
+                        samp['comments'] = ""
                         samplist.append(samp)
                 is_pack_all = 0
                 for n in range(len(dis_list) - 1):
