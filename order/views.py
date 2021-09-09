@@ -4515,7 +4515,7 @@ class makeinReadyView(APIView):
                     rObj = rObj.all()[start:]
                     i = 0
                     for one in rObj:
-                        if i >= page_size:
+                        if i <= page_size:
                             fmObj = FactoryMake.objects.filter(order_id=one.id)
                             fm_num = fmObj.count()
                             sure_plan_num = 0
