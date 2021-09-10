@@ -149,8 +149,8 @@ class showOutStockView(APIView):
                 try:
                     # 更新order
                     order = PlanOrder.objects.get(id=data['order_id'])
-                    pgall = PlanOrderLine.objects.filter(order_id=data['order_id'])
-                    pgone = PlanOrderLine.objects.filter(order_id=data['order_id'],is_pushprogram=1)
+                    pgall = PlanOrderLine.objects.filter(order_id=data['order_id'],delete_time=None)
+                    pgone = PlanOrderLine.objects.filter(order_id=data['order_id'],is_pushprogram=1,delete_time=None)
                     if pgall.count()==pgone.count():
                         order.is_pushprogram = 1
                     order.pushprogram_num =pgone.count()
