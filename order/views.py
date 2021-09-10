@@ -4250,7 +4250,7 @@ class productReadyView(APIView):
                                 samp['leader'] = one.leader
                                 #发货倒计时
                                 try:
-                                    orderlineObj = PlanOrderLine.objects.filter(order_id = one.id)
+                                    orderlineObj = PlanOrderLine.objects.filter(order_id = one.id,delete_time=None)
                                     time1 = datetime.now()
                                     send_time = orderlineObj[0].send_time
                                     for one1 in orderlineObj:
