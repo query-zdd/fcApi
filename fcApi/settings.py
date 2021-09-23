@@ -48,6 +48,7 @@ REST_FRAMEWORK = {
     "DEFAULT_VERSION": 'v1',  # 默认的版本
     "ALLOWED_VERSIONS": ['v1', 'v2'],  # 允许的版本
     "VERSION_PARAM": 'version',  # GET方式url中参数的名字  ?version=xxx
+    "DEFAULT_PAGINATION_CLASS":'rest_framework.pagination.PageNumberPagination',
     "PAGE_SIZE": 10,  # 每页最多显示两条数据
 }
 

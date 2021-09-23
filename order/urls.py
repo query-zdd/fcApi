@@ -68,6 +68,9 @@ urlpatterns = [
     url('^reightSpace$', views.reightSpaceView.as_view()),
     url('^reightSpace/(?P<nid>\d+)', views.reightSpaceOneView.as_view()),
 
+    url('^exportCustomsDeclaration$', views.exportCustomsDeclarationView.as_view()),
+    url('^exportClothSample/(?P<nid>\d+)', views.exportClothSampleView.as_view()),
+
     url('^makeFactoryInspect$', views.makeFactoryInspectView.as_view()),
     url('^makeFactoryInspect/(?P<nid>\d+)', views.makeFactoryInspectOneView.as_view()),
 
@@ -76,6 +79,11 @@ urlpatterns = [
 
     url('^Bquality$', views.BqualityView.as_view()),
     url('^Bquality/(?P<nid>\d+)', views.BqualityOneView.as_view()),
+
+    url('^showContract$', views.showContractView.as_view()),
+    url('^showContract/(?P<nid>\d+)', views.showContractOneView.as_view()),
+
+
 
 
 

@@ -250,6 +250,19 @@ class CompanyPlan(models.Model):
         db_table = 'company_plan'
 
 
+class Contracts(models.Model):
+    items = models.TextField(blank=True, null=True)
+    type = models.CharField(max_length=255, blank=True, null=True)
+    merchant_id = models.IntegerField(blank=True, null=True)
+    create_time = models.DateTimeField(blank=True, null=True)
+    update_time = models.DateTimeField(blank=True, null=True)
+    delete_time = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'contracts'
+
+
 class CustomerCompany(models.Model):
     create_time = models.DateTimeField(blank=True, null=True)
     update_time = models.DateTimeField(blank=True, null=True)
@@ -951,6 +964,8 @@ class PlanClothSampleLine(models.Model):
     custom_type = models.CharField(max_length=255, blank=True, null=True)
     custom = models.CharField(max_length=255, blank=True, null=True)
     is_sure = models.IntegerField(blank=True, null=True)
+    is_export = models.IntegerField(blank=True, null=True)
+    pay_custom = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1056,6 +1071,7 @@ class PlanOrder(models.Model):
     real_start_date = models.DateTimeField(blank=True, null=True)
     is_sure_drop_lable = models.IntegerField(blank=True, null=True)
     inspect_name = models.CharField(max_length=255, blank=True, null=True)
+    indicate_time = models.DateField(blank=True, null=True)
 
     class Meta:
         managed = False

@@ -10475,6 +10475,7 @@ class planClothSampleView(APIView):
                             bObj.sample_type = done['sample_type']
                             bObj.delivery_member = done['delivery_member']
                             bObj.send_custom = done['send_custom']
+                            bObj.pay_custom = done['send_custom']
                             bObj.countdown = done['countdown']
                             bObj.send_num = done['send_num']
                             bObj.send_time = done['send_time']
@@ -10482,6 +10483,7 @@ class planClothSampleView(APIView):
                             bObj.is_pay = done['is_pay']
                             bObj.file_url = done['file_url']
                             bObj.status = 0
+                            bObj.is_sure = 0
                             bObj.pcs_id = 0
                             bObj.plan_id = valObj.data['plan_id']
                             bObj.save()
@@ -10584,6 +10586,41 @@ class planClothSampleOneView(APIView):
                 "request": request,
             }
             return Response(post_result)
+
+    # 订单类型更新-active
+    @csrf_exempt
+    def put(self, request, nid):
+        data = request.query_params
+        valObj = planClothOne1Serializer(data=request.query_params)
+        if valObj.is_valid():
+            dt = datetime.now()
+            bObj = PlanClothSampleLine.objects.get(id=nid)
+            bObj.is_fee = data['is_fee']
+            bObj.is_pay = data['is_pay']
+            bObj.pay_custom = data['pay_custom']
+            bObj.is_sure = 1
+            bObj.update_time = dt
+            bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "确认成衣样品结算/报关成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
 
 ############################在建企划-成衣样品colorSpecs###############################################
 

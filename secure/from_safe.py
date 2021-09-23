@@ -485,6 +485,11 @@ class planColorSpecsGetOneSerializer(serializers.Serializer):
 class planClothOneSerializer(serializers.Serializer):
     plan_id = serializers.IntegerField(error_messages={'required': '必须传入在建企划ID'})
 
+class planClothOne1Serializer(serializers.Serializer):
+    is_pay = serializers.IntegerField(default=0,allow_null=True)
+    is_fee = serializers.IntegerField(default=0,allow_null=True)
+    pay_custom = serializers.CharField(default="",allow_null=True,allow_blank=True)
+
 
 class planClothlineSerializer(serializers.Serializer):
     delivery_mode = serializers.IntegerField(error_messages={'required': '必须传入成衣样品提供方式'})
@@ -854,11 +859,7 @@ class submisInfoSerializer(serializers.Serializer):
 
 class indicateDateoneSerializer(serializers.Serializer):
     indicate_time = serializers.CharField(error_messages={'required': '必须传入指示发货日期！'})
-    order_id = serializers.IntegerField(error_messages={'required': '必须传入订单id'})
-    order_line_id = serializers.IntegerField(error_messages={'required': '必须传入订单项id'})
-    delivery_way = serializers.CharField(error_messages={'required': '必须传入提货承运人'})
-    transportation = serializers.CharField(error_messages={'required': '必须传入出口运输方式'})
-    exporter_way = serializers.CharField(error_messages={'required': '必须传入出口承运方'})
+    order_id = serializers.ListField(error_messages={'required': '必须传入订单id'})
 
 class indicateDateSerializer(serializers.Serializer):
     order_custom = serializers.CharField(default="")
@@ -877,9 +878,9 @@ class colorSizeDataSerializer(serializers.Serializer):
 class reightSpaceSerializer(serializers.Serializer):
     indicate_time = serializers.CharField(error_messages={'required': '必须传入指示发货日期！'})
     order_line_ids = serializers.CharField(error_messages={'required': '必须传入订单项id'})
-    shou_huo_term_name = serializers.CharField(default="")
-    shou_huo_term_id = serializers.IntegerField(default=0)
-    space_name = serializers.CharField(default="")
+    # shou_huo_term_name = serializers.CharField(default="")
+    # shou_huo_term_id = serializers.IntegerField(default=0)
+    # space_name = serializers.CharField(default="")
     pol = serializers.CharField(error_messages={'required': '必须传入起运港'})
     pod = serializers.CharField(error_messages={'required': '必须传入目的港'})
     transportation = serializers.CharField(error_messages={'required': '必须传入出口运输方式'})
@@ -894,8 +895,22 @@ class reightSpaceLineSerializer(serializers.Serializer):
     page_size = serializers.IntegerField(default=10)
     page = serializers.IntegerField(default=1)
 
+class exportCustomsDeclarationSerializer(serializers.Serializer):
+    status = serializers.IntegerField(default=0)
+    order_custom = serializers.CharField(default="")
+    price_code = serializers.CharField(default="")
+    bill = serializers.CharField(default="")
+    dhkhao = serializers.CharField(default="")
+    page_size = serializers.IntegerField(default=10)
+    page = serializers.IntegerField(default=1)
+
 class reightSpaceOneSerializer(serializers.Serializer):
-    info_url = serializers.CharField(error_messages={'required': '必须传入确认仓位信息'})
+    info_url = serializers.CharField(error_messages={'required': '必须传入仓位文件路径'})
+    reight_s_time = serializers.CharField(error_messages={'required': '必须传入确认仓位日期'})
+
+class reightSpaceOne1Serializer(serializers.Serializer):
+    shou_huo_term_name = serializers.CharField(error_messages={'required': '必须传入收货人条款'})
+    space_name = serializers.CharField(error_messages={'required': '必须传入预定商品品名'})
 
 class purchasRecordsUploadSerializer(serializers.Serializer):
     file_url = serializers.ListField(error_messages={'required': '必须传入文件路径'})
@@ -952,3 +967,8 @@ class inspectinfoUrlSerializer(serializers.Serializer):
 class BqualitySerializer(serializers.Serializer):
     order_id = serializers.IntegerField(error_messages={'required': '必须传入订单id'})
     type = serializers.IntegerField(allow_null=True,default=1)
+
+class showContractSerializer(serializers.Serializer):
+    merchant_id = serializers.CharField(error_messages={'required': '必须传入商户id'})
+    type = serializers.CharField(error_messages={'required': '必须传入合同类型'})
+    items = serializers.CharField(error_messages={'required': '必须传入条款内容'})
