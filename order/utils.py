@@ -210,7 +210,14 @@ def getClothCat(order_id):
 
     return cloth_cat_list,supplier_list,delivery_name_list
 
-
+def getMakeFatoryInspect(order_id):
+    bObj = FactoryMake.objects.filter(order_id=order_id,delete_time=None)
+    mfi_num = bObj.count()
+    mfi_y_num = 0
+    for one in bObj:
+        if one.inspect_name:
+            mfi_y_num +=1
+    return mfi_num,mfi_y_num
 
 # 日期之差
 def downDay(d1,d2):

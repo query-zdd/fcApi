@@ -5497,91 +5497,6 @@ class reightSpaceOneView(APIView):
 ############################订单管理-报关理单###############################################
 
 class exportCustomsDeclarationView(APIView):
-    # 添加/编辑 预定仓位
-    @csrf_exempt
-    def post(self, request):
-        #################校验数据################################
-        d_flag = 0
-        d_num = 0
-        l_msg = []
-        dataone = request.data
-        for done in dataone:
-            d_num = d_num + 1
-            valObjline = reightSpaceSerializer(data=done)
-            if not valObjline.is_valid():
-                d_flag = 1
-                samp = {}
-                samp['msg'] = valObjline.errors
-                samp['key_num'] = d_num
-                l_msg.append(samp)
-        #################校验数据################################
-        dt = datetime.now()
-        ##############保存装箱指示#############################
-        if d_flag == 0:
-            for done in dataone:
-                try:
-                    mid =done['id']
-                    if mid:
-                        bObj = ReightSpace.objects.get(id=mid)
-                        bObj.update_time = dt
-                    else:
-                        bObj = ReightSpace()
-                        bObj.create_time = dt
-                    bObj.indicate_time = done['indicate_time']
-                    # bObj.shou_huo_term_id = valObj.data['shou_huo_term_id']
-                    # bObj.shou_huo_term_name = valObj.data['shou_huo_term_name']
-                    # bObj.space_name = valObj.data['space_name']
-                    bObj.exporter_way = done['exporter_way']
-                    bObj.pol = done['pol']
-                    bObj.pod = done['pod']
-                    bObj.transportation = done['transportation']
-                    bObj.order_line_ids = done['order_line_ids']
-                    bObj.status = 0
-                    bObj.save()
-                    if mid:
-                        reight_space_id = mid
-                    else:
-                        bOne = ReightSpace.objects.latest("id")
-                        reight_space_id = bOne.id
-                    try:
-                        line_id_line =  done['order_line_ids'].split(",")
-                        for l_id in line_id_line:
-                            if l_id:
-                                planLine = PlanOrderLine.objects.get(id=l_id)
-                                planLine.reight_space_id = reight_space_id
-                                planLine.save()
-                    except:
-                        pass
-                except:
-                    msg = "id参数错误"
-                    error_code = 10030
-                    request = request.method + '  ' + request.get_full_path()
-                    post_result = {
-                        "error_code": error_code,
-                        "message": msg,
-                        "request": request,
-                    }
-                    return Response(post_result)
-            msg = "编辑指示预定仓位"
-            error_code = 0
-            request = request.method + '  ' + request.get_full_path()
-            post_result = {
-                "error_code": error_code,
-                "message": msg,
-                "request": request,
-            }
-            return Response(post_result)
-        else:
-            msg = l_msg
-            error_code = 10030
-            request = request.method + '  ' + request.get_full_path()
-            post_result = {
-                "error_code": error_code,
-                "message": msg,
-                "request": request,
-            }
-            return Response(post_result)
-
     # 获取报关理单
     @csrf_exempt
     def get(self, request):
@@ -5620,6 +5535,16 @@ class exportCustomsDeclarationView(APIView):
                         one['indicate_time'] = orderObj.indicate_time
                     one['dhkhao'] = orderObj.dhkhao
                     one['price_code'] = orderObj.price_code
+                # 获取送检报告
+                    mfi_num, mfi_y_num = getMakeFatoryInspect(one["order_id"])
+                    one["mfi_num"] = mfi_num
+                    one["mfi_y_num"] = mfi_y_num
+
+                    one["custom_dec_num"] = 1
+                    one["custom_dec_y_num"] = 1
+
+                    one["export_info_num"] = 1
+                    one["export_info_y_num"] = 1
 
                 temp["data"] = data
                 temp['error_code'] = 0
@@ -5973,6 +5898,131 @@ class makeFactoryInspectOneView(APIView):
             return Response(post_result)
 
 
+############################订单管理-报关理单###############################################
+
+class inportCustomsDeclarationView(APIView):
+    # 添加/编辑 预定仓位
+    @csrf_exempt
+    def post(self, request):
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        dataone = request.data
+        for done in dataone:
+            d_num = d_num + 1
+            valObjline = inportCustomsDeclarationsaveSerializer(data=done)
+            if not valObjline.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObjline.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
+        dt = datetime.now()
+        ##############保存装箱指示#############################
+        if d_flag == 0:
+            for done in dataone:
+                try:
+                    mid = done['order_line_id']
+                    if mid:
+                        bObj = PlanOrderLine.objects.get(id=mid)
+                        bObj.update_time = dt
+                        bObj.indicate_time = done['indicate_time']
+                        bObj.delivery_way = done['delivery_way']
+                        bObj.delivery_time = done['delivery_time']
+                        bObj.save()
+                except:
+                    msg = "order_line_id参数错误"
+                    error_code = 10030
+                    request = request.method + '  ' + request.get_full_path()
+                    post_result = {
+                        "error_code": error_code,
+                        "message": msg,
+                        "request": request,
+                    }
+                    return Response(post_result)
+            msg = "编辑指示预定仓位"
+            error_code = 0
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+        else:
+            msg = l_msg
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+    # 获取报关理单
+    @csrf_exempt
+    def get(self, request):
+        data = request.query_params
+        valObj = exportCustomsDeclarationSerializer(data=request.query_params)
+        if valObj.is_valid():
+            try:
+                rObj = PlanOrder.objects.filter(delete_time=None,order_type__in=[3])
+                status = valObj.data['status'] if valObj.data['status'] is not None else 0
+                bill= valObj.data['bill'] if valObj.data['bill'] is not None else ""
+                order_custom = valObj.data['order_custom'] if valObj.data['order_custom'] is not None else ""
+                price_code = valObj.data['price_code'] if valObj.data['price_code'] is not None else ""
+                dhkhao = valObj.data['dhkhao'] if valObj.data['dhkhao'] is not None else ""
+                if order_custom:
+                    rObj = rObj.filter(custom=order_custom)
+                if price_code:
+                    rObj = rObj.filter(price_code=price_code)
+                if dhkhao:
+                    rObj = rObj.filter(dhkhao=dhkhao)
+                order_ids = [one.id for one in rObj]
+                orderLine = PlanOrderLine.objects.filter(delete_time=None,order_id__in=order_ids).order_by("-reight_space_id","order_id")
+                temp = {}
+                data = orderLine.values()
+                for one in data:
+                    orderObj = PlanOrder.objects.get(id=one["order_id"])
+                    if not one['indicate_time']:
+                        one['indicate_time'] = orderObj.indicate_time
+                    one['dhkhao'] = orderObj.dhkhao
+                    one['price_code'] = orderObj.price_code
+                # 获取送检报告
+                    mfi_num, mfi_y_num = getMakeFatoryInspect(one["order_id"])
+                    one["mfi_num"] = mfi_num
+                    one["mfi_y_num"] = mfi_y_num
+                temp["data"] = data
+                temp['error_code'] = 0
+                temp['message'] = "成功"
+                temp['request'] = request.method + '  ' + request.get_full_path()
+                return Response(temp)
+
+            except:
+                msg = "未找到对应的企划订单"
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+
 
 ############################生产管理-包箱信息###############################################
 
@@ -6278,6 +6328,288 @@ class showContractOneView(APIView):
         except:
             msg = "未找到对应包箱信息"
             error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+
+############################报关管理-录入工厂送检情况###############################################
+
+class exportFactoryInspectView(APIView):
+    # 添加/编辑 录入工厂送检情况
+    @csrf_exempt
+    def post(self, request):
+        data = request.data
+        valObj = inspectSerializer(data=request.data)
+        if valObj.is_valid():
+            #################校验数据################################
+            d_flag = 0
+            d_num = 0
+            l_msg = []
+            dataone = data['data']
+            for done in dataone:
+                d_num = d_num + 1
+                valObjline = exportinspectOneSerializer(data=done)
+                if not valObjline.is_valid():
+                    d_flag = 1
+                    samp = {}
+                    samp['msg'] = valObjline.errors
+                    samp['key_num'] = d_num
+                    l_msg.append(samp)
+            datains = data['inspect_name_list']
+            d_i_flag = 0
+            d_i_num = 0
+            l_i_msg = []
+            dataone = data['data']
+            for dione in datains:
+                d_num = d_num + 1
+                valObjiline = inspectInOneSerializer(data=dione)
+                if not valObjline.is_valid():
+                    d_i_flag = 1
+                    samp = {}
+                    samp['msg'] = valObjiline.errors
+                    samp['key_i_num'] = d_i_num
+                    l_i_msg.append(samp)
+            #################校验数据################################
+            dt = datetime.now()
+            ##############保存出货方案#############################
+            if d_flag == 0 and d_i_flag ==0:
+                inspect_name = ""
+                for dione in datains:
+                    mfObj = FactoryMake.objects.get(id=dione['make_factory_id'])
+                    mfObj.inspect_name = dione['inspect_name']
+                    mfObj.save()
+                    inspect_name = dione['inspect_name']
+                for done in dataone:
+                    try:
+                        try:
+                            mid = done["id"]
+                            if mid:
+                                bObj = MakeFatoryInspect.objects.get(id=mid)
+                                bObj.update_time = dt
+                            else:
+                                bObj = MakeFatoryInspect()
+                                bObj.create_time = dt
+                        except:
+                            bObj = MakeFatoryInspect()
+                            bObj.create_time = dt
+                        bObj.specs = done["specs_list"]
+                        bObj.save()
+                    except:
+                        msg = "参数错误"
+                        error_code = 10030
+                        request = request.method + '  ' + request.get_full_path()
+                        post_result = {
+                            "error_code": error_code,
+                            "message": msg,
+                            "request": request,
+                        }
+                        return Response(post_result)
+                try:
+                    # 更新order
+                    order = PlanOrder.objects.get(id=data['order_id'])
+                    order.inspect_name = inspect_name
+                    order.export_goods_name = data['export_goods_name']
+                    order.inport_goods_name = data['inport_goods_name']
+                    order.inspect_send_info_person = data['inspect_send_info_person']
+                    order.save()
+                except:
+                    pass
+                msg = "创建/编辑工厂送检成功"
+                error_code = 0
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+            else:
+                msg = l_msg
+                msg1 = l_i_msg
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "message1": msg1,
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+class exportFactoryInspectOneView(APIView):
+    # 获取录入工厂送检情况
+    @csrf_exempt
+    def get(self, request, nid):
+        try:
+            order = PlanOrder.objects.get(id=nid)
+            orderLine = PlanOrderLine.objects.filter(order_id=nid)
+            factoryObj = FactoryMake.objects.filter(order_id=nid)
+            order_color_list = []
+            order_specs_list = []
+            custom_list = []
+            comments=""
+            # 检品数据
+            fm_list = []
+            for one in factoryObj:
+                fm_dic = {}
+                fm_dic['make_factory_id'] = one.id
+                fm_dic['make_factory'] = one.make_factory
+                fm_dic['inspect_name'] = one.inspect_name
+                order_line_list = []
+                # 订单项数据
+                for one1 in orderLine:
+                    comments += one1.comments
+                    custom_list.append(one1.order_custom)
+                    order_line_dic = {}
+                    order_line_dic['order_custom'] = one1.order_custom
+                    order_line_dic['order_line_id'] = one1.id
+                    #颜色尺码数据
+                    color_list = []
+                    specs_list = []
+                    ousStock = OutStock.objects.filter(order_id=nid,order_line_id=one1.id)
+                    for one2 in ousStock:
+                        if one2.color not in color_list:
+                            color_list.append(one2.color)
+                        if one2.specs not in specs_list:
+                            specs_list.append(one2.specs)
+                        if one2.color not in order_color_list:
+                            order_color_list.append(one2.color)
+                        if one2.specs not in order_specs_list:
+                            order_specs_list.append(one2.specs)
+                    order_line_dic['color_list'] =color_list
+                    order_line_dic['specs_list'] = specs_list
+                    #装箱信息
+                    orderPackInfo = OrderPackInfo.objects.filter(order_line_id = one1.id)
+                    if orderPackInfo.count()>0:
+                        order_line_dic['box_rough_weight'] = orderPackInfo[0].box_rough_weight
+                        order_line_dic['box_pack_num'] = orderPackInfo[0].box_pack_num
+                        order_line_dic['pack_weight'] = orderPackInfo[0].pack_weight
+                        order_line_dic['unit_weight'] = orderPackInfo[0].unit_weight
+                        order_line_dic['volume'] = orderPackInfo[0].volume
+
+                    else:
+                        order_line_dic['box_rough_weight'] =None
+                        order_line_dic['box_pack_num'] = None
+                        order_line_dic['pack_weight'] = None
+                        order_line_dic['unit_weight'] = None
+                        order_line_dic['volume'] = None
+                    # 已保存数据
+                    mkfacObj = MakeFatoryInspect.objects.filter(order_id=nid,make_factory_id=one.id,order_line_id=one1.id).order_by("color")
+                    # if mkfacObj.count()>0:
+                    order_line_dic["inspect_info"]= mkfacObj.values()
+                    # else:
+                    #     zamp = {}
+                    #     zamp['id'] = 0
+                    #     zamp['custom'] = one1.order_custom
+                    #     zamp['order_id'] = order.id
+                    #     zamp['make_factory_id'] = one.id
+                    #     zamp['order_line_id'] = one1.id
+                    #     zamp['make_factory'] = one.make_factory
+
+
+                    order_line_list.append(order_line_dic)
+                fm_dic['order_line_info'] = order_line_list
+                fm_list.append(fm_dic)
+            temp = {}
+            temp["data"] = fm_list
+            temp['comments'] = comments
+            temp['orderObj'] = model_to_dict(order)
+            temp['custom_list'] = custom_list
+            temp['order_color_list'] = order_color_list
+            temp['order_specs_list'] = order_specs_list
+            temp['order_specs_list_num'] = len(order_specs_list)
+            temp['error_code'] = 0
+            temp['message'] = "成功"
+            temp['request'] = request.method + '  ' + request.get_full_path()
+            return Response(temp)
+
+        except:
+            msg = "未找到对应的厂送检情况"
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+    # 批量删除 订单出货方案showOutStock
+    @csrf_exempt
+    def delete(self, request, nid):
+        try:
+            bObj = MakeFatoryInspect.objects.get(id=nid)
+            bObj.delete()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "工厂送检情况删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "工厂送检情况不存在!",
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+    @csrf_exempt
+    def post(self, request, nid):
+        valObj = inspectinfoUrlSerializer(data=request.query_params)
+        if valObj.is_valid():
+            type = valObj.data['type'] if valObj.data['type'] is not None else 1
+            file_url = valObj.data['file_url'] if valObj.data['file_url'] is not None else ""
+            if type ==1:
+                bObj = FactoryMake.objects.get(id=nid)
+                # 返回数据
+                request = request.method + '  ' + request.get_full_path()
+                error_code = 0
+                post_result = {
+                    "data":model_to_dict(bObj),
+                    "error_code": error_code,
+                    "message": "工厂送检明细单保存成功!",
+                    "request": request,
+                }
+                return Response(post_result)
+            else:
+                bObj = FactoryMake.objects.get(id=nid)
+                bObj.inspect_url = file_url
+                bObj.save()
+                # 返回数据
+                request = request.method + '  ' + request.get_full_path()
+                error_code = 0
+                post_result = {
+                    "error_code": error_code,
+                    "message": "工厂送检明细单保存成功!",
+                    "request": request,
+                }
+                return Response(post_result)
+
+        else:
+            msg = "工厂送检情况不存在!",
+            error_code = 10020
             request = request.method + '  ' + request.get_full_path()
             post_result = {
                 "error_code": error_code,

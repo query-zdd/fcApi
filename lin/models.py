@@ -1072,6 +1072,9 @@ class PlanOrder(models.Model):
     is_sure_drop_lable = models.IntegerField(blank=True, null=True)
     inspect_name = models.CharField(max_length=255, blank=True, null=True)
     indicate_time = models.DateField(blank=True, null=True)
+    export_goods_name = models.CharField(max_length=255, blank=True, null=True)
+    inport_goods_name = models.CharField(max_length=255, blank=True, null=True)
+    inspect_send_info_person = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         managed = False

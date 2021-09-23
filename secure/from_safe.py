@@ -887,6 +887,13 @@ class reightSpaceSerializer(serializers.Serializer):
     exporter_way = serializers.CharField(error_messages={'required': '必须传入出口承运方'})
     id = serializers.IntegerField(default=0)
 
+
+class inportCustomsDeclarationsaveSerializer(serializers.Serializer):
+    indicate_time = serializers.CharField(error_messages={'required': '必须传入指示发货日期！'})
+    order_line_id = serializers.IntegerField(error_messages={'required': '必须传入订单项id'})
+    delivery_way = serializers.CharField(error_messages={'required': '必须传入提货承运人'})
+    delivery_time = serializers.CharField(error_messages={'required': '必须传入提货日'})
+
 class reightSpaceLineSerializer(serializers.Serializer):
     order_type = serializers.IntegerField(default=0)
     order_custom = serializers.CharField(default="")
@@ -921,6 +928,12 @@ class purchasRecordsUploadSerializer(serializers.Serializer):
 class inspectSerializer(serializers.Serializer):
     order_id = serializers.IntegerField(error_messages={'required': '必须传入订单id'})
 
+class exportinspectSerializer(serializers.Serializer):
+    order_id = serializers.IntegerField(error_messages={'required': '必须传入订单id'})
+    export_goods_name = serializers.CharField(error_messages={'required': '必须传入录入报关品名'})
+    inport_goods_name = serializers.CharField(error_messages={'required': '必须传入录入国内出货品名'})
+    inspect_send_info_person = serializers.CharField(error_messages={'required': '必须传入送检出货详情人员'})
+
 class inspectInOneSerializer(serializers.Serializer):
     inspect_name = serializers.CharField(error_messages={'required': '必须传入送检录入人员'})
     make_factory_id = serializers.CharField(error_messages={'required': '必须传入加工工厂id'})
@@ -941,6 +954,9 @@ class inspectOneSerializer(serializers.Serializer):
     gw = serializers.CharField(error_messages={'required': '必须传入毛重'})
     nw = serializers.CharField(error_messages={'required': '必须传入净重'})
     meas = serializers.CharField(error_messages={'required': '必须传入体积'})
+    id = serializers.IntegerField(allow_null=True, default=0)
+
+class exportinspectOneSerializer(serializers.Serializer):
     id = serializers.IntegerField(allow_null=True, default=0)
 
 
