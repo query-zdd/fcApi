@@ -902,6 +902,17 @@ class reightSpaceLineSerializer(serializers.Serializer):
     page_size = serializers.IntegerField(default=10)
     page = serializers.IntegerField(default=1)
 
+
+class orderAccountsLineSerializer(serializers.Serializer):
+    order_type = serializers.IntegerField(default=0)
+    status = serializers.IntegerField(default=0)
+    order_custom = serializers.CharField(default="")
+    price_code = serializers.CharField(default="")
+    dhkhao = serializers.CharField(default="")
+    brand = serializers.CharField(default="")
+    page_size = serializers.IntegerField(default=10)
+    page = serializers.IntegerField(default=1)
+
 class exportCustomsDeclarationSerializer(serializers.Serializer):
     status = serializers.IntegerField(default=0)
     order_custom = serializers.CharField(default="")

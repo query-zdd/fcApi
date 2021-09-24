@@ -88,6 +88,12 @@ urlpatterns = [
     url('^exportFactoryInspect$', views.exportFactoryInspectView.as_view()),
     url('^exportFactoryInspect/(?P<nid>\d+)', views.exportFactoryInspectOneView.as_view()),
 
+    url('^orderAccounts$', views.orderAccountsView.as_view()),
+    url('^orderAccounts/(?P<nid>\d+)', views.orderAccountsOneView.as_view()),
+
+    url('^orderInAccounts$', views.orderInAccountsView.as_view()),
+    url('^orderInAccounts/(?P<nid>\d+)', views.orderInAccountsOneView.as_view()),
+
 
 
 
