@@ -926,6 +926,12 @@ class reightSpaceOneSerializer(serializers.Serializer):
     info_url = serializers.CharField(error_messages={'required': '必须传入仓位文件路径'})
     reight_s_time = serializers.CharField(error_messages={'required': '必须传入确认仓位日期'})
 
+class orderAccountOneSerializer(serializers.Serializer):
+    is_shipping = serializers.IntegerField(error_messages={'required': '必须传入船样报关'})
+    order_price_type = serializers.CharField(error_messages={'required': '必须传入结算币种'})
+    order_price = serializers.CharField(error_messages={'required': '必须传入确认报价'})
+    is_sure_price = serializers.CharField(error_messages={'required': '必须传入是否确认'})
+
 class reightSpaceOne1Serializer(serializers.Serializer):
     shou_huo_term_name = serializers.CharField(error_messages={'required': '必须传入收货人条款'})
     space_name = serializers.CharField(error_messages={'required': '必须传入预定商品品名'})
@@ -999,3 +1005,28 @@ class showContractSerializer(serializers.Serializer):
     merchant_id = serializers.CharField(error_messages={'required': '必须传入商户id'})
     type = serializers.CharField(error_messages={'required': '必须传入合同类型'})
     items = serializers.CharField(error_messages={'required': '必须传入条款内容'})
+
+
+class orderOtherAcountOneSerializer(serializers.Serializer):
+    custom = serializers.CharField(error_messages={'required': '必须传入客户名称！'})
+    pay_content = serializers.CharField(error_messages={'required': '必须传入结算内容'})
+    pay_type = serializers.CharField(error_messages={'required': '必须传入结算币种'})
+    pay_num = serializers.CharField(error_messages={'required': '必须传入结算数量'})
+    pay_price = serializers.CharField(error_messages={'required': '必须传入结算单价'})
+    amount = serializers.CharField(error_messages={'required': '必须传入结算金额'})
+    is_sure_price = serializers.IntegerField(error_messages={'required': '必须传入是否确认'})
+    id = serializers.IntegerField(default=0)
+
+class orderInAccountsLineSerializer(serializers.Serializer):
+    search_time_type = serializers.IntegerField(default=0)
+    start_time = serializers.CharField(default="")
+    end_time = serializers.CharField(default="")
+    order_type = serializers.IntegerField(default=0)
+    order_custom = serializers.CharField(default="")
+    price_code = serializers.CharField(default="")
+    dhkhao = serializers.CharField(default="")
+    status = serializers.IntegerField(default=0)
+    page_size = serializers.IntegerField(default=10)
+    page = serializers.IntegerField(default=1)
+    invoice_num = serializers.CharField(default="")
+    fee_num = serializers.CharField(default="")

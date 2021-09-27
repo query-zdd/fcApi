@@ -804,6 +804,25 @@ class OrderPackInfo(models.Model):
         db_table = 'order_pack_info'
 
 
+class OrderPay(models.Model):
+    create_time = models.DateTimeField(blank=True, null=True)
+    update_time = models.DateTimeField(blank=True, null=True)
+    delete_time = models.DateTimeField(blank=True, null=True)
+    order_id = models.IntegerField(blank=True, null=True)
+    order_line_id = models.IntegerField(blank=True, null=True)
+    custom = models.CharField(max_length=255, blank=True, null=True)
+    pay_content = models.CharField(max_length=255, blank=True, null=True)
+    pay_type = models.CharField(max_length=255, blank=True, null=True)
+    pay_num = models.IntegerField(blank=True, null=True)
+    pay_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    is_sure_price = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'order_pay'
+
+
 class OtherCategory(models.Model):
     create_time = models.DateTimeField(blank=True, null=True)
     update_time = models.DateTimeField(blank=True, null=True)
@@ -1075,6 +1094,10 @@ class PlanOrder(models.Model):
     export_goods_name = models.CharField(max_length=255, blank=True, null=True)
     inport_goods_name = models.CharField(max_length=255, blank=True, null=True)
     inspect_send_info_person = models.CharField(max_length=255, blank=True, null=True)
+    pay_status = models.IntegerField(blank=True, null=True)
+    invoice_num = models.CharField(max_length=255, blank=True, null=True)
+    fee_num = models.CharField(max_length=255, blank=True, null=True)
+    sure_status = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1115,6 +1138,10 @@ class PlanOrderLine(models.Model):
     reight_space_id = models.IntegerField(blank=True, null=True)
     drop_url = models.CharField(max_length=255, blank=True, null=True)
     lable_url = models.CharField(max_length=255, blank=True, null=True)
+    is_shipping = models.IntegerField(blank=True, null=True)
+    order_price_type = models.CharField(max_length=255, blank=True, null=True)
+    order_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    is_sure_price = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False

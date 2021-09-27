@@ -91,6 +91,10 @@ urlpatterns = [
     url('^orderAccounts$', views.orderAccountsView.as_view()),
     url('^orderAccounts/(?P<nid>\d+)', views.orderAccountsOneView.as_view()),
 
+
+    url('^orderOtherAccounts$', views.orderOtherAccountsView.as_view()),
+    url('^orderOtherAccounts/(?P<nid>\d+)', views.orderOtherAccountsOneView.as_view()),
+
     url('^orderInAccounts$', views.orderInAccountsView.as_view()),
     url('^orderInAccounts/(?P<nid>\d+)', views.orderInAccountsOneView.as_view()),
 
