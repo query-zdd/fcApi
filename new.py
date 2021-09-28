@@ -817,10 +817,35 @@ class OrderPay(models.Model):
     pay_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     is_sure_price = models.IntegerField(blank=True, null=True)
+    pay_y_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    pay_n_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    is_finish_pay = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'order_pay'
+
+
+class OrderPayInfoList(models.Model):
+    create_time = models.DateTimeField(blank=True, null=True)
+    update_time = models.DateTimeField(blank=True, null=True)
+    delete_time = models.DateTimeField(blank=True, null=True)
+    pay_time = models.DateTimeField(blank=True, null=True)
+    custom = models.CharField(max_length=255, blank=True, null=True)
+    custom_type = models.CharField(max_length=255, blank=True, null=True)
+    price_type = models.CharField(max_length=255, blank=True, null=True)
+    pay_mode = models.CharField(max_length=255, blank=True, null=True)
+    pay_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    pay_y_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    pay_n_amount_one = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    beizhun = models.CharField(max_length=255, blank=True, null=True)
+    order_id = models.IntegerField(blank=True, null=True)
+    order_line_id = models.IntegerField(blank=True, null=True)
+    order_other_pay_id = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'order_pay_info_list'
 
 
 class OtherCategory(models.Model):
@@ -1098,6 +1123,8 @@ class PlanOrder(models.Model):
     invoice_num = models.CharField(max_length=255, blank=True, null=True)
     fee_num = models.CharField(max_length=255, blank=True, null=True)
     sure_status = models.IntegerField(blank=True, null=True)
+    provide_custom = models.CharField(max_length=255, blank=True, null=True)
+    is_finish_pay = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1142,6 +1169,10 @@ class PlanOrderLine(models.Model):
     order_price_type = models.CharField(max_length=255, blank=True, null=True)
     order_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     is_sure_price = models.IntegerField(blank=True, null=True)
+    pay_y_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    pay_n_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    provide_custom = models.CharField(max_length=255, blank=True, null=True)
+    is_finish_pay = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False

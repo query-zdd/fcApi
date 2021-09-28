@@ -1030,3 +1030,17 @@ class orderInAccountsLineSerializer(serializers.Serializer):
     page = serializers.IntegerField(default=1)
     invoice_num = serializers.CharField(default="")
     fee_num = serializers.CharField(default="")
+
+class orderInAccountsOneSerializer(serializers.Serializer):
+    pay_time = serializers.CharField(error_messages={'required': '必须传入收款时间！'})
+    custom = serializers.CharField(error_messages={'required': '必须传入客户'})
+    # custom_type = serializers.CharField(error_messages={'required': '必须传入结算币种'})
+    price_type = serializers.CharField(error_messages={'required': '必须传入报价币种'})
+    pay_mode = serializers.CharField(error_messages={'required': '必须传入首款性质'})
+    pay_amount = serializers.CharField(error_messages={'required': '必须传入收款金额'})
+    pay_y_amount = serializers.CharField(error_messages={'required': '必须传入累计已收'})
+    pay_n_amount_one = serializers.CharField(error_messages={'required': '必须传入本期未收'})
+    beizhun = serializers.CharField(error_messages={'required': '必须传入备注'})
+    order_line_id = serializers.IntegerField(error_messages={'required': '必须传入订单项id'})
+    order_other_pay_id = serializers.IntegerField(error_messages={'required': '必须传入其他应收款id'})
+    id = serializers.IntegerField(default=0)

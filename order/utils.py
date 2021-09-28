@@ -219,6 +219,92 @@ def getMakeFatoryInspect(order_id):
             mfi_y_num +=1
     return mfi_num,mfi_y_num
 
+# 获取订单的所有的客户
+def getAllCustom(order_id):
+    order = PlanOrder.objects.get(id=order_id)
+    orderLine = PlanOrderLine.objects.filter(order_id = order_id)
+    orderClothLineShip = OrderClothLineShip.objects.filter(order_id=order_id)
+    custom_list = []
+    custom_dic = {}
+    samp1 = []
+    samp2 = []
+    for one in orderLine:
+        if one.order_custom not in custom_list:
+            custom_list.append(one.order_custom)
+        if one.order_custom not in samp1:
+            samp1.append(one.order_custom)
+    custom_dic['order_custom'] = order.custom
+    custom_dic['line_order_custom'] = samp1
+
+    for one1 in orderClothLineShip:
+        if one1.delivery_name not in custom_list:
+            custom_list.append(one1.delivery_name)
+        if one1.delivery_name not in samp2:
+            samp2.append(one1.delivery_name)
+    custom_dic['list_delivery_name'] = samp2
+    return custom_dic,custom_list
+
+# 获取所有订单的支付信息
+def orderPayStatus(order_id):
+    order = PlanOrder.objects.get(id=order_id)
+    if order.is_finish_pay == 1:
+        orderLine = PlanOrderLine.objects.filter(delete_time=None, order_id=order_id)
+        orderPay = OrderPay.objects.filter(delete_time=None, order_id=order_id)
+        payInfo = OrderPayInfoList.objects.filter(delete_time=None, order_id=order_id)
+        all_amount = Decimal(0)
+        pay_amount = Decimal(0)
+        for one in orderLine:
+            try:
+                if one.order_price:
+                    all_amount += one.order_price
+            except:
+                pass
+        for one1 in orderPay:
+            try:
+                if one1.amount:
+                    all_amount += one1.amount
+            except:
+                pass
+        for one2 in payInfo:
+            try:
+                if one2.pay_amount:
+                    pay_amount += one2.pay_amount
+            except:
+                pass
+        pay_finish_deg = 1
+        pay_status = 1
+    else:
+        orderLine = PlanOrderLine.objects.filter(delete_time=None,order_id=order_id)
+        orderPay = OrderPay.objects.filter(delete_time=None,order_id = order_id)
+        payInfo = OrderPayInfoList.objects.filter(delete_time=None,order_id = order_id)
+        all_amount = Decimal(0)
+        pay_amount = Decimal(0)
+        for one in orderLine:
+            try:
+                if one.order_price:
+                    all_amount +=one.order_price
+            except:
+                pass
+        for one1 in orderPay:
+            try:
+                if one1.amount:
+                    all_amount +=one1.amount
+            except:
+                pass
+        for one2 in payInfo:
+            try:
+                if one2.pay_amount:
+                    pay_amount +=one2.pay_amount
+            except:
+                pass
+        if all_amount ==0:
+            pay_finish_deg = 0
+        else:
+            pay_finish_deg =round(pay_amount/all_amount,2)
+        pay_status = 0
+    return pay_finish_deg,pay_status,all_amount,pay_amount
+
+
 # 日期之差
 def downDay(d1,d2):
     if d1 and d2:
