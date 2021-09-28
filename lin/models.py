@@ -634,6 +634,8 @@ class OrderClothLineShip(models.Model):
     short_send_num = models.IntegerField(blank=True, null=True)
     add_up_num = models.IntegerField(blank=True, null=True)
     is_sure_in_store = models.IntegerField(blank=True, null=True)
+    is_sure_pay = models.IntegerField(blank=True, null=True)
+    sure_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -661,6 +663,8 @@ class OrderClothShip(models.Model):
     plan_material_id = models.IntegerField(blank=True, null=True)
     is_sure = models.IntegerField(blank=True, null=True)
     is_sure_in_store = models.IntegerField(blank=True, null=True)
+    price_type = models.CharField(max_length=255, blank=True, null=True)
+    is_sure_pay = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False

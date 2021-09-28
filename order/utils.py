@@ -224,10 +224,12 @@ def getAllCustom(order_id):
     order = PlanOrder.objects.get(id=order_id)
     orderLine = PlanOrderLine.objects.filter(order_id = order_id)
     orderClothLineShip = OrderClothLineShip.objects.filter(order_id=order_id)
+    fkObj = FactoryMake.objects.filter(order_id = order_id)
     custom_list = []
     custom_dic = {}
     samp1 = []
     samp2 = []
+    samp3 = []
     for one in orderLine:
         if one.order_custom not in custom_list:
             custom_list.append(one.order_custom)
@@ -242,6 +244,13 @@ def getAllCustom(order_id):
         if one1.delivery_name not in samp2:
             samp2.append(one1.delivery_name)
     custom_dic['list_delivery_name'] = samp2
+
+    for one2 in fkObj:
+        if one2.make_factory not in custom_list:
+            custom_list.append(one2.make_factory)
+        if one2.make_factory not in samp3:
+            samp3.append(one2.make_factory)
+    custom_dic['list_make_factory'] = samp3
     return custom_dic,custom_list
 
 # 获取所有订单的支付信息
@@ -271,7 +280,7 @@ def orderPayStatus(order_id):
                     pay_amount += one2.pay_amount
             except:
                 pass
-        pay_finish_deg = 1
+        pay_finish_deg = round(pay_amount/all_amount,2)
         pay_status = 1
     else:
         orderLine = PlanOrderLine.objects.filter(delete_time=None,order_id=order_id)
@@ -304,6 +313,90 @@ def orderPayStatus(order_id):
         pay_status = 0
     return pay_finish_deg,pay_status,all_amount,pay_amount
 
+
+# 获取所有订单的未付款金额
+def getOrderPayNum():
+    order = PlanOrder.objects.filter(delete_time=None)
+    order_num = order.count()
+    order_no_pay_num = 0
+    order_yes_pay_num = 0
+    dollar_all = Decimal(0)
+    euro_all = Decimal(0)
+    renminbi_all = Decimal(0)
+    dollar_y = Decimal(0)
+    dollar_n = Decimal(0)
+    euro_y = Decimal(0)
+    euro_n = Decimal(0)
+    renminbi_y = Decimal(0)
+    renminbi_n = Decimal(0)
+    for obj in order:
+        if obj.is_finish_pay == 1:
+            order_yes_pay_num +=1
+        order_id = obj.id
+        orderLine = PlanOrderLine.objects.filter(delete_time=None, order_id=order_id)
+        orderPay = OrderPay.objects.filter(delete_time=None, order_id=order_id)
+        payInfo = OrderPayInfoList.objects.filter(delete_time=None, order_id=order_id)
+        for one in orderLine:
+            try:
+                if one.order_price:
+                    if one.order_price_type == "美元":
+                        dollar_all += one.order_price
+                    if one.order_price_type == "欧元":
+                        euro_all += one.order_price
+                    if one.order_price_type == "人民币":
+                        renminbi_all += one.order_price
+            except:
+                pass
+        for one1 in orderPay:
+            try:
+                if one1.amount:
+                    if one1.pay_type == "美元":
+                        dollar_all += one1.amount
+                    if one1.pay_type == "欧元":
+                        euro_all += one1.amount
+                    if one1.pay_type == "人民币":
+                        renminbi_all += one1.amount
+            except:
+                pass
+        for one2 in payInfo:
+            try:
+                if one2.pay_amount:
+                    if one2.price_type == "美元":
+                        dollar_y += one2.pay_amount
+                    if one2.price_type == "欧元":
+                        euro_y += one2.pay_amount
+                    if one2.price_type == "人民币":
+                        renminbi_y += one2.pay_amount
+            except:
+                pass
+    order_no_pay_num = order_num - order_yes_pay_num
+    dollar_n = dollar_all - dollar_y
+    euro_n = euro_all - euro_y
+    renminbi_n = renminbi_all - renminbi_y
+    temp = {}
+    temp['order_num'] = order_num
+    temp['order_yes_pay_num'] = order_yes_pay_num
+    temp['order_no_pay_num'] = order_no_pay_num
+    temp['dollar_all'] = dollar_all
+    temp['dollar_y'] = dollar_y
+    temp['dollar_n'] = dollar_n
+    temp['euro_all'] = euro_all
+    temp['euro_y'] = euro_y
+    temp['euro_n'] = euro_n
+    temp['renminbi_all'] = renminbi_all
+    temp['renminbi_y'] = renminbi_y
+    temp['renminbi_n'] = renminbi_n
+    return temp
+
+def getSupplierSure(order_id):
+    orderClothShip = OrderClothShip.objects.filter(delete_time=None, order_id=order_id)
+    supplier_num = orderClothShip.count()
+    supplier_sure_num = 0
+    for one in orderClothShip:
+        if one.is_sure_pay == 1:
+            supplier_sure_num += 1
+    supplier_no_num = supplier_num - supplier_sure_num
+    return supplier_num,supplier_sure_num,supplier_no_num
 
 # 日期之差
 def downDay(d1,d2):

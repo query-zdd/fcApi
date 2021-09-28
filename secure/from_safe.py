@@ -1044,3 +1044,8 @@ class orderInAccountsOneSerializer(serializers.Serializer):
     order_line_id = serializers.IntegerField(error_messages={'required': '必须传入订单项id'})
     order_other_pay_id = serializers.IntegerField(error_messages={'required': '必须传入其他应收款id'})
     id = serializers.IntegerField(default=0)
+
+class productAccountOneSerializer(serializers.Serializer):
+    price_type = serializers.CharField(error_messages={'required': '必须传入结算币种'})
+    sure_price = serializers.CharField(error_messages={'required': '必须传入确定采购单价'})
+    is_sure_pay = serializers.IntegerField(error_messages={'required': '必须传入确认报价'})
