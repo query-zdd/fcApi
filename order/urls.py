@@ -97,8 +97,13 @@ urlpatterns = [
 
     url('^productAccounts$', views.productAccountsView.as_view()),
     url('^productAccounts/(?P<nid>\d+)', views.productAccountsOneView.as_view()),
+
+    url('^productMakeAccounts$', views.productMakeAccountsView.as_view()),
+    url('^productMakeAccounts/(?P<nid>\d+)', views.productMakeAccountsOneView.as_view()),
+
     url('^productOtherAccounts$', views.productOtherAccountsView.as_view()),
     url('^productOtherAccounts/(?P<nid>\d+)', views.productOtherAccountsOneView.as_view()),
+
     url('^productInAccounts$', views.productInAccountsView.as_view()),
     url('^productInAccounts/(?P<nid>\d+)', views.productInAccountsOneView.as_view()),
 

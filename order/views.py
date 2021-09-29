@@ -5283,6 +5283,7 @@ class reightSpaceView(APIView):
                         one['pol'] = onespcace.pol
                         one['exporter_way'] = onespcace.exporter_way
                         one['transportation'] = onespcace.transportation
+                        one['info_url'] = onespcace.info_url
                     else:
                         one["reight_space_status"] = 0
                         one['indicate_time'] = orderObj.indicate_time
@@ -7660,6 +7661,243 @@ class productAccountsOneView(APIView):
                 "request": request,
             }
             return Response(post_result)
+
+
+
+class productMakeAccountsView(APIView):
+    # 获取确认报价
+    @csrf_exempt
+    def get(self, request):
+        data = request.query_params
+        valObj = orderAccountsLineSerializer(data=request.query_params)
+        if valObj.is_valid():
+            try:
+                order_type = valObj.data['order_type'] if valObj.data['order_type'] is not None else 0
+                status = valObj.data['status'] if valObj.data['status'] is not None else 0
+                order_custom = valObj.data['order_custom'] if valObj.data['order_custom'] is not None else ""
+                price_code = valObj.data['price_code'] if valObj.data['price_code'] is not None else ""
+                dhkhao = valObj.data['dhkhao'] if valObj.data['dhkhao'] is not None else ""
+                brand = valObj.data['brand'] if valObj.data['brand'] is not None else ""
+                rObj = PlanOrder.objects.filter(delete_time=None)
+                if status == 0:
+                    rObj = rObj.filter(~Q(sure_status=1))
+                if status ==1:
+                    rObj = rObj.filter(sure_status=1)
+                if order_type != 0:
+                    rObj = rObj.filter(order_type=order_type)
+                if order_custom:
+                    rObj = rObj.filter(custom=order_custom)
+                if price_code:
+                    rObj = rObj.filter(price_code=price_code)
+                if dhkhao:
+                    rObj = rObj.filter(dhkhao=dhkhao)
+                if brand:
+                    rObj = rObj.filter(brand=brand)
+
+                samp = []
+                for one in rObj:
+                    zamp = {}
+                    zamp["order_id"] = one.id
+                    zamp["create_time"] = one.create_time
+                    zamp["indicate_time"] = one.indicate_time
+                    zamp["order_type"] = one.order_type
+                    zamp["custom"] = one.custom
+                    zamp["price_code"] = one.price_code
+                    zamp["dhkhao"] = one.dhkhao
+                    zamp["brand"] = one.brand
+                    zamp["goods_name"] = one.goods_name
+                    zamp["order_num"] = one.order_num
+                    # 是否确认
+                    orderline = PlanOrderLine.objects.filter(order_id=one.id)
+                    c_pay_num = orderline.count()
+                    c_pay_sure_num = 0
+                    for o1 in orderline:
+                        if o1.is_sure_price ==1:
+                            c_pay_sure_num +=1
+                    zamp["c_pay_num"] = c_pay_num
+                    zamp["c_pay_sure_num"] = c_pay_sure_num
+                    otherPay = OrderPay.objects.filter(order_id=one.id)
+                    other_pay_num = otherPay.count()
+                    other_pay_sure_num = 0
+                    for o2 in otherPay:
+                        if o2.is_sure_price == 1:
+                            other_pay_sure_num +=1
+                    zamp["other_pay_num"] = other_pay_num
+                    zamp["other_pay_sure_num"] = other_pay_sure_num
+                    zamp["status"] = status
+                    samp.append(zamp)
+                temp = {}
+                temp["data"] = samp
+                temp['error_code'] = 0
+                temp['message'] = "成功"
+                temp['request'] = request.method + '  ' + request.get_full_path()
+                return Response(temp)
+
+            except:
+                msg = "未找到对应的企划订单"
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+class productMakeAccountsOneView(APIView):
+    # 获取确认报价
+    @csrf_exempt
+    def get(self, request, nid):
+        try:
+            order = PlanOrder.objects.get(id=nid)
+            orderLine = PlanOrderLine.objects.filter(order_id=nid)
+            factoryObj = FactoryMake.objects.filter(order_id=nid)
+            order_color_list = []
+            order_specs_list = []
+            comments = ""
+            coop_mode_all = ""
+            # 检品数据
+            fm_list = []
+            for one in factoryObj:
+                fm_dic = {}
+                fm_dic['make_factory_id'] = one.id
+                fm_dic['make_factory'] = one.make_factory
+                fm_dic['coop_mode'] = one.coop_mode
+                coop_mode_all =coop_mode_all +one.coop_mode + "|"
+                fm_dic['ticketing_custom'] = one.ticketing_custom
+                order_line_list = []
+                # 订单项数据
+                for one1 in orderLine:
+                    order_line_dic = {}
+                    order_line_dic['order_line_id'] = one1.id
+
+                    order_line_dic['order_custom'] = one1.order_custom
+                    order_line_dic['order_type'] = one1.order_type
+                    # 颜色尺码数据
+                    color_list = []
+                    specs_list = []
+                    ousStock = OutStock.objects.filter(order_id=nid, order_line_id=one1.id)
+                    for one2 in ousStock:
+                        if one2.color not in color_list:
+                            color_list.append(one2.color)
+                        if one2.specs not in specs_list:
+                            specs_list.append(one2.specs)
+                        if one2.color not in order_color_list:
+                            order_color_list.append(one2.color)
+                        if one2.specs not in order_specs_list:
+                            order_specs_list.append(one2.specs)
+                    order_line_dic['color_list'] = color_list
+                    order_line_dic['specs_list'] = specs_list
+                    # 装箱信息
+                    orderPackInfo = OrderPackInfo.objects.filter(order_line_id=one1.id)
+                    if orderPackInfo.count() > 0:
+                        order_line_dic['box_rough_weight'] = orderPackInfo[0].box_rough_weight
+                        order_line_dic['box_pack_num'] = orderPackInfo[0].box_pack_num
+                        order_line_dic['pack_weight'] = orderPackInfo[0].pack_weight
+                        order_line_dic['unit_weight'] = orderPackInfo[0].unit_weight
+                        order_line_dic['volume'] = orderPackInfo[0].volume
+
+                    else:
+                        order_line_dic['box_rough_weight'] = None
+                        order_line_dic['box_pack_num'] = None
+                        order_line_dic['pack_weight'] = None
+                        order_line_dic['unit_weight'] = None
+                        order_line_dic['volume'] = None
+                    # 已保存数据
+                    mkfacObj = MakeFatoryInspect.objects.filter(order_id=nid, make_factory_id=one.id,
+                                                                order_line_id=one1.id).order_by("color")
+                    order_line_dic["inspect_info"] = mkfacObj.values()
+                    order_line_list.append(order_line_dic)
+                fm_dic['order_line_info'] = order_line_list
+                fm_list.append(fm_dic)
+            temp = {}
+            temp["data"] = fm_list
+            temp['comments'] = comments
+            temp['orderObj'] = model_to_dict(order)
+            temp['order_color_list'] = order_color_list
+            temp['order_specs_list'] = order_specs_list
+            temp['order_specs_list_num'] = len(order_specs_list)
+            temp['error_code'] = 0
+            temp['message'] = "成功"
+            temp['request'] = request.method + '  ' + request.get_full_path()
+            return Response(temp)
+        except:
+            msg = "未找到对应加工费报价"
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+    @csrf_exempt
+    def post(self, request, nid):
+        valObj = productAccountOneSerializer(data=request.query_params)
+        if valObj.is_valid():
+            try:
+                dt = datetime.now()
+                bObj = OrderClothLineShip.objects.get(id=nid)
+                bObj.update_time = dt
+                bObj.price_type = request.query_params["price_type"]
+                bObj.sure_price =request.query_params["sure_price"]
+                bObj.is_sure_pay = request.query_params["is_sure_pay"]
+                bObj.save()
+                # 采购 是否全部确认
+                orderCloth = OrderClothShip.objects.get(id = bObj.order_cloth_ship_id)
+                orderClothLine = OrderClothLineShip.objects.filter(order_cloth_ship_id = bObj.order_cloth_ship_id)
+                flag = 0
+                for one in orderClothLine:
+                    if one.is_sure_pay !=1:
+                        flag = 1
+                if flag == 0:
+                    orderCloth.is_sure_pay = 1
+                    orderCloth.save()
+                else:
+                    orderCloth.is_sure_pay = 0
+                    orderCloth.save()
+                msg = "确认合同报价"
+                error_code = 0
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+            except:
+                msg = "id参数错误"
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+
 
 
 class productOtherAccountsView(APIView):
