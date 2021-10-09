@@ -8172,6 +8172,10 @@ class productInAccountsView(APIView):
                 if status:
                     rObj = rObj.filter(pay_status=status)
                 samp = []
+                dollor = Decimal(0)
+                euro = Decimal(0)
+                renminbi = Decimal(0)
+                pay_order_no_num = 0
                 for one in rObj:
                     zamp = {}
                     zamp["order_id"] = one.id
@@ -8187,15 +8191,29 @@ class productInAccountsView(APIView):
                     # 是否确认
                     projectPay = ProductPayStatic.objects.filter(order_id=one.id,delete_time=None)
                     pay_sure_num = 0
+
                     for o1 in projectPay:
                         if o1.is_finish_pay == 1:
                             pay_sure_num += 1
+                        if o1.price_type=="人民币" and o1.pay_amount and o1.finish_amount:
+                            renminbi =renminbi + o1.pay_amount-o1.finish_amount
+                        if o1.price_type=="美元" and o1.pay_amount and o1.finish_amount:
+                            dollor =dollor + o1.pay_amount-o1.finish_amount
+                        if o1.price_type=="欧元" and o1.pay_amount and o1.finish_amount:
+                            euro =euro + o1.pay_amount-o1.finish_amount
                     zamp['pay_num'] = projectPay.count()
                     zamp['pay_sure_num'] = pay_sure_num
+                    if projectPay.count() != pay_sure_num:
+                        pay_order_no_num +=1
                     zamp["status"] = "订单状态"
                     samp.append(zamp)
+
                 temp = {}
                 temp["data"] = samp
+                temp["renminbi"] = renminbi
+                temp["dollor"] = dollor
+                temp["euro"] = euro
+                temp["pay_order_no_num"] = pay_order_no_num
                 temp['error_code'] = 0
                 temp['message'] = "成功"
                 temp['request'] = request.method + '  ' + request.get_full_path()
