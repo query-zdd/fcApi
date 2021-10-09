@@ -7457,22 +7457,22 @@ class productAccountsView(APIView):
                     zamp["goods_name"] = one.goods_name
                     zamp["order_num"] = one.order_num
                     # 是否确认
-                    orderline = PlanOrderLine.objects.filter(order_id=one.id)
+                    orderline = OrderClothShip.objects.filter(order_id=one.id)
                     c_pay_num = orderline.count()
                     c_pay_sure_num = 0
                     for o1 in orderline:
-                        if o1.is_sure_price ==1:
-                            c_pay_sure_num +=1
+                        if o1.is_sure_pay == 1:
+                            c_pay_sure_num += 1
                     zamp["c_pay_num"] = c_pay_num
                     zamp["c_pay_sure_num"] = c_pay_sure_num
-                    otherPay = OrderPay.objects.filter(order_id=one.id)
+                    otherPay = FactoryMake.objects.filter(order_id=one.id)
                     other_pay_num = otherPay.count()
                     other_pay_sure_num = 0
                     for o2 in otherPay:
-                        if o2.is_sure_price == 1:
+                        if o2.is_sure_pay == 1:
                             other_pay_sure_num +=1
-                    zamp["other_pay_num"] = other_pay_num
-                    zamp["other_pay_sure_num"] = other_pay_sure_num
+                    zamp["make_pay_num"] = other_pay_num
+                    zamp["make_pay_sure_num"] = other_pay_sure_num
                     zamp["status"] = status
                     samp.append(zamp)
                 temp = {}
@@ -7618,17 +7618,45 @@ class productAccountsOneView(APIView):
                 bObj.price_type = request.query_params["price_type"]
                 bObj.sure_price =request.query_params["sure_price"]
                 bObj.is_sure_pay = request.query_params["is_sure_pay"]
+                bObj.pay_amount = request.query_params["pay_amount"]
                 bObj.save()
                 # 采购 是否全部确认
                 orderCloth = OrderClothShip.objects.get(id = bObj.order_cloth_ship_id)
                 orderClothLine = OrderClothLineShip.objects.filter(order_cloth_ship_id = bObj.order_cloth_ship_id)
                 flag = 0
+                pay_amount = Decimal(0)
                 for one in orderClothLine:
                     if one.is_sure_pay !=1:
                         flag = 1
+                    else:
+                        pay_amount += one.pay_amount
                 if flag == 0:
                     orderCloth.is_sure_pay = 1
                     orderCloth.save()
+                    #保存付款项目
+                    projectPay = ProductPayStatic.objects.filter(order_cloth_ship_id = bObj.order_cloth_ship_id)
+                    if projectPay.count()>0:
+                        projectOne = projectPay[0]
+                    else:
+                        projectOne = ProductPayStatic()
+                    projectOne.order_id = orderCloth.order_id
+                    projectOne.type = 1
+                    projectOne.factory_make_id = 0
+                    projectOne.order_cloth_ship_id = bObj.order_cloth_ship_id
+                    projectOne.pay_project = "采购费"
+                    projectOne.custom_type = "面辅料供应商"
+                    projectOne.custom =orderCloth.supplier
+                    projectOne.pay_custom = orderCloth.delivery_name
+                    projectOne.pay_comment = ""
+                    projectOne.price_type = orderCloth.price_type
+                    projectOne.pay_price = pay_amount
+                    projectOne.pay_num = 1
+                    projectOne.pay_amount = pay_amount
+                    projectOne.finish_amount = Decimal(0)
+                    projectOne.is_sure = 1
+                    projectOne.is_finish_pay = 0
+                    projectOne.save()
+
                 else:
                     orderCloth.is_sure_pay = 0
                     orderCloth.save()
@@ -7760,11 +7788,18 @@ class productMakeAccountsOneView(APIView):
     def get(self, request, nid):
         try:
             order = PlanOrder.objects.get(id=nid)
+            planPrice = PlanPrice.objects.get(plan_id =order.plan_id)
             orderLine = PlanOrderLine.objects.filter(order_id=nid)
             factoryObj = FactoryMake.objects.filter(order_id=nid)
-            order_color_list = []
-            order_specs_list = []
-            comments = ""
+            order_sn = ""
+            for o1 in orderLine:
+                order_sn = order_sn + o1.order_sn + "|"
+
+            coop_mode = ''
+            ticketing_custom = ''
+            for o in factoryObj:
+                coop_mode += o.coop_mode + '|'
+                ticketing_custom += o.ticketing_custom + '|'
             coop_mode_all = ""
             # 检品数据
             fm_list = []
@@ -7775,58 +7810,35 @@ class productMakeAccountsOneView(APIView):
                 fm_dic['coop_mode'] = one.coop_mode
                 coop_mode_all =coop_mode_all +one.coop_mode + "|"
                 fm_dic['ticketing_custom'] = one.ticketing_custom
+                fm_dic['price_type'] = one.price_type
+                fm_dic['plan_price'] = planPrice.plan_price
+                fm_dic['amount'] = one.amount
+                fm_dic['sure_amount'] = one.sure_amount
+
                 order_line_list = []
                 # 订单项数据
                 for one1 in orderLine:
-                    order_line_dic = {}
-                    order_line_dic['order_line_id'] = one1.id
-
-                    order_line_dic['order_custom'] = one1.order_custom
-                    order_line_dic['order_type'] = one1.order_type
-                    # 颜色尺码数据
-                    color_list = []
-                    specs_list = []
-                    ousStock = OutStock.objects.filter(order_id=nid, order_line_id=one1.id)
-                    for one2 in ousStock:
-                        if one2.color not in color_list:
-                            color_list.append(one2.color)
-                        if one2.specs not in specs_list:
-                            specs_list.append(one2.specs)
-                        if one2.color not in order_color_list:
-                            order_color_list.append(one2.color)
-                        if one2.specs not in order_specs_list:
-                            order_specs_list.append(one2.specs)
-                    order_line_dic['color_list'] = color_list
-                    order_line_dic['specs_list'] = specs_list
-                    # 装箱信息
-                    orderPackInfo = OrderPackInfo.objects.filter(order_line_id=one1.id)
-                    if orderPackInfo.count() > 0:
-                        order_line_dic['box_rough_weight'] = orderPackInfo[0].box_rough_weight
-                        order_line_dic['box_pack_num'] = orderPackInfo[0].box_pack_num
-                        order_line_dic['pack_weight'] = orderPackInfo[0].pack_weight
-                        order_line_dic['unit_weight'] = orderPackInfo[0].unit_weight
-                        order_line_dic['volume'] = orderPackInfo[0].volume
-
-                    else:
-                        order_line_dic['box_rough_weight'] = None
-                        order_line_dic['box_pack_num'] = None
-                        order_line_dic['pack_weight'] = None
-                        order_line_dic['unit_weight'] = None
-                        order_line_dic['volume'] = None
-                    # 已保存数据
-                    mkfacObj = MakeFatoryInspect.objects.filter(order_id=nid, make_factory_id=one.id,
-                                                                order_line_id=one1.id).order_by("color")
-                    order_line_dic["inspect_info"] = mkfacObj.values()
-                    order_line_list.append(order_line_dic)
+                    jamp  = {}
+                    samp,zemp = getOrderFactoryInfoColor(nid,one1.id,one.id)
+                    jamp['order_line_one'] = zemp
+                    jamp['custom'] = one1.order_custom
+                    jamp['order_type'] = one1.order_custom
+                    order_line_list.append(zemp)
                 fm_dic['order_line_info'] = order_line_list
                 fm_list.append(fm_dic)
             temp = {}
             temp["data"] = fm_list
-            temp['comments'] = comments
-            temp['orderObj'] = model_to_dict(order)
-            temp['order_color_list'] = order_color_list
-            temp['order_specs_list'] = order_specs_list
-            temp['order_specs_list_num'] = len(order_specs_list)
+
+
+            temp['coop_mode'] = coop_mode
+            temp['ticketing_custom'] = ticketing_custom
+            temp['order_id'] = nid
+            temp["dhkh"] = order.dhkhao
+            temp["price_code"] = order.price_code
+            temp["order_sn"] = order_sn
+            temp["invoice_num"] = order.invoice_num
+            temp["fee_num"] = order.fee_num
+            temp["work_type"] = order.work_type
             temp['error_code'] = 0
             temp['message'] = "成功"
             temp['request'] = request.method + '  ' + request.get_full_path()
@@ -7844,30 +7856,43 @@ class productMakeAccountsOneView(APIView):
 
     @csrf_exempt
     def post(self, request, nid):
-        valObj = productAccountOneSerializer(data=request.query_params)
+        valObj = productMakeAccountOneSerializer(data=request.query_params)
         if valObj.is_valid():
             try:
                 dt = datetime.now()
-                bObj = OrderClothLineShip.objects.get(id=nid)
+                bObj = FactoryMake.objects.get(id=nid)
                 bObj.update_time = dt
                 bObj.price_type = request.query_params["price_type"]
-                bObj.sure_price =request.query_params["sure_price"]
-                bObj.is_sure_pay = request.query_params["is_sure_pay"]
+                bObj.make_pay_num =request.query_params["make_pay_num"]
+                bObj.sure_amount = request.query_params["sure_amount"]
+                bObj.amount = request.query_params["amount"]
+                bObj.is_sure_pay = 1
                 bObj.save()
-                # 采购 是否全部确认
-                orderCloth = OrderClothShip.objects.get(id = bObj.order_cloth_ship_id)
-                orderClothLine = OrderClothLineShip.objects.filter(order_cloth_ship_id = bObj.order_cloth_ship_id)
-                flag = 0
-                for one in orderClothLine:
-                    if one.is_sure_pay !=1:
-                        flag = 1
-                if flag == 0:
-                    orderCloth.is_sure_pay = 1
-                    orderCloth.save()
+                # 添加加工费项目
+                projectPay = ProductPayStatic.objects.filter(factory_make_id=nid)
+                if projectPay.count() > 0:
+                    projectOne = projectPay[0]
                 else:
-                    orderCloth.is_sure_pay = 0
-                    orderCloth.save()
-                msg = "确认合同报价"
+                    projectOne = ProductPayStatic()
+                projectOne.order_id = bObj.order_id
+                projectOne.type = 2
+                projectOne.factory_make_id = nid
+                projectOne.order_cloth_ship_id = 0
+                projectOne.pay_project = "加工费"
+                projectOne.custom_type = "加工工厂"
+                projectOne.custom = bObj.make_factory
+                projectOne.pay_custom = bObj.ticketing_custom
+                projectOne.pay_comment = ""
+                projectOne.price_type = request.query_params["price_type"]
+                projectOne.pay_price = request.query_params["sure_amount"]
+                projectOne.pay_num = request.query_params["make_pay_num"]
+                projectOne.pay_amount =  request.query_params["amount"]
+                projectOne.finish_amount = Decimal(0)
+                projectOne.is_sure = 1
+                projectOne.is_finish_pay = 0
+                projectOne.save()
+
+                msg = "确认加工费报价"
                 error_code = 0
                 request = request.method + '  ' + request.get_full_path()
                 post_result = {
@@ -7901,7 +7926,7 @@ class productMakeAccountsOneView(APIView):
 
 
 class productOtherAccountsView(APIView):
-    # 添加/编辑 其他应收款
+    # 添加/编辑 生产组织其他应付
     @csrf_exempt
     def post(self, request):
         #################校验数据################################
@@ -7924,7 +7949,7 @@ class productOtherAccountsView(APIView):
         dataone =data['data']
         for done in dataone:
             d_num = d_num + 1
-            valObjline = orderOtherAcountOneSerializer(data=done)
+            valObjline = makeOtherAcountOneSerializer(data=done)
             if not valObjline.is_valid():
                 d_flag = 1
                 samp = {}
@@ -7939,41 +7964,28 @@ class productOtherAccountsView(APIView):
                 try:
                     mid =done['id']
                     if mid:
-                        bObj = OrderPay.objects.get(id=mid)
+                        bObj = ProductPayStatic.objects.get(id=mid)
                         bObj.update_time = dt
                     else:
-                        bObj = OrderPay()
+                        bObj = ProductPayStatic()
                         bObj.create_time = dt
                     bObj.order_id = data['order_id']
+                    bObj.pay_project = done['pay_project']
+                    bObj.custom_type = done['custom_type']
                     bObj.custom = done['custom']
-                    bObj.pay_content = done['pay_content']
-                    bObj.pay_type = done['pay_type']
+                    bObj.pay_custom = done['pay_custom']
+                    bObj.pay_comment = done['pay_comment']
+                    bObj.price_type = done['price_type']
                     bObj.pay_num = done['pay_num']
                     bObj.pay_price = done['pay_price']
-                    bObj.amount = done['amount']
-                    bObj.is_sure_price = done['is_sure_price']
+                    bObj.pay_amount = done['pay_amount']
+                    bObj.factory_make_id = 0
+                    bObj.order_cloth_ship_id = 0
+                    bObj.finish_amount = Decimal(0)
+                    bObj.type = 3
+                    bObj.is_sure = 1
+                    bObj.is_finish_pay = 0
                     bObj.save()
-                    # 订单是否全部确认
-                    # 是否确认
-                    orderline = PlanOrderLine.objects.filter(order_id=data['order_id'])
-                    c_pay_num = orderline.count()
-                    c_pay_sure_num = 0
-                    for o1 in orderline:
-                        if o1.is_sure_price == 1:
-                            c_pay_sure_num += 1
-                    otherPay = OrderPay.objects.filter(order_id=data['order_id'])
-                    other_pay_num = otherPay.count()
-                    other_pay_sure_num = 0
-                    for o2 in otherPay:
-                        if o2.is_sure_price == 1:
-                            other_pay_sure_num += 1
-
-                    order = PlanOrder.objects.get(id=data['order_id'])
-                    if c_pay_num == c_pay_sure_num and other_pay_num == other_pay_sure_num:
-                        order.sure_status = 1
-                    else:
-                        order.sure_status = 0
-                    order.save()
                 except:
                     msg = "id参数错误"
                     error_code = 10030
@@ -8004,21 +8016,70 @@ class productOtherAccountsView(APIView):
             }
             return Response(post_result)
 
+    #批量删除 生产组织其他应付
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for nid in ids:
+                bObj = ProductPayStatic.objects.get(id=nid)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "生产组织其他应付删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "生产组织其他应付不存在!",
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+
 class productOtherAccountsOneView(APIView):
-    # 获取其他应收款
+    # 获取生产组织其他应付
     @csrf_exempt
     def get(self, request, nid):
         try:
             order = PlanOrder.objects.get(id=nid)
-            orderPay = OrderPay.objects.filter(delete_time = None,order_id = nid)
+            makePay = ProductPayStatic.objects.filter(delete_time = None,order_id = nid,type=3)
             custom_dic, custom_list = getAllCustom(nid)
+            orderObj = PlanOrder.objects.get(delete_time=None, id=nid)
+            planOrder = PlanOrderLine.objects.filter(order_id=nid)
+            order_sn = ""
+            for one in planOrder:
+                order_sn = order_sn + one.order_sn + "|"
+            fmObj = FactoryMake.objects.filter(order_id=nid)
+            coop_mode = ''
+            ticketing_custom = ''
+            for o in fmObj:
+                coop_mode += o.coop_mode + '|'
+                ticketing_custom += o.ticketing_custom + '|'
             temp = {}
-            temp["data"] = orderPay.values()
+            temp["data"] = makePay.values()
             temp['order_type'] =order.order_type
             temp['provide'] = "南通风尚国际"
-            temp['order_type'] = order.order_type
-            temp['dhkhao'] = order.dhkhao
-            temp['price_code'] = order.price_code
+            temp['coop_mode'] = coop_mode
+            temp['ticketing_custom'] = ticketing_custom
+            temp['order_id'] = nid
+            temp["dhkh"] = orderObj.dhkhao
+            temp["price_code"] = orderObj.price_code
+            # temp["order_sn"] = order_sn
+            # temp["invoice_num"] = orderObj.invoice_num
+            # temp["fee_num"] = orderObj.fee_num
+            temp["work_type"] = orderObj.work_type
             temp['custom_list'] = custom_list
             temp['custom_dic'] = custom_dic
             temp['error_code'] = 0
@@ -8026,7 +8087,7 @@ class productOtherAccountsOneView(APIView):
             temp['request'] = request.method + '  ' + request.get_full_path()
             return Response(temp)
         except:
-            msg = "确认其他应收款"
+            msg = "确认生产组织其他应付"
             error_code = 10030
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -8036,11 +8097,11 @@ class productOtherAccountsOneView(APIView):
             }
             return Response(post_result)
 
-    # 批量删除 其他应收款
+    # 批量删除 生产组织其他应付
     @csrf_exempt
     def delete(self, request, nid):
         try:
-            bObj = OrderPay.objects.get(id=nid)
+            bObj = ProductPayStatic.objects.get(id=nid)
             dt = datetime.now()
             bObj.delete_time = dt
             bObj.save()
@@ -8124,33 +8185,17 @@ class productInAccountsView(APIView):
                     zamp["fee_num"] = one.fee_num
                     zamp["order_num"] = one.order_num
                     # 是否确认
-                    orderline = PlanOrderLine.objects.filter(order_id=one.id)
-                    c_pay_num = orderline.count()
-                    c_pay_sure_num = 0
-                    for o1 in orderline:
-                        if o1.is_sure_price == 1:
-                            c_pay_sure_num += 1
-                    zamp["c_pay_num"] = c_pay_num
-                    zamp["c_pay_sure_num"] = c_pay_sure_num
-                    otherPay = OrderPay.objects.filter(order_id=one.id)
-                    other_pay_num = otherPay.count()
-                    other_pay_sure_num = 0
-                    for o2 in otherPay:
-                        if o2.is_sure_price == 1:
-                            other_pay_sure_num += 1
-                    zamp["other_pay_num"] = other_pay_num
-                    zamp["other_pay_sure_num"] = other_pay_sure_num
-                    pay_finish_deg, pay_status, all_amount, pay_amount = orderPayStatus(one.id)
-                    zamp["pay_finish_deg"] = pay_finish_deg
-                    zamp["pay_status"] = pay_status
-                    zamp["all_amount"] = all_amount
-                    zamp["pay_amount"] = pay_amount
+                    projectPay = ProductPayStatic.objects.filter(order_id=one.id,delete_time=None)
+                    pay_sure_num = 0
+                    for o1 in projectPay:
+                        if o1.is_finish_pay == 1:
+                            pay_sure_num += 1
+                    zamp['pay_num'] = projectPay.count()
+                    zamp['pay_sure_num'] = pay_sure_num
                     zamp["status"] = "订单状态"
                     samp.append(zamp)
                 temp = {}
-                pay_info = getOrderPayNum()
                 temp["data"] = samp
-                temp['order_pay_info'] = pay_info
                 temp['error_code'] = 0
                 temp['message'] = "成功"
                 temp['request'] = request.method + '  ' + request.get_full_path()
@@ -8177,16 +8222,165 @@ class productInAccountsView(APIView):
             }
             return Response(post_result)
 
-    # 新增订单收款结算
+class productInAccountsOneView(APIView):
+    # 获取确认报价
+    @csrf_exempt
+    def get(self, request, nid):
+        try:
+            order = PlanOrder.objects.get(id=nid)
+            planOrder = PlanOrderLine.objects.filter(delete_time=None,order_id=nid)
+            mfobj = FactoryMake.objects.filter(delete_time=None,order_id=nid)
+
+            zemp = []
+            order_sn = ""
+            coop_mode = ""
+            ticketing_custom = ""
+            for one in planOrder:
+                order_sn = order_sn + one.order_sn +"|"
+            for one1 in mfobj:
+                coop_mode  = coop_mode + one1.coop_mode + "|"
+                ticketing_custom = ticketing_custom + one1.ticketing_custom + "|"
+
+            # 结算列表信息
+            projectPay = ProductPayStatic.objects.filter(order_id=nid)
+
+            temp = {}
+            temp["dhkh"] = order.dhkhao
+            temp["price_code"] = order.price_code
+            temp["order_sn"] = order_sn
+            temp["coop_mode"] = coop_mode
+            temp["invoice_num"] = order.invoice_num
+            temp["fee_num"] = order.fee_num
+            temp['work_type'] = order.work_type
+            temp["data"] = projectPay.values()
+            temp["merchant"] = "南通风尚国际"
+            temp["ticketing_custom"] = ticketing_custom
+            temp['order_id'] =nid
+            custom_dic, custom_list = getAllCustom(nid)
+            temp["custom_dic"] = custom_dic
+            temp['custom_list'] = custom_list
+            temp['error_code'] = 0
+            temp['message'] = "成功"
+            temp['request'] = request.method + '  ' + request.get_full_path()
+            return Response(temp)
+        except:
+            msg = "未找到对应的报价项目"
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+
+
+class productPayAccountsView(APIView):
+    # 获取确认报价
+    @csrf_exempt
+    def get(self, request):
+        data = request.query_params
+        valObj = orderInAccountsLineSerializer(data=request.query_params)
+        if valObj.is_valid():
+            try:
+                rObj = PlanOrder.objects.filter(delete_time=None)
+                order_type = valObj.data['order_type'] if valObj.data['order_type'] is not None else 0
+                order_custom = valObj.data['order_custom'] if valObj.data['order_custom'] is not None else ""
+                price_code = valObj.data['price_code'] if valObj.data['price_code'] is not None else ""
+                dhkhao = valObj.data['dhkhao'] if valObj.data['dhkhao'] is not None else ""
+                search_time_type = valObj.data['search_time_type'] if valObj.data['search_time_type'] is not None else 0
+                start_time = valObj.data['start_time'] if valObj.data['start_time'] is not None else ""
+                end_time = valObj.data['end_time'] if valObj.data['end_time'] is not None else ""
+                invoice_num = valObj.data['invoice_num'] if valObj.data['invoice_num'] is not None else ""
+                fee_num = valObj.data['fee_num'] if valObj.data['fee_num'] is not None else ""
+                status = valObj.data['status'] if valObj.data['status'] is not None else 0
+                if order_type != 0:
+                    rObj = rObj.filter(order_type=order_type)
+                if order_custom:
+                    rObj = rObj.filter(custom=order_custom)
+                if price_code:
+                    rObj = rObj.filter(price_code=price_code)
+                if dhkhao:
+                    rObj = rObj.filter(dhkhao=dhkhao)
+                if search_time_type == 1:
+                    if start_time:
+                        rObj = rObj.filter(create_time__gte=start_time)
+                    if end_time:
+                        rObj = rObj.filter(create_time__lte=end_time)
+                if search_time_type == 2:
+                    if start_time:
+                        rObj = rObj.filter(indicate_time__gte = start_time)
+                    if end_time:
+                        rObj = rObj.filter(indicate_time__lte = end_time)
+                if invoice_num:
+                    rObj = rObj.filter(invoice_num=invoice_num)
+                if fee_num:
+                    rObj = rObj.filter(custom=fee_num)
+                if status:
+                    rObj = rObj.filter(pay_status=status)
+                samp = []
+                for one in rObj:
+                    zamp = {}
+                    zamp["order_id"] = one.id
+                    zamp["create_time"] = one.create_time
+                    zamp["indicate_time"] = one.indicate_time
+                    zamp["order_type"] = one.order_type
+                    zamp["custom"] = one.custom
+                    zamp["price_code"] = one.price_code
+                    zamp["dhkhao"] = one.dhkhao
+                    zamp["invoice_num"] = one.invoice_num
+                    zamp["fee_num"] = one.fee_num
+                    zamp["order_num"] = one.order_num
+                    # 是否确认
+                    projectPay = ProductPayStatic.objects.filter(order_id=one.id,delete_time=None)
+                    pay_sure_num = 0
+                    for o1 in projectPay:
+                        if o1.is_finish_pay == 1:
+                            pay_sure_num += 1
+                    zamp['pay_num'] = projectPay.count()
+                    zamp['pay_sure_num'] = pay_sure_num
+                    zamp["status"] = "订单状态"
+                    samp.append(zamp)
+                temp = {}
+                temp["data"] = samp
+                temp['error_code'] = 0
+                temp['message'] = "成功"
+                temp['request'] = request.method + '  ' + request.get_full_path()
+                return Response(temp)
+
+            except:
+                msg = "未找到对应的企划订单"
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+     # 添加/编辑  付款操作
+
     @csrf_exempt
     def post(self, request):
         #################校验数据################################
         d_flag = 0
         d_num = 0
         l_msg = []
-        data  = request.data
+        data = request.data
         try:
-            order_id = data['order_id']
+            product_pay_static_id = data['product_pay_static_id']
         except:
             msg = "请输入订单id"
             error_code = 10030
@@ -8197,10 +8391,10 @@ class productInAccountsView(APIView):
                 "request": request,
             }
             return Response(post_result)
-        dataone =data['data']
+        dataone = data['data']
         for done in dataone:
             d_num = d_num + 1
-            valObjline = orderInAccountsOneSerializer(data=done)
+            valObjline = orderPayAccountsLineSerializer(data=done)
             if not valObjline.is_valid():
                 d_flag = 1
                 samp = {}
@@ -8215,47 +8409,30 @@ class productInAccountsView(APIView):
                 try:
                     mid = done['id']
                     if mid:
-                        bObj = OrderPayInfoList.objects.get(id=mid)
+                        bObj = ProductPayInfo.objects.get(id=mid)
                         bObj.update_time = dt
                     else:
-                        bObj = OrderPayInfoList()
+                        bObj = ProductPayInfo()
                         bObj.create_time = dt
-                    bObj.order_id = data['order_id']
-                    bObj.custom = done['custom']
-                    bObj.custom_type = done['custom_type']
+                    bObj.product_pay_static_id = data['product_pay_static_id']
                     bObj.price_type = done['price_type']
-                    bObj.pay_amount = done['pay_amount']
-                    bObj.pay_y_amount = done['pay_y_amount']
-                    bObj.pay_n_amount_one = done['pay_n_amount_one']
-                    bObj.beizhun = done['beizhun']
-                    bObj.order_line_id = done['order_line_id']
-                    bObj.order_other_pay_id = done['order_other_pay_id']
+                    bObj.pay_mode = done['pay_mode']
+                    bObj.pay_now_amount = done['pay_now_amount']
+                    bObj.pay_all_amount = done['pay_all_amount']
+                    bObj.pay_no_amount = done['pay_no_amount']
+                    bObj.is_entrust = done['is_entrust']
+                    bObj.entrust_company = done['entrust_company']
+                    bObj.entrust_book = done['entrust_book']
                     bObj.save()
-                    # 订单是否全部确认
-                    if done['order_line_id']:
-                        orderline = PlanOrderLine.objects.get(id=done['order_line_id'])
-                        payInfo = OrderPayInfoList.objects.filter(delete_time=None,order_line_id=done['order_line_id'])
-                        amount = orderline.order_price
-                        y_amount = Decimal(0)
-                        for o1 in payInfo:
-                            y_amount = y_amount +o1.pay_amount
-                        if orderline.order_price == y_amount:
-                            orderline.is_finish_pay = 1
-                        orderline.pay_y_amount = y_amount
-                        orderline.pay_n_amount = amount-y_amount
-                        orderline.save()
-                    if done['order_other_pay_id']:
-                        orderPay = OrderPay.objects.get(id=done['order_other_pay_id'])
-                        payInfo = OrderPayInfoList.objects.filter(delete_time=None, order_other_pay_id=done['order_other_pay_id'])
-                        amount = orderPay.amount
-                        y_amount = Decimal(0)
-                        for o2 in payInfo:
-                            y_amount = y_amount + o2.pay_amount
-                        if orderPay.amount == y_amount:
-                            orderPay.is_finish_pay = 1
-                        orderPay.pay_y_amount = y_amount
-                        orderPay.pay_n_amount = amount-y_amount
-                        orderPay.save()
+                    productsta = ProductPayStatic.objects.get(id= data['product_pay_static_id'])
+                    infoObj = ProductPayInfo.objects.filter(product_pay_static_id=data['product_pay_static_id'])
+                    amount  = Decimal(0)
+                    for one in infoObj:
+                        amount +=one.pay_now_amount
+                    productsta.finish_amount = amount
+                    if productsta.pay_amount<=amount:
+                        productsta.is_finish_pay = 1
+                    productsta.save()
                 except:
                     msg = "id参数错误"
                     error_code = 10030
@@ -8266,7 +8443,7 @@ class productInAccountsView(APIView):
                         "request": request,
                     }
                     return Response(post_result)
-            msg = "保存收款结算信息"
+            msg = "编辑付款操作"
             error_code = 0
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -8286,14 +8463,69 @@ class productInAccountsView(APIView):
             }
             return Response(post_result)
 
-    #批量删除 发货方案
+
+class productPayAccountsOneView(APIView):
+    # 获取确认报价
+    @csrf_exempt
+    def get(self, request, nid):
+        try:
+            projectPay = ProductPayStatic.objects.get(id=nid,delete_time=None)
+            order = PlanOrder.objects.get(delete_time=None,id=projectPay.order_id)
+            planOrder = PlanOrderLine.objects.filter(delete_time=None,order_id=projectPay.order_id)
+            mfobj = FactoryMake.objects.filter(delete_time=None,order_id=projectPay.order_id)
+            order_sn = ""
+            coop_mode = ""
+            ticketing_custom = ""
+            for one in planOrder:
+                order_sn = order_sn + one.order_sn +"|"
+            for one1 in mfobj:
+                coop_mode  = coop_mode + one1.coop_mode + "|"
+                ticketing_custom = ticketing_custom + one1.ticketing_custom + "|"
+            # 结算列表信息
+            if projectPay.type == 1:
+                samp = getMakePayInfo1(nid)
+            if projectPay.type == 2:
+                samp = getMakePayInfo2(nid)
+            if projectPay.type == 3:
+                samp = getMakePayInfo3(nid)
+
+            temp = {}
+            temp["order_sn"] = order_sn
+            temp["coop_mode"] = coop_mode
+            temp["invoice_num"] = order.invoice_num
+            temp["fee_num"] = order.fee_num
+            temp['work_type'] = order.work_type
+            temp["custom"] = projectPay.custom
+            temp["pay_custom"] = projectPay.pay_custom
+            temp["pay_amount"] = projectPay.pay_amount
+            temp["finish_amount"] = projectPay.finish_amount
+            temp['order_id'] =projectPay.order_id
+            temp['type'] = projectPay.type
+            temp["data"] = samp
+            temp['error_code'] = 0
+            temp['message'] = "成功"
+            temp['request'] = request.method + '  ' + request.get_full_path()
+            return Response(temp)
+        except:
+            msg = "未找到对应的报价项目"
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+    # 批量删除 生产组织其他应付
+
     @csrf_exempt
     def delete(self, request):
         try:
             data = request.data
             ids = data['ids']
             for nid in ids:
-                bObj = OrderPayInfoList.objects.get(id=nid)
+                bObj = ProductPayInfo.objects.get(id=nid)
                 dt = datetime.now()
                 bObj.delete_time = dt
                 bObj.save()
@@ -8302,12 +8534,12 @@ class productInAccountsView(APIView):
             error_code = 0
             post_result = {
                 "error_code": error_code,
-                "message": "收款结算删除成功!",
+                "message": "生产应付付款操作成功删除成功!",
                 "request": request,
             }
             return Response(post_result)
         except:
-            msg = "收款结算不存在!",
+            msg = "生产应付付款操作不存在!",
             error_code = 10020
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -8316,148 +8548,3 @@ class productInAccountsView(APIView):
                 "request": request,
             }
             return Response(post_result)
-
-
-class productInAccountsOneView(APIView):
-    # 获取确认报价
-    @csrf_exempt
-    def get(self, request, nid):
-        try:
-            order = PlanOrder.objects.get(id=nid)
-            planOrder = PlanOrderLine.objects.filter(order_id=nid)
-            orderPay = OrderPay.objects.filter(order_id=nid)
-            zemp = []
-            order_sn = ""
-            for one in planOrder:
-                samp = {}
-                order_sn = order_sn + one.order_sn +"|"
-                samp['custom'] = one.order_custom
-                samp['custom_flag'] = 1
-                samp['price_type'] = one.order_price_type
-                samp['amount'] = one.order_price
-                samp['pay_y_amount'] = one.pay_y_amount
-                samp['pay_n_amount'] = one.pay_n_amount
-                samp['order_id'] = nid
-                samp['order_line_id'] = one.id
-                samp['order_other_pay_id'] = 0
-                zemp.append(samp)
-            for one2 in orderPay:
-                samp = {}
-                samp['custom'] = one2.custom
-                samp['custom_flag'] = 1
-                samp['price_type'] = one2.pay_type
-                samp['amount'] = one2.amount
-                samp['pay_y_amount'] = one2.pay_y_amount
-                samp['pay_n_amount'] = one2.pay_n_amount
-                samp['order_id'] = nid
-                samp['order_line_id'] = 0
-                samp['order_other_pay_id'] = one.id
-                zemp.append(samp)
-            # 结算列表信息
-            orderPayInfoList = OrderPayInfoList.objects.filter(delete_time=None,order_id = nid)
-            data = orderPayInfoList.values()
-            for o3 in data:
-                if o3.order_line_id:
-                    lineone = PlanOrderLine.objects.get(id=o3.order_line_id)
-                    o3['pay_y_amount'] = lineone.pay_y_amount
-                if o3.order_other_pay_id:
-                    orderpay = OrderPay.objects.get(id=o3.order_other_pay_id)
-                    o3['pay_y_amount'] = orderpay.pay_y_amount
-            temp = {}
-            temp["dhkh"] = order.dhkhao
-            temp["price_code"] = order.price_code
-            temp["order_sn"] = order_sn
-            temp["invoice_num"] = order.invoice_num
-            temp["fee_num"] = order.fee_num
-            temp["data"] = orderPayInfoList.values()
-            temp["payData"] = zemp
-            temp['order_id'] =nid
-            custom_dic, custom_list = getAllCustom(nid)
-            temp["custom_dic"] = custom_dic
-            temp['custom_list'] = custom_list
-            temp['error_code'] = 0
-            temp['message'] = "成功"
-            temp['request'] = request.method + '  ' + request.get_full_path()
-            return Response(temp)
-        except:
-            msg = "未找到对应的仓位信息"
-            error_code = 10030
-            request = request.method + '  ' + request.get_full_path()
-            post_result = {
-                "error_code": error_code,
-                "message": msg,
-                "request": request,
-            }
-            return Response(post_result)
-
-    @csrf_exempt
-    def put(self, request, nid):
-        try:
-            dt = datetime.now()
-            # 订单项
-            order = PlanOrder.objects.get(id=nid)
-            order.is_finish_pay = 1
-            order.save()
-            orderLine = PlanOrderLine.objects.filter(order_id = nid)
-            for one in orderLine:
-                one.is_finish_pay = 1
-                one.save()
-                payInfo = OrderPayInfoList.objects.filter(order_line_id = one.id)
-                y_l_amount = Decimal(0)
-                for o1 in payInfo:
-                    y_l_amount += o1.pay_amount
-                if one.order_price == y_l_amount:
-                    one.is_finish_pay = 1
-                    one.save()
-                else:
-                    msg = "存在不一致的结算数据"
-                    error_code = 0
-                    request = request.method + '  ' + request.get_full_path()
-                    post_result = {
-                        "error_code": error_code,
-                        "message": msg,
-                        "request": request,
-                    }
-                    return Response(post_result)
-            payOther = OrderPay.objects.filter(order_id = nid)
-            for one1 in payOther:
-                one1.is_finish_pay = 1
-                one1.save()
-                payInfo = OrderPayInfoList.objects.filter(order_other_pay_id=one1.id)
-                y_o_amount = Decimal(0)
-                for o2 in payInfo:
-                    y_o_amount += o2.pay_amount
-                if one1.amount == y_o_amount:
-                    one1.is_finish_pay = 1
-                    one1.save()
-                else:
-                    msg = "存在不一致的结算数据"
-                    error_code = 10030
-                    request = request.method + '  ' + request.get_full_path()
-                    post_result = {
-                        "error_code": error_code,
-                        "message": msg,
-                        "request": request,
-                    }
-                    return Response(post_result)
-            msg = "确认全部收款完成"
-            error_code = 0
-            request = request.method + '  ' + request.get_full_path()
-            post_result = {
-                "error_code": error_code,
-                "message": msg,
-                "request": request,
-            }
-            return Response(post_result)
-        except:
-            msg = "id参数错误"
-            error_code = 10030
-            request = request.method + '  ' + request.get_full_path()
-            post_result = {
-                "error_code": error_code,
-                "message": msg,
-                "request": request,
-            }
-            return Response(post_result)
-
-

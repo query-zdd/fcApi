@@ -398,6 +398,163 @@ def getSupplierSure(order_id):
     supplier_no_num = supplier_num - supplier_sure_num
     return supplier_num,supplier_sure_num,supplier_no_num
 
+
+# 获取指定订单，加工工厂，订单项下的产品的颜色，客户色号下的信息
+def getOrderFactoryInfoColor(order_id,order_line_id,factory_make_id):
+
+    order = PlanOrder.objects.get(id=order_id)
+    orderLine = PlanOrderLine.objects.get(id = order_line_id)
+    facObj = FactoryMake.objects.get(id=factory_make_id)
+    fcLineObj = FactoryMakeLine.objects.filter(factory_make_id=factory_make_id,order_line_id = order_line_id,delete_time=None).order_by("color_name","specs")
+    samp = []
+    zemp = []
+    jamp = {}
+    specs_list =[]
+    specs_dic = {}
+    for one in fcLineObj:
+        if one.color_name not in samp:
+            samp.append(one.color_name)
+            if jamp:
+                jamp['specs_list'] = specs_dic
+                zemp.append(jamp)
+                jamp = {}
+                specs_dic = {}
+            # 检品出货详情
+            mkfin = MakeFatoryInspect.objects.filter(order_line_id=order_line_id,make_factory_id=factory_make_id,color=one.color_num)
+            jamp['order_line_id'] = order_line_id
+            jamp['factory_make_id'] = factory_make_id
+            # jamp['custom'] = orderLine.order_custom
+            # jamp['order_type'] = orderLine.order_type
+            jamp['color_name'] = one.color_name
+            jamp['color_num'] = one.color_num
+            if mkfin.count()>0:
+                jamp['inspect_num'] = mkfin[0].inspect_num
+                jamp['total'] = mkfin[0].total
+                # B品数量
+                jamp["inspect_b_num"] = mkfin[0].b_num
+
+            else:
+                jamp['inspect_num'] = 0
+                jamp['total'] = 0
+                jamp["inspect_b_num"] = 0
+            jamp['sure_b_num'] = one.b_num
+            specs_dic[one.specs] = one.specs
+            
+            #样品结算
+            sample_pay_num = 0
+            sample_num = 0
+            planClothSamp = PlanClothSampleLine.objects.filter(plan_id=order.plan_id,custom= facObj.make_factory)
+            if planClothSamp.count()>0:
+                for one2 in planClothSamp:
+                    planClothSampNum = PlanClothSampleNumber.objects.filter(pcsl_id = one2.id,sub_color_name= one.color_name)
+                    for one3 in planClothSampNum:
+                        sample_num +=one3.num
+                        if one2.is_pay==1:
+                            sample_pay_num +=one3.num
+            jamp['sample_num'] = sample_num
+            jamp['sample_pay_num'] = sample_pay_num
+        else:
+            specs_dic[one.specs] = one.specs
+
+    return samp,zemp
+
+
+#获取指定订单的生产应付
+def getMakePayInfo1(nid):
+    projectPay = ProductPayStatic.objects.get(id=nid, delete_time=None)
+    one = OrderClothShip.objects.get(delete_time=None, id=nid)
+    orderObj = PlanOrder.objects.get(id=projectPay.order_id)
+    samp = {}
+    planMater = PlanMaterial.objects.get(id=one.plan_material_id)
+    samp['cloth_type'] = one.cloth_type
+    samp['cloth_cat'] = one.cloth_cat
+    samp['cloth_name'] = one.cloth_name
+    samp['m_unit'] = planMater.m_unit
+    samp['m_use'] = planMater.m_use
+    samp['m_rate'] = planMater.m_rate
+    samp['loss_lv'] = one.loss_lv
+    samp['buy_all_num'] = one.buy_all_num
+    samp['supplier'] = one.supplier
+    samp['delivery_type'] = one.delivery_type
+    samp['delivery_name'] = one.delivery_name
+    if one.price_type:
+        samp['price_type'] = one.price_type
+    else:
+        samp['price_type'] = "人民币"
+    samp['all_amount'] = one.all_amount
+    samp['is_inspect'] = one.is_inspect
+    samp['order_cloth_ship_id'] = one.id
+    rObj = OrderClothLineShip.objects.filter(delete_time=None, order_cloth_id=one.order_cloth_id,
+                                             order_cloth_ship_id=one.id).order_by('color', 'specs')
+    sub_data = []
+    for one1 in rObj:
+        zamp = {}
+        zamp["order_cloth_ship_line_id"] = one1.id
+        zamp['color'] = one1.color
+        zamp['color_num'] = one1.color_num
+        zamp['guige'] = one1.guige
+        zamp['specs'] = one1.specs
+        zamp['order_num'] = orderObj.order_num
+        zamp['buy_num'] = one1.buy_num
+
+        zamp['provide_num'] = one1.provide_num
+        zamp['provide_time'] = one1.provide_time
+        zamp['price'] = one1.price
+        zamp['sure_price'] = one1.sure_price
+        zamp['amount'] = one1.amount
+        zamp['sample_send_time'] = one1.sample_send_time
+        zamp['is_sure_pay'] = one1.is_sure_pay
+        sub_data.append(zamp)
+    samp['sub_data'] = sub_data
+    productInfo = ProductPayInfo.objects.filter(product_pay_static_id=nid)
+    samp['pay_info'] = productInfo.values()
+    return  samp
+
+
+#获取指定订单的生产应付
+def getMakePayInfo2(nid):
+    projectPay = ProductPayStatic.objects.get(id=nid, delete_time=None)
+    facObj = FactoryMake.objects.get(id = projectPay.factory_make_id)
+    facinObj = MakeFatoryInspect.objects.filter(make_factory_id=projectPay.factory_make_id)
+    order = PlanOrder.objects.get(id =projectPay.order_id )
+    paln = PlanPrice.objects.get(plan_id = order.plan_id)
+    inspect_num = 0
+    b_num = 0
+    for one in facinObj:
+        if one.inspect_num:
+            inspect_num +=one.inspect_num
+        if b_num:
+            b_num +=one.b_num
+    samp={ }
+    samp['pay_project'] = "加工费"
+    samp['custom'] = facObj.make_factory
+    samp['price_type'] = projectPay.price_type
+    samp['plan_amount'] = paln.plan_price
+    samp['inspect_num'] = inspect_num
+    if facObj.make_num:
+        samp['good_num'] = facObj.make_num - b_num
+    else:
+        samp['good_num'] = 0
+    samp['b_num'] = b_num
+    try:
+        samp['b_lv'] = b_num/ samp['good_num']
+    except:
+        samp['b_lv'] = 0
+    samp['pay_rule'] = "结算原则"
+    samp['pay_amount'] = facObj.amount
+    productInfo = ProductPayInfo.objects.filter(product_pay_static_id=nid)
+    samp['pay_info'] = productInfo.values()
+    return  samp
+
+
+#获取指定订单的生产应付
+def getMakePayInfo3(nid):
+    projectPay = ProductPayStatic.objects.get(id=nid, delete_time=None)
+    samp = model_to_dict(projectPay)
+    productInfo = ProductPayInfo.objects.filter(product_pay_static_id=nid)
+    samp['pay_info'] = productInfo.values()
+    return  samp
+
 # 日期之差
 def downDay(d1,d2):
     if d1 and d2:

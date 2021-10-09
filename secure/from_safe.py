@@ -1049,3 +1049,36 @@ class productAccountOneSerializer(serializers.Serializer):
     price_type = serializers.CharField(error_messages={'required': '必须传入结算币种'})
     sure_price = serializers.CharField(error_messages={'required': '必须传入确定采购单价'})
     is_sure_pay = serializers.IntegerField(error_messages={'required': '必须传入确认报价'})
+    pay_amount = serializers.CharField(error_messages={'required': '必须传入合计金额'})
+
+class productMakeAccountOneSerializer(serializers.Serializer):
+    price_type = serializers.CharField(error_messages={'required': '必须传入结算币种'})
+    sure_amount = serializers.CharField(error_messages={'required': '必须传入确定报价'})
+    amount = serializers.CharField(error_messages={'required': '必须传入合计金额'})
+    make_pay_num = serializers.IntegerField(error_messages={'required': '必须传入合计数量'})
+
+class makeOtherAcountOneSerializer(serializers.Serializer):
+    pay_project = serializers.CharField(error_messages={'required': '必须传入应付报价项目！'})
+    custom_type = serializers.CharField(error_messages={'required': '必须传入客户名称！'})
+    custom = serializers.CharField(error_messages={'required': '必须传入供应商/合作客户（收款方）！'})
+    pay_custom = serializers.CharField(error_messages={'required': '必须传入付款方！'})
+    pay_comment = serializers.CharField(error_messages={'required': '必须传入结算内容'})
+    price_type = serializers.CharField(error_messages={'required': '必须传入结算币种'})
+    pay_num = serializers.CharField(error_messages={'required': '必须传入结算数量'})
+    pay_price = serializers.CharField(error_messages={'required': '必须传入结算单价'})
+    pay_amount = serializers.CharField(error_messages={'required': '必须传入结算金额'})
+    id = serializers.IntegerField(default=0)
+
+
+
+
+class orderPayAccountsLineSerializer(serializers.Serializer):
+    price_type = serializers.CharField(error_messages={'required': '必须传入结算币种'})
+    pay_mode = serializers.CharField(error_messages={'required': '必须传入付款性质！'})
+    pay_now_amount = serializers.CharField(error_messages={'required': '必须传入付款金额！'})
+    pay_all_amount = serializers.CharField(error_messages={'required': '必须传入累计付款！'})
+    pay_no_amount = serializers.CharField(error_messages={'required': '必须传入本期未付！'})
+    is_entrust = serializers.CharField(error_messages={'required': '必须传入是否委托'})
+    entrust_company = serializers.CharField(allow_blank=True,allow_null=True)
+    entrust_book = serializers.CharField(allow_blank=True,allow_null=True)
+    id = serializers.IntegerField(default=0)

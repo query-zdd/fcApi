@@ -107,6 +107,9 @@ urlpatterns = [
     url('^productInAccounts$', views.productInAccountsView.as_view()),
     url('^productInAccounts/(?P<nid>\d+)', views.productInAccountsOneView.as_view()),
 
+    url('^productPayAccounts$', views.productPayAccountsView.as_view()),
+    url('^productPayAccounts/(?P<nid>\d+)', views.productPayAccountsOneView.as_view()),
+
 
 
 

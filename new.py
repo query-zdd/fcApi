@@ -391,6 +391,14 @@ class FactoryMake(models.Model):
     flag = models.IntegerField(blank=True, null=True)
     inspect_name = models.CharField(max_length=255, blank=True, null=True)
     inspect_url = models.TextField(blank=True, null=True)
+    is_b_sure = models.IntegerField(db_column='is_B_sure', blank=True, null=True)  # Field name made lowercase.
+    make_pay_num = models.IntegerField(blank=True, null=True)
+    price_type = models.CharField(max_length=255, blank=True, null=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    sure_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    is_sure_pay = models.IntegerField(blank=True, null=True)
+    is_finish_pay = models.IntegerField(blank=True, null=True)
+    finish_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -414,6 +422,8 @@ class FactoryMakeLine(models.Model):
     make_num = models.IntegerField(blank=True, null=True)
     no_allocation_num = models.IntegerField(blank=True, null=True)
     factory_make_id = models.IntegerField(blank=True, null=True)
+    b_num = models.IntegerField(blank=True, null=True)
+    is_b_sure = models.IntegerField(db_column='is_B_sure', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -534,6 +544,8 @@ class MakeFatoryInspect(models.Model):
     nw = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     meas = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     make_factory = models.CharField(max_length=255, blank=True, null=True)
+    inspect_num = models.IntegerField(blank=True, null=True)
+    b_num = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -636,6 +648,7 @@ class OrderClothLineShip(models.Model):
     is_sure_in_store = models.IntegerField(blank=True, null=True)
     is_sure_pay = models.IntegerField(blank=True, null=True)
     sure_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    pay_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -665,6 +678,7 @@ class OrderClothShip(models.Model):
     is_sure_in_store = models.IntegerField(blank=True, null=True)
     price_type = models.CharField(max_length=255, blank=True, null=True)
     is_sure_pay = models.IntegerField(blank=True, null=True)
+    is_finish_pay = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1286,6 +1300,52 @@ class Post(models.Model):
     class Meta:
         managed = False
         db_table = 'post'
+
+
+class ProductPayInfo(models.Model):
+    create_time = models.DateTimeField(blank=True, null=True)
+    update_time = models.DateTimeField(blank=True, null=True)
+    delete_time = models.DateTimeField(blank=True, null=True)
+    product_pay_static_id = models.IntegerField(blank=True, null=True)
+    price_type = models.CharField(max_length=255, blank=True, null=True)
+    pay_mode = models.CharField(max_length=255, blank=True, null=True)
+    pay_now_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    pay_all_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    pay_no_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    is_entrust = models.IntegerField(blank=True, null=True)
+    entrust_company = models.CharField(max_length=255, blank=True, null=True)
+    entrust_book = models.CharField(max_length=255, blank=True, null=True)
+    beizhu = models.CharField(max_length=255, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'product_pay_info'
+
+
+class ProductPayStatic(models.Model):
+    create_time = models.DateTimeField(blank=True, null=True)
+    update_time = models.DateTimeField(blank=True, null=True)
+    delete_time = models.DateTimeField(blank=True, null=True)
+    order_id = models.IntegerField(blank=True, null=True)
+    pay_project = models.CharField(max_length=255, blank=True, null=True)
+    custom_type = models.CharField(max_length=255, blank=True, null=True)
+    custom = models.CharField(max_length=255, blank=True, null=True)
+    pay_custom = models.CharField(max_length=255, blank=True, null=True)
+    pay_comment = models.CharField(max_length=255, blank=True, null=True)
+    price_type = models.CharField(max_length=255, blank=True, null=True)
+    pay_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    pay_num = models.IntegerField(blank=True, null=True)
+    pay_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    finish_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    is_sure = models.IntegerField(blank=True, null=True)
+    is_finish_pay = models.IntegerField(blank=True, null=True)
+    type = models.IntegerField(blank=True, null=True)
+    factory_make_id = models.IntegerField(blank=True, null=True)
+    order_cloth_ship_id = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'product_pay_static'
 
 
 class PurchasingRecords(models.Model):
