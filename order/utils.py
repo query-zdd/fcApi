@@ -555,6 +555,24 @@ def getMakePayInfo3(nid):
     samp['pay_info'] = productInfo.values()
     return  samp
 
+# 获取成衣样品报价项目明细
+def getSamplePayProject(order_id):
+    facObj = FactoryMake.objects.filter(order_id=order_id)
+    sampObj = SamplePayStatic.objects.filter(order_id=order_id)
+    samp=[]
+    for one1 in facObj:
+        temp={}
+        temp['price_type'] = one1.price_type
+        temp['price_type'] = one1.price_type
+        temp['price_type'] = one1.price_type
+        temp['price_type'] = one1.price_type
+        temp['price_type'] = one1.price_type
+        temp['price_type'] = one1.price_type
+        temp['price_type'] = one1.price_type
+        temp['price_type'] = one1.price_type
+        temp['price_type'] = one1.price_type
+        temp['price_type'] = one1.price_type
+
 # 日期之差
 def downDay(d1,d2):
     if d1 and d2:

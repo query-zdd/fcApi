@@ -1070,8 +1070,6 @@ class makeOtherAcountOneSerializer(serializers.Serializer):
     id = serializers.IntegerField(default=0)
 
 
-
-
 class orderPayAccountsLineSerializer(serializers.Serializer):
     price_type = serializers.CharField(error_messages={'required': '必须传入结算币种'})
     pay_mode = serializers.CharField(error_messages={'required': '必须传入付款性质！'})
@@ -1082,3 +1080,18 @@ class orderPayAccountsLineSerializer(serializers.Serializer):
     entrust_company = serializers.CharField(allow_blank=True,allow_null=True)
     entrust_book = serializers.CharField(allow_blank=True,allow_null=True)
     id = serializers.IntegerField(default=0)
+
+class sampOtherAcountOneSerializer(serializers.Serializer):
+    custom = serializers.CharField(error_messages={'required': '必须传入成衣出票客户（供货/收款方）！'})
+    pay_custom = serializers.CharField(error_messages={'required': '必须传入成衣采购方（付款方）！'})
+    pay_comment = serializers.CharField(error_messages={'required': '必须传入结算内容'})
+    price_type = serializers.CharField(error_messages={'required': '必须传入结算币种'})
+    pay_num = serializers.CharField(error_messages={'required': '必须传入结算数量'})
+    pay_price = serializers.CharField(error_messages={'required': '必须传入结算单价'})
+    pay_amount = serializers.CharField(error_messages={'required': '必须传入结算金额'})
+    id = serializers.IntegerField(default=0)
+
+class sampleMakeAccountOneSerializer(serializers.Serializer):
+    price_type = serializers.CharField(error_messages={'required': '必须传入结算币种'})
+    sample_sure_amount = serializers.CharField(error_messages={'required': '必须传入确定报价'})
+    amount = serializers.CharField(error_messages={'required': '必须传入合计金额'})

@@ -110,6 +110,17 @@ urlpatterns = [
     url('^productPayAccounts$', views.productPayAccountsView.as_view()),
     url('^productPayAccounts/(?P<nid>\d+)', views.productPayAccountsOneView.as_view()),
 
+    url('^sampleAccounts$', views.sampleAccountsView.as_view()),
+
+    url('^sampleOtherAccounts$', views.sampleOtherAccountsView.as_view()),
+    url('^sampleOtherAccounts/(?P<nid>\d+)', views.sampleOtherAccountsOneView.as_view()),
+
+    url('^samplePayNumAccounts$', views.samplePayNumAccountsView.as_view()),
+    url('^samplePayNumAccounts/(?P<nid>\d+)', views.samplePayNumAccountsOneView.as_view()),
+
+    url('^sampleInAccounts$', views.sampleInAccountsView.as_view()),
+    url('^sampleInAccounts/(?P<nid>\d+)', views.sampleInAccountsOneView.as_view()),
+
 
 
 

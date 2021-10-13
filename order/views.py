@@ -7305,11 +7305,11 @@ class orderInAccountsOneView(APIView):
             orderPayInfoList = OrderPayInfoList.objects.filter(delete_time=None,order_id = nid)
             data = orderPayInfoList.values()
             for o3 in data:
-                if o3.order_line_id:
-                    lineone = PlanOrderLine.objects.get(id=o3.order_line_id)
+                if o3["order_line_id"]:
+                    lineone = PlanOrderLine.objects.get(id=o3["order_line_id"])
                     o3['pay_y_amount'] = lineone.pay_y_amount
-                if o3.order_other_pay_id:
-                    orderpay = OrderPay.objects.get(id=o3.order_other_pay_id)
+                if o3["order_other_pay_id"]:
+                    orderpay = OrderPay.objects.get(id=o3["order_other_pay_id"])
                     o3['pay_y_amount'] = orderpay.pay_y_amount
             temp = {}
             temp["dhkh"] = order.dhkhao
@@ -8097,35 +8097,6 @@ class productOtherAccountsOneView(APIView):
             }
             return Response(post_result)
 
-    # 批量删除 生产组织其他应付
-    @csrf_exempt
-    def delete(self, request, nid):
-        try:
-            bObj = ProductPayStatic.objects.get(id=nid)
-            dt = datetime.now()
-            bObj.delete_time = dt
-            bObj.save()
-            # 返回数据
-            request = request.method + '  ' + request.get_full_path()
-            error_code = 0
-            post_result = {
-                "error_code": error_code,
-                "message": "其他应收款信息删除成功!",
-                "request": request,
-            }
-            return Response(post_result)
-        except:
-            msg = "其他应收款不存在!",
-            error_code = 10020
-            request = request.method + '  ' + request.get_full_path()
-            post_result = {
-                "error_code": error_code,
-                "message": msg,
-                "request": request,
-            }
-            return Response(post_result)
-
-
 
 
 class productInAccountsView(APIView):
@@ -8566,3 +8537,883 @@ class productPayAccountsOneView(APIView):
                 "request": request,
             }
             return Response(post_result)
+
+
+class sampleAccountsView(APIView):
+    # 获取确认报价
+    @csrf_exempt
+    def get(self, request):
+        data = request.query_params
+        valObj = orderAccountsLineSerializer(data=request.query_params)
+        if valObj.is_valid():
+            try:
+                order_type = valObj.data['order_type'] if valObj.data['order_type'] is not None else 0
+                status = valObj.data['status'] if valObj.data['status'] is not None else 0
+                order_custom = valObj.data['order_custom'] if valObj.data['order_custom'] is not None else ""
+                price_code = valObj.data['price_code'] if valObj.data['price_code'] is not None else ""
+                dhkhao = valObj.data['dhkhao'] if valObj.data['dhkhao'] is not None else ""
+                brand = valObj.data['brand'] if valObj.data['brand'] is not None else ""
+                rObj = PlanOrder.objects.filter(delete_time=None)
+                if status == 0:
+                    rObj = rObj.filter(~Q(sure_status=1))
+                if status ==1:
+                    rObj = rObj.filter(sure_status=1)
+                if order_type != 0:
+                    rObj = rObj.filter(order_type=order_type)
+                if order_custom:
+                    rObj = rObj.filter(custom=order_custom)
+                if price_code:
+                    rObj = rObj.filter(price_code=price_code)
+                if dhkhao:
+                    rObj = rObj.filter(dhkhao=dhkhao)
+                if brand:
+                    rObj = rObj.filter(brand=brand)
+
+                samp = []
+                for one in rObj:
+                    zamp = {}
+                    zamp["order_id"] = one.id
+                    zamp["create_time"] = one.create_time
+                    zamp["indicate_time"] = one.indicate_time
+                    zamp["order_type"] = one.order_type
+                    zamp["custom"] = one.custom
+                    zamp["price_code"] = one.price_code
+                    zamp["dhkhao"] = one.dhkhao
+                    zamp["brand"] = one.brand
+                    zamp["goods_name"] = one.goods_name
+                    zamp["order_num"] = one.order_num
+                    # 是否确认
+                    orderline = OrderClothShip.objects.filter(order_id=one.id)
+                    c_pay_num = orderline.count()
+                    c_pay_sure_num = 0
+                    for o1 in orderline:
+                        if o1.is_sure_pay == 1:
+                            c_pay_sure_num += 1
+                    zamp["c_pay_num"] = c_pay_num
+                    zamp["c_pay_sure_num"] = c_pay_sure_num
+                    otherPay = FactoryMake.objects.filter(order_id=one.id)
+                    other_pay_num = otherPay.count()
+                    other_pay_sure_num = 0
+                    for o2 in otherPay:
+                        if o2.is_sure_pay == 1:
+                            other_pay_sure_num +=1
+                    zamp["make_pay_num"] = other_pay_num
+                    zamp["make_pay_sure_num"] = other_pay_sure_num
+                    zamp["status"] = status
+                    samp.append(zamp)
+                temp = {}
+                temp["data"] = samp
+                temp['error_code'] = 0
+                temp['message'] = "成功"
+                temp['request'] = request.method + '  ' + request.get_full_path()
+                return Response(temp)
+
+            except:
+                msg = "未找到对应的企划订单"
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+
+class sampleOtherAccountsView(APIView):
+    # 添加/编辑 生产组织其他应付
+    @csrf_exempt
+    def post(self, request):
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        data  = request.data
+        try:
+            order_id = data['order_id']
+        except:
+            msg = "请输入订单id"
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+        dataone =data['data']
+        for done in dataone:
+            d_num = d_num + 1
+            valObjline = sampOtherAcountOneSerializer(data=done)
+            if not valObjline.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObjline.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
+        dt = datetime.now()
+        ##############保存装箱指示#############################
+        if d_flag == 0:
+            for done in dataone:
+                try:
+                    mid =done['id']
+                    if mid:
+                        bObj = SamplePayStatic.objects.get(id=mid)
+                        bObj.update_time = dt
+                    else:
+                        bObj = SamplePayStatic()
+                        bObj.create_time = dt
+                    bObj.order_id = data['order_id']
+                    bObj.custom = done['custom']
+                    bObj.pay_custom = done['pay_custom']
+                    bObj.pay_comment = done['pay_comment']
+                    bObj.price_type = done['price_type']
+                    bObj.pay_num = done['pay_num']
+                    bObj.pay_price = done['pay_price']
+                    bObj.pay_amount = done['pay_amount']
+                    bObj.finish_amount = Decimal(0)
+                    bObj.is_sure = 1
+                    bObj.is_finish_pay = 0
+                    bObj.save()
+                except:
+                    msg = "id参数错误"
+                    error_code = 10030
+                    request = request.method + '  ' + request.get_full_path()
+                    post_result = {
+                        "error_code": error_code,
+                        "message": msg,
+                        "request": request,
+                    }
+                    return Response(post_result)
+            msg = "编辑其他应收款"
+            error_code = 0
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+        else:
+            msg = l_msg
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+    #批量删除 生产组织其他应付
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for nid in ids:
+                bObj = SamplePayStatic.objects.get(id=nid)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "生产组织其他应付删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "生产组织其他应付不存在!",
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+
+class sampleOtherAccountsOneView(APIView):
+    # 获取生产组织其他应付
+    @csrf_exempt
+    def get(self, request, nid):
+        try:
+            order = PlanOrder.objects.get(id=nid)
+            samplePay = SamplePayStatic.objects.filter(delete_time = None,order_id = nid)
+            custom_dic, custom_list = getAllCustom(nid)
+            orderObj = PlanOrder.objects.get(delete_time=None, id=nid)
+            planOrder = PlanOrderLine.objects.filter(order_id=nid)
+            order_sn = ""
+            for one in planOrder:
+                order_sn = order_sn + one.order_sn + "|"
+            fmObj = FactoryMake.objects.filter(order_id=nid)
+            coop_mode = ''
+            ticketing_custom = ''
+            for o in fmObj:
+                coop_mode += o.coop_mode + '|'
+                ticketing_custom += o.ticketing_custom + '|'
+            temp = {}
+            temp["data"] = samplePay.values()
+            temp['order_type'] =order.order_type
+            temp['provide'] = "南通风尚国际"
+            temp['coop_mode'] = coop_mode
+            temp['ticketing_custom'] = ticketing_custom
+            temp['order_id'] = nid
+            temp["dhkh"] = orderObj.dhkhao
+            temp["price_code"] = orderObj.price_code
+            temp["work_type"] = orderObj.work_type
+            temp['custom_list'] = custom_list
+            temp['custom_dic'] = custom_dic
+            temp['error_code'] = 0
+            temp['message'] = "成功"
+            temp['request'] = request.method + '  ' + request.get_full_path()
+            return Response(temp)
+        except:
+            msg = "确认生产组织其他应付"
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+
+
+class samplePayNumAccountsView(APIView):
+    # 获取确认报价
+    @csrf_exempt
+    def get(self, request):
+        data = request.query_params
+        valObj = orderAccountsLineSerializer(data=request.query_params)
+        if valObj.is_valid():
+            try:
+                order_type = valObj.data['order_type'] if valObj.data['order_type'] is not None else 0
+                status = valObj.data['status'] if valObj.data['status'] is not None else 0
+                order_custom = valObj.data['order_custom'] if valObj.data['order_custom'] is not None else ""
+                price_code = valObj.data['price_code'] if valObj.data['price_code'] is not None else ""
+                dhkhao = valObj.data['dhkhao'] if valObj.data['dhkhao'] is not None else ""
+                brand = valObj.data['brand'] if valObj.data['brand'] is not None else ""
+                rObj = PlanOrder.objects.filter(delete_time=None)
+                if status == 0:
+                    rObj = rObj.filter(~Q(sure_status=1))
+                if status ==1:
+                    rObj = rObj.filter(sure_status=1)
+                if order_type != 0:
+                    rObj = rObj.filter(order_type=order_type)
+                if order_custom:
+                    rObj = rObj.filter(custom=order_custom)
+                if price_code:
+                    rObj = rObj.filter(price_code=price_code)
+                if dhkhao:
+                    rObj = rObj.filter(dhkhao=dhkhao)
+                if brand:
+                    rObj = rObj.filter(brand=brand)
+
+                samp = []
+                for one in rObj:
+                    zamp = {}
+                    zamp["order_id"] = one.id
+                    zamp["create_time"] = one.create_time
+                    zamp["indicate_time"] = one.indicate_time
+                    zamp["order_type"] = one.order_type
+                    zamp["custom"] = one.custom
+                    zamp["price_code"] = one.price_code
+                    zamp["dhkhao"] = one.dhkhao
+                    zamp["brand"] = one.brand
+                    zamp["goods_name"] = one.goods_name
+                    zamp["order_num"] = one.order_num
+                    # 是否确认
+                    orderline = PlanOrderLine.objects.filter(order_id=one.id)
+                    c_pay_num = orderline.count()
+                    c_pay_sure_num = 0
+                    for o1 in orderline:
+                        if o1.is_sure_price ==1:
+                            c_pay_sure_num +=1
+                    zamp["c_pay_num"] = c_pay_num
+                    zamp["c_pay_sure_num"] = c_pay_sure_num
+                    otherPay = OrderPay.objects.filter(order_id=one.id)
+                    other_pay_num = otherPay.count()
+                    other_pay_sure_num = 0
+                    for o2 in otherPay:
+                        if o2.is_sure_price == 1:
+                            other_pay_sure_num +=1
+                    zamp["other_pay_num"] = other_pay_num
+                    zamp["other_pay_sure_num"] = other_pay_sure_num
+                    zamp["status"] = status
+                    samp.append(zamp)
+                temp = {}
+                temp["data"] = samp
+                temp['error_code'] = 0
+                temp['message'] = "成功"
+                temp['request'] = request.method + '  ' + request.get_full_path()
+                return Response(temp)
+
+            except:
+                msg = "未找到对应的企划订单"
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+class samplePayNumAccountsOneView(APIView):
+    # 获取确认报价
+    @csrf_exempt
+    def get(self, request, nid):
+        try:
+            order = PlanOrder.objects.get(id=nid)
+            planPrice = PlanPrice.objects.get(plan_id =order.plan_id)
+            orderLine = PlanOrderLine.objects.filter(order_id=nid)
+            factoryObj = FactoryMake.objects.filter(order_id=nid)
+            order_sn = ""
+            for o1 in orderLine:
+                order_sn = order_sn + o1.order_sn + "|"
+
+            coop_mode = ''
+            ticketing_custom = ''
+            for o in factoryObj:
+                coop_mode += o.coop_mode + '|'
+                ticketing_custom += o.ticketing_custom + '|'
+            coop_mode_all = ""
+            # 检品数据
+            fm_list = []
+            for one in factoryObj:
+                fm_dic = {}
+                fm_dic['make_factory_id'] = one.id
+                fm_dic['make_factory'] = one.make_factory
+                fm_dic['coop_mode'] = one.coop_mode
+                coop_mode_all =coop_mode_all +one.coop_mode + "|"
+                fm_dic['ticketing_custom'] = one.ticketing_custom
+                fm_dic['price_type'] = one.price_type
+                fm_dic['plan_price'] = planPrice.plan_price
+                fm_dic['amount'] = one.amount
+                fm_dic['sure_amount'] = one.sure_amount
+                fm_dic['sample_sure_amount'] = one.sample_sure_amount
+
+                order_line_list = []
+                # 订单项数据
+                for one1 in orderLine:
+                    jamp  = {}
+                    samp,zemp = getOrderFactoryInfoColor(nid,one1.id,one.id)
+                    jamp['order_line_one'] = zemp
+                    jamp['custom'] = one1.order_custom
+                    jamp['order_type'] = one1.order_custom
+                    order_line_list.append(zemp)
+                fm_dic['order_line_info'] = order_line_list
+                fm_list.append(fm_dic)
+            temp = {}
+            temp["data"] = fm_list
+
+
+            temp['coop_mode'] = coop_mode
+            temp['ticketing_custom'] = ticketing_custom
+            temp['order_id'] = nid
+            temp["dhkh"] = order.dhkhao
+            temp["price_code"] = order.price_code
+            temp["order_sn"] = order_sn
+            temp["invoice_num"] = order.invoice_num
+            temp["fee_num"] = order.fee_num
+            temp["work_type"] = order.work_type
+            temp['error_code'] = 0
+            temp['message'] = "成功"
+            temp['request'] = request.method + '  ' + request.get_full_path()
+            return Response(temp)
+        except:
+            msg = "未找到对应加工费报价"
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+    @csrf_exempt
+    def post(self, request, nid):
+        valObj = sampleMakeAccountOneSerializer(data=request.query_params)
+        if valObj.is_valid():
+            try:
+                dt = datetime.now()
+                bObj = FactoryMake.objects.get(id=nid)
+                bObj.update_time = dt
+                bObj.price_type = request.query_params["price_type"]
+                bObj.sample_sure_amount = request.query_params["sample_sure_amount"]
+                bObj.amount = request.query_params["amount"]
+                bObj.is_sure_pay_sample = 1
+                bObj.save()
+
+                msg = "成衣结算数量和报价"
+                error_code = 0
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+            except:
+                msg = "id参数错误"
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+
+
+
+
+class sampleInAccountsView(APIView):
+    # 获取确认报价
+    @csrf_exempt
+    def get(self, request):
+        data = request.query_params
+        valObj = orderInAccountsLineSerializer(data=request.query_params)
+        if valObj.is_valid():
+            try:
+                rObj = PlanOrder.objects.filter(delete_time=None)
+                order_type = valObj.data['order_type'] if valObj.data['order_type'] is not None else 0
+                order_custom = valObj.data['order_custom'] if valObj.data['order_custom'] is not None else ""
+                price_code = valObj.data['price_code'] if valObj.data['price_code'] is not None else ""
+                dhkhao = valObj.data['dhkhao'] if valObj.data['dhkhao'] is not None else ""
+                search_time_type = valObj.data['search_time_type'] if valObj.data['search_time_type'] is not None else 0
+                start_time = valObj.data['start_time'] if valObj.data['start_time'] is not None else ""
+                end_time = valObj.data['end_time'] if valObj.data['end_time'] is not None else ""
+                invoice_num = valObj.data['invoice_num'] if valObj.data['invoice_num'] is not None else ""
+                fee_num = valObj.data['fee_num'] if valObj.data['fee_num'] is not None else ""
+                status = valObj.data['status'] if valObj.data['status'] is not None else 0
+                if order_type != 0:
+                    rObj = rObj.filter(order_type=order_type)
+                if order_custom:
+                    rObj = rObj.filter(custom=order_custom)
+                if price_code:
+                    rObj = rObj.filter(price_code=price_code)
+                if dhkhao:
+                    rObj = rObj.filter(dhkhao=dhkhao)
+                if search_time_type == 1:
+                    if start_time:
+                        rObj = rObj.filter(create_time__gte=start_time)
+                    if end_time:
+                        rObj = rObj.filter(create_time__lte=end_time)
+                if search_time_type == 2:
+                    if start_time:
+                        rObj = rObj.filter(indicate_time__gte = start_time)
+                    if end_time:
+                        rObj = rObj.filter(indicate_time__lte = end_time)
+                if invoice_num:
+                    rObj = rObj.filter(invoice_num=invoice_num)
+                if fee_num:
+                    rObj = rObj.filter(custom=fee_num)
+                if status:
+                    rObj = rObj.filter(pay_status=status)
+                samp = []
+                for one in rObj:
+                    zamp = {}
+                    zamp["order_id"] = one.id
+                    zamp["create_time"] = one.create_time
+                    zamp["indicate_time"] = one.indicate_time
+                    zamp["order_type"] = one.order_type
+                    zamp["custom"] = one.custom
+                    zamp["price_code"] = one.price_code
+                    zamp["dhkhao"] = one.dhkhao
+                    zamp["invoice_num"] = one.invoice_num
+                    zamp["fee_num"] = one.fee_num
+                    zamp["order_num"] = one.order_num
+                    # 是否确认
+                    facObj = FactoryMake.objects.filter(order_id = one.id)
+                    c_pay_num = facObj.count()
+                    c_pay_sure_num = 0
+                    all_amount = Decimal(0)
+                    pay_amount = Decimal(0)
+                    for o1 in facObj:
+                        if o1.is_sure_pay_sample == 1:
+                            c_pay_sure_num += 1
+                            if o1.sample_sure_amount:
+                                all_amount += o1.sample_sure_amount
+                            if o1.finish_sample_amount:
+                                pay_amount +=o1.finish_sample_amount
+                    zamp["c_pay_num"] = c_pay_num
+                    zamp["c_pay_sure_num"] = c_pay_sure_num
+                    samplesta = SamplePayStatic.objects.filter(order_id=one.id)
+                    other_pay_num = samplesta.count()
+                    other_pay_sure_num = 0
+                    for o2 in samplesta:
+                        if o2.is_sure == 1:
+                            other_pay_sure_num += 1
+                            if o2.pay_amount:
+                                all_amount += o2.pay_amount
+                            if o2.finish_amount:
+                                pay_amount += o2.finish_amount
+                    zamp["other_pay_num"] = other_pay_num
+                    zamp["other_pay_sure_num"] = other_pay_sure_num
+                    try:
+                        zamp["pay_finish_deg"] = pay_amount/all_amount
+                    except:
+                        zamp["pay_finish_deg"] = 0
+
+                    zamp["all_amount"] = all_amount
+                    zamp["pay_amount"] = pay_amount
+                    zamp["status"] = "订单状态"
+                    samp.append(zamp)
+                temp = {}
+                pay_info = getOrderPayNum()
+                temp["data"] = samp
+                temp['order_pay_info'] = pay_info
+                temp['error_code'] = 0
+                temp['message'] = "成功"
+                temp['request'] = request.method + '  ' + request.get_full_path()
+                return Response(temp)
+
+            except:
+                msg = "未找到对应的企划订单"
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+    # 新增订单收款结算
+    @csrf_exempt
+    def post(self, request):
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        data  = request.data
+        try:
+            order_id = data['order_id']
+        except:
+            msg = "请输入订单id"
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+        dataone =data['data']
+        for done in dataone:
+            d_num = d_num + 1
+            valObjline = orderInAccountsOneSerializer(data=done)
+            if not valObjline.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObjline.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
+        dt = datetime.now()
+        ##############保存装箱指示#############################
+        if d_flag == 0:
+            for done in dataone:
+                try:
+                    mid = done['id']
+                    if mid:
+                        bObj = OrderPayInfoList.objects.get(id=mid)
+                        bObj.update_time = dt
+                    else:
+                        bObj = OrderPayInfoList()
+                        bObj.create_time = dt
+                    bObj.order_id = data['order_id']
+                    bObj.custom = done['custom']
+                    bObj.custom_type = done['custom_type']
+                    bObj.price_type = done['price_type']
+                    bObj.pay_amount = done['pay_amount']
+                    bObj.pay_y_amount = done['pay_y_amount']
+                    bObj.pay_n_amount_one = done['pay_n_amount_one']
+                    bObj.beizhun = done['beizhun']
+                    bObj.order_line_id = done['order_line_id']
+                    bObj.order_other_pay_id = done['order_other_pay_id']
+                    bObj.save()
+                    # 订单是否全部确认
+                    if done['order_line_id']:
+                        orderline = PlanOrderLine.objects.get(id=done['order_line_id'])
+                        payInfo = OrderPayInfoList.objects.filter(delete_time=None,order_line_id=done['order_line_id'])
+                        amount = orderline.order_price
+                        y_amount = Decimal(0)
+                        for o1 in payInfo:
+                            y_amount = y_amount +o1.pay_amount
+                        if orderline.order_price == y_amount:
+                            orderline.is_finish_pay = 1
+                        orderline.pay_y_amount = y_amount
+                        orderline.pay_n_amount = amount-y_amount
+                        orderline.save()
+                    if done['order_other_pay_id']:
+                        orderPay = OrderPay.objects.get(id=done['order_other_pay_id'])
+                        payInfo = OrderPayInfoList.objects.filter(delete_time=None, order_other_pay_id=done['order_other_pay_id'])
+                        amount = orderPay.amount
+                        y_amount = Decimal(0)
+                        for o2 in payInfo:
+                            y_amount = y_amount + o2.pay_amount
+                        if orderPay.amount == y_amount:
+                            orderPay.is_finish_pay = 1
+                        orderPay.pay_y_amount = y_amount
+                        orderPay.pay_n_amount = amount-y_amount
+                        orderPay.save()
+                except:
+                    msg = "id参数错误"
+                    error_code = 10030
+                    request = request.method + '  ' + request.get_full_path()
+                    post_result = {
+                        "error_code": error_code,
+                        "message": msg,
+                        "request": request,
+                    }
+                    return Response(post_result)
+            msg = "保存收款结算信息"
+            error_code = 0
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+        else:
+            msg = l_msg
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+    #批量删除 发货方案
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for nid in ids:
+                bObj = OrderPayInfoList.objects.get(id=nid)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "收款结算删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "收款结算不存在!",
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+
+class sampleInAccountsOneView(APIView):
+    # 获取确认报价
+    @csrf_exempt
+    def get(self, request, nid):
+        try:
+            order = PlanOrder.objects.get(id=nid)
+            facObj = FactoryMake.objects.filter(order_id=nid)
+            samplePay = SamplePayStatic.objects.filter(order_id=nid)
+            orderLine = PlanOrderLine.objects.filter(order_id=nid)
+            order_sn = ""
+            for o1 in orderLine:
+                order_sn = order_sn + o1.order_sn + "|"
+            zemp = []
+            order_sn = ""
+            for one in facObj:
+                samp = {}
+                samp['price_type'] = one.price_type
+                samp['create_time'] = one.create_time
+                samp['pay_custom'] = "南通风尚国际"
+                samp['custom'] = one.make_factory
+                samp['amount'] = one.order_price
+                samp['pay_y_amount'] = one.sample_sure_amount
+                samp['pay_n_amount'] = one.finish_sample_amount
+                samp['order_id'] = nid
+                samp['factory_make_id'] = one.id
+                samp['sample_static_id'] = 0
+                zemp.append(samp)
+            for one2 in samplePay:
+                samp = {}
+                samp['price_type'] = one2.price_type
+                samp['create_time'] = one2.create_time
+                samp['pay_custom'] = "南通风尚国际"
+                samp['custom'] = one2.custom
+                samp['amount'] = one2.pay_amount
+                samp['pay_y_amount'] = one2.finish_amount
+                samp['pay_n_amount'] = one2.pay_amount - one2.finish_amount
+                samp['order_id'] = nid
+                samp['factory_make_id'] = 0
+                samp['sample_static_id'] = one.id
+                zemp.append(samp)
+            # 结算列表信息
+            orderPayInfoList = OrderPayInfoList.objects.filter(delete_time=None,order_id = nid)
+            data = orderPayInfoList.values()
+            for o3 in data:
+                if o3.order_line_id:
+                    lineone = PlanOrderLine.objects.get(id=o3.order_line_id)
+                    o3['pay_y_amount'] = lineone.pay_y_amount
+                if o3.order_other_pay_id:
+                    orderpay = OrderPay.objects.get(id=o3.order_other_pay_id)
+                    o3['pay_y_amount'] = orderpay.pay_y_amount
+            temp = {}
+            temp["dhkh"] = order.dhkhao
+            temp["price_code"] = order.price_code
+            temp["order_sn"] = order_sn
+            temp["invoice_num"] = order.invoice_num
+            temp["fee_num"] = order.fee_num
+            temp["data"] = orderPayInfoList.values()
+            temp["payData"] = zemp
+            temp['order_id'] =nid
+            custom_dic, custom_list = getAllCustom(nid)
+            temp["custom_dic"] = custom_dic
+            temp['custom_list'] = custom_list
+            temp['error_code'] = 0
+            temp['message'] = "成功"
+            temp['request'] = request.method + '  ' + request.get_full_path()
+            return Response(temp)
+        except:
+            msg = "未找到对应的成衣样品的应付"
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+    @csrf_exempt
+    def put(self, request, nid):
+        try:
+            dt = datetime.now()
+            # 订单项
+            order = PlanOrder.objects.get(id=nid)
+            order.is_finish_pay = 1
+            order.save()
+            orderLine = PlanOrderLine.objects.filter(order_id = nid)
+            for one in orderLine:
+                one.is_finish_pay = 1
+                one.save()
+                payInfo = OrderPayInfoList.objects.filter(order_line_id = one.id)
+                y_l_amount = Decimal(0)
+                for o1 in payInfo:
+                    y_l_amount += o1.pay_amount
+                if one.order_price == y_l_amount:
+                    one.is_finish_pay = 1
+                    one.save()
+                else:
+                    msg = "存在不一致的结算数据"
+                    error_code = 0
+                    request = request.method + '  ' + request.get_full_path()
+                    post_result = {
+                        "error_code": error_code,
+                        "message": msg,
+                        "request": request,
+                    }
+                    return Response(post_result)
+            payOther = OrderPay.objects.filter(order_id = nid)
+            for one1 in payOther:
+                one1.is_finish_pay = 1
+                one1.save()
+                payInfo = OrderPayInfoList.objects.filter(order_other_pay_id=one1.id)
+                y_o_amount = Decimal(0)
+                for o2 in payInfo:
+                    y_o_amount += o2.pay_amount
+                if one1.amount == y_o_amount:
+                    one1.is_finish_pay = 1
+                    one1.save()
+                else:
+                    msg = "存在不一致的结算数据"
+                    error_code = 10030
+                    request = request.method + '  ' + request.get_full_path()
+                    post_result = {
+                        "error_code": error_code,
+                        "message": msg,
+                        "request": request,
+                    }
+                    return Response(post_result)
+            msg = "确认全部收款完成"
+            error_code = 0
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "id参数错误"
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+

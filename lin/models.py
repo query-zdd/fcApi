@@ -399,6 +399,9 @@ class FactoryMake(models.Model):
     is_sure_pay = models.IntegerField(blank=True, null=True)
     is_finish_pay = models.IntegerField(blank=True, null=True)
     finish_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    sample_sure_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    is_sure_pay_sample = models.IntegerField(blank=True, null=True)
+    finish_sample_amount = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1447,6 +1450,27 @@ class SampleCatalogue(models.Model):
     class Meta:
         managed = False
         db_table = 'sample_catalogue'
+
+
+class SamplePayStatic(models.Model):
+    create_time = models.DateTimeField(blank=True, null=True)
+    update_time = models.DateTimeField(blank=True, null=True)
+    delete_time = models.DateTimeField(blank=True, null=True)
+    order_id = models.IntegerField(blank=True, null=True)
+    custom = models.CharField(max_length=255, blank=True, null=True)
+    pay_custom = models.CharField(max_length=255, blank=True, null=True)
+    pay_comment = models.CharField(max_length=255, blank=True, null=True)
+    price_type = models.CharField(max_length=255, blank=True, null=True)
+    pay_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    pay_num = models.IntegerField(blank=True, null=True)
+    pay_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    finish_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    is_sure = models.IntegerField(blank=True, null=True)
+    is_finish_pay = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'sample_pay_static'
 
 
 class SampleType(models.Model):
