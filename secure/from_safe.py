@@ -1116,7 +1116,7 @@ class saveReceiptSerializer(serializers.Serializer):
     fee_no_id = serializers.CharField(error_messages={'required': '必须传入发票信息id'})
 
 class showSurrenderSerializer(serializers.Serializer):
-    order_id = serializers.CharField(error_messages={'required': '必须传入订单id列表'})
+    # order_id = serializers.CharField(error_messages={'required': '必须传入订单id列表'})
     sur_lv = serializers.CharField(error_messages={'required': '必须传入结汇汇率'})
     sur_amount = serializers.CharField(error_messages={'required': '必须传入结汇金额'})
     sur_bp = serializers.CharField(error_messages={'required': '必须传入结汇返点'})

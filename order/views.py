@@ -10108,9 +10108,7 @@ class showSurrenderView(APIView):
         d_flag = 0
         d_num = 0
         l_msg = []
-        data = request.data
-
-        dataone =data['data']
+        dataone =request.data
         for done in dataone:
             d_num = d_num + 1
             valObjline = showSurrenderSerializer(data=done)
@@ -10133,7 +10131,7 @@ class showSurrenderView(APIView):
                     else:
                         bObj = OrderSurBp()
                         bObj.create_time = dt
-                    bObj.order_id = data['order_id']
+                    bObj.order_id = done['order_id']
                     bObj.sur_lv = done['sur_lv']
                     bObj.sur_amount = done['sur_amount']
                     bObj.sur_bp = done['sur_bp']
@@ -10141,7 +10139,7 @@ class showSurrenderView(APIView):
                     bObj.is_pay = 1
                     bObj.save()
                     # 订单是否全部确认
-                    for o_id in data['order_id']:
+                    for o_id in done['order_id']:
                         planOrder = PlanOrder.objects.get(id=o_id)
                         planOrder.is_surrender = 1
                         planOrder.save()
