@@ -121,6 +121,20 @@ urlpatterns = [
     url('^sampleInAccounts$', views.sampleInAccountsView.as_view()),
     url('^sampleInAccounts/(?P<nid>\d+)', views.sampleInAccountsOneView.as_view()),
 
+    # 发票管理
+    url('^showReceipt$', views.showReceiptView.as_view()),
+    url('^saveReceipt$', views.saveReceiptView.as_view()),
+    # 采购发票
+    url('^getBuyReceipt/(?P<nid>\d+)', views.getBuyReceiptOneView.as_view()),
+    #加工费
+    url('^getMakeReceipt/(?P<nid>\d+)', views.getMakeReceiptOneView.as_view()),
+    #其他项目
+    url('^getOtherReceipt/(?P<nid>\d+)', views.getOtherReceiptOneView.as_view()),
+    # 成衣样品
+    url('^getSampReceipt/(?P<nid>\d+)', views.getSampReceiptOneView.as_view()),
+
+    url('^showSurrender$', views.showSurrenderView.as_view()),
+
 
 
 

@@ -1092,6 +1092,33 @@ class sampOtherAcountOneSerializer(serializers.Serializer):
     id = serializers.IntegerField(default=0)
 
 class sampleMakeAccountOneSerializer(serializers.Serializer):
+    order_line_id = serializers.CharField(error_messages={'required': '必须传入订单项id'})
+    custom = serializers.CharField(error_messages={'required': '必须传入成衣出票客户（供货/收款方）！'})
+    pay_custom = serializers.CharField(error_messages={'required': '必须传入成衣采购方（付款方）！'})
     price_type = serializers.CharField(error_messages={'required': '必须传入结算币种'})
-    sample_sure_amount = serializers.CharField(error_messages={'required': '必须传入确定报价'})
-    amount = serializers.CharField(error_messages={'required': '必须传入合计金额'})
+    pay_amount = serializers.CharField(error_messages={'required': '必须传入确定报价'})
+    pay_comment = serializers.CharField(error_messages={'required': '必须传入结算说明'})
+    id = serializers.IntegerField(default=0)
+
+class showReceiptSerializer(serializers.Serializer):
+    sort_type = serializers.IntegerField(default=1)
+    order_type = serializers.IntegerField(default=0)
+    order_custom = serializers.CharField(default="")
+    price_code = serializers.CharField(default="")
+    dhkhao = serializers.CharField(default="")
+    page_size = serializers.IntegerField(default=10)
+    page = serializers.IntegerField(default=1)
+
+
+class saveReceiptSerializer(serializers.Serializer):
+    type = serializers.CharField(error_messages={'required': '必须传入发票类型'})
+    order_id = serializers.CharField(error_messages={'required': '必须传入订单id'})
+    fee_no_id = serializers.CharField(error_messages={'required': '必须传入发票信息id'})
+
+class showSurrenderSerializer(serializers.Serializer):
+    order_id = serializers.CharField(error_messages={'required': '必须传入订单id列表'})
+    sur_lv = serializers.CharField(error_messages={'required': '必须传入结汇汇率'})
+    sur_amount = serializers.CharField(error_messages={'required': '必须传入结汇金额'})
+    sur_bp = serializers.CharField(error_messages={'required': '必须传入结汇返点'})
+    bp_amount = serializers.CharField(error_messages={'required': '必须传入返点金额'})
+    id = serializers.IntegerField(default=0)

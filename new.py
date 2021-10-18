@@ -433,6 +433,26 @@ class FactoryMakeLine(models.Model):
         db_table = 'factory_make_line'
 
 
+class FeeNo(models.Model):
+    create_time = models.DateTimeField(blank=True, null=True)
+    update_time = models.DateTimeField(blank=True, null=True)
+    delete_time = models.DateTimeField(blank=True, null=True)
+    order_id = models.IntegerField(blank=True, null=True)
+    type = models.IntegerField(blank=True, null=True)
+    fee_no = models.CharField(max_length=255, blank=True, null=True)
+    amount = models.CharField(max_length=255, blank=True, null=True)
+    file_url = models.CharField(max_length=255, blank=True, null=True)
+    status = models.CharField(max_length=255, blank=True, null=True)
+    make_factory_id = models.IntegerField(blank=True, null=True)
+    order_line_id = models.IntegerField(blank=True, null=True)
+    order_cloth_ship_id = models.IntegerField(blank=True, null=True)
+    other_id = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'fee_no'
+
+
 class GarmentSampleRecord(models.Model):
     create_time = models.DateTimeField(blank=True, null=True)
     update_time = models.DateTimeField(blank=True, null=True)
@@ -841,6 +861,11 @@ class OrderPay(models.Model):
     pay_y_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     pay_n_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     is_finish_pay = models.IntegerField(blank=True, null=True)
+    fee_no = models.CharField(max_length=255, blank=True, null=True)
+    fee_amount = models.CharField(max_length=255, blank=True, null=True)
+    file_url = models.CharField(max_length=255, blank=True, null=True)
+    fee_no_status = models.CharField(max_length=255, blank=True, null=True)
+    provide_custom = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -867,6 +892,22 @@ class OrderPayInfoList(models.Model):
     class Meta:
         managed = False
         db_table = 'order_pay_info_list'
+
+
+class OrderSurBp(models.Model):
+    create_time = models.DateTimeField(blank=True, null=True)
+    update_time = models.DateTimeField(blank=True, null=True)
+    delete_time = models.DateTimeField(blank=True, null=True)
+    order_id = models.CharField(max_length=255, blank=True, null=True)
+    sur_lv = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    sur_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    sur_bp = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    bp_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    is_pay = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'order_sur_bp'
 
 
 class OtherCategory(models.Model):
@@ -1146,6 +1187,7 @@ class PlanOrder(models.Model):
     sure_status = models.IntegerField(blank=True, null=True)
     provide_custom = models.CharField(max_length=255, blank=True, null=True)
     is_finish_pay = models.IntegerField(blank=True, null=True)
+    is_surrender = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1345,6 +1387,10 @@ class ProductPayStatic(models.Model):
     type = models.IntegerField(blank=True, null=True)
     factory_make_id = models.IntegerField(blank=True, null=True)
     order_cloth_ship_id = models.IntegerField(blank=True, null=True)
+    fee_no = models.CharField(max_length=255, blank=True, null=True)
+    fee_amount = models.CharField(max_length=255, blank=True, null=True)
+    file_url = models.CharField(max_length=255, blank=True, null=True)
+    fee_no_status = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1437,6 +1483,33 @@ class RoleMenu(models.Model):
         db_table = 'role_menu'
 
 
+class SampPayFeeInfo(models.Model):
+    create_time = models.DateTimeField(blank=True, null=True)
+    udate_time = models.DateTimeField(blank=True, null=True)
+    deletw_time = models.DateTimeField(blank=True, null=True)
+    factory_make_id = models.IntegerField(blank=True, null=True)
+    samp_id = models.CharField(max_length=255, blank=True, null=True)
+    order_line_id = models.IntegerField(blank=True, null=True)
+    price_type = models.CharField(max_length=255, blank=True, null=True)
+    pay_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    is_sure = models.IntegerField(blank=True, null=True)
+    is_finish = models.IntegerField(blank=True, null=True)
+    finish_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    fee_no = models.CharField(max_length=255, blank=True, null=True)
+    fee_amount = models.CharField(max_length=255, blank=True, null=True)
+    file_url = models.CharField(max_length=255, blank=True, null=True)
+    fee_no_status = models.CharField(max_length=255, blank=True, null=True)
+    custom = models.CharField(max_length=255, blank=True, null=True)
+    pay_comment = models.CharField(max_length=255, blank=True, null=True)
+    pay_custom = models.CharField(max_length=255, blank=True, null=True)
+    pay_project = models.CharField(max_length=255, blank=True, null=True)
+    pay_num = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'samp_pay_fee_info'
+
+
 class SampleCatalogue(models.Model):
     create_time = models.DateTimeField(blank=True, null=True)
     update_time = models.DateTimeField(blank=True, null=True)
@@ -1489,6 +1562,10 @@ class SamplePayStatic(models.Model):
     finish_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     is_sure = models.IntegerField(blank=True, null=True)
     is_finish_pay = models.IntegerField(blank=True, null=True)
+    fee_no = models.CharField(max_length=255, blank=True, null=True)
+    fee_amount = models.CharField(max_length=255, blank=True, null=True)
+    file_url = models.CharField(max_length=255, blank=True, null=True)
+    fee_no_status = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         managed = False

@@ -555,23 +555,142 @@ def getMakePayInfo3(nid):
     samp['pay_info'] = productInfo.values()
     return  samp
 
-# 获取成衣样品报价项目明细
-def getSamplePayProject(order_id):
-    facObj = FactoryMake.objects.filter(order_id=order_id)
-    sampObj = SamplePayStatic.objects.filter(order_id=order_id)
-    samp=[]
-    for one1 in facObj:
-        temp={}
+# 获取订单所有的其他报价
+def getOrderOtherFee(order_id):
+    order = PlanOrder.objects.get(id=order_id)
+    orderPay = OrderPay.objects.filter(delete_time=None,order_id = order_id)
+    productPay = ProductPayStatic.objects.filter(order_id = order_id)
+    samplePay = SamplePayStatic.objects.filter(order_id = order_id)
+    samp = []
+    other_num = orderPay.count()+productPay.count()+samplePay.count()
+    other_fee_num = 0
+    for one in orderPay:
+        temp = {}
+        temp['other_type'] = 1
+        temp['other_id'] = one.id
+        temp['pay_project'] = "订单应收其他账目"
+        temp['custom'] =one.provide_custom
+        temp['price_type'] = one.pay_type
+        temp['pay_amount'] = one.amount
+        temp['pay_num'] = one.pay_num
+        temp['finish_amount'] = one.amount
+        temp['pay_custom'] = one.custom
+        if one.fee_no:
+            fee_no = one.fee_no.split("|")
+        else:
+            fee_no = []
+        if one.fee_amount:
+            amount = one.fee_amount.split("|")
+        else:
+            amount = []
+        if one.file_url:
+            file_url = one.file_url.split("|")
+        else:
+            file_url = []
+        file_url_y = []
+        fee_no_y = []
+        amount_y = []
+        for l1 in fee_no:
+            if l1:
+                fee_no_y.append(l1)
+        for l2 in amount:
+            if l2:
+                amount_y.append(Decimal(l2))
+        for l3 in file_url:
+            if l3:
+                file_url_y.append(Decimal(l2))
+        temp['fee_no'] = fee_no_y
+        temp['fee_amount'] = amount_y
+        temp['file_url'] = file_url_y
+        temp['fee_no_status'] = one.fee_no_status
+        if one.fee_amount:
+            other_fee_num +=1
+        samp.append(temp)
+    for one1 in productPay:
+        temp = {}
+        temp['other_type'] = 2
+        temp['pay_project'] = one1.pay_project
+        temp['custom'] = one1.custom
         temp['price_type'] = one1.price_type
-        temp['price_type'] = one1.price_type
-        temp['price_type'] = one1.price_type
-        temp['price_type'] = one1.price_type
-        temp['price_type'] = one1.price_type
-        temp['price_type'] = one1.price_type
-        temp['price_type'] = one1.price_type
-        temp['price_type'] = one1.price_type
-        temp['price_type'] = one1.price_type
-        temp['price_type'] = one1.price_type
+        temp['pay_amount'] = one1.pay_amount
+        temp['pay_num'] = one1.pay_num
+        temp['finish_amount'] = one1.pay_amount
+        temp['pay_custom'] = one1.pay_custom
+        if one1.fee_no:
+            fee_no = one1.fee_no.split("|")
+        else:
+            fee_no = []
+        if one1.fee_amount:
+            amount = one1.fee_amount.split("|")
+        else:
+            amount = []
+        if one1.file_url:
+            file_url = one1.file_url.split("|")
+        else:
+            file_url = []
+
+        file_url_y = []
+        fee_no_y = []
+        amount_y = []
+        for l1 in fee_no:
+            if l1:
+                fee_no_y.append(l1)
+        for l2 in amount:
+            if l2:
+                amount_y.append(Decimal(l2))
+        for l3 in file_url:
+            if l3:
+                file_url_y.append(Decimal(l2))
+        temp['fee_no'] = fee_no_y
+        temp['fee_amount'] = amount_y
+        temp['file_url'] = file_url_y
+        temp['fee_no_status'] = one1.fee_no_status
+        if one1.fee_amount:
+            other_fee_num +=1
+        samp.append(temp)
+    for one2 in samplePay:
+        temp = {}
+        temp['other_type'] = 3
+        temp['other_id'] = one2.id
+        temp['pay_project'] ="成衣其他应付账目"
+        temp['custom'] = one2.custom
+        temp['price_type'] = one2.price_type
+        temp['pay_amount'] = one2.pay_amount
+        temp['pay_num'] = one2.pay_num
+        temp['finish_amount'] = one2.finish_amount
+        temp['pay_custom'] = one2.pay_custom
+        if one2.fee_no:
+            fee_no = one2.fee_no.split("|")
+        else:
+            fee_no = []
+        if one2.fee_amount:
+            amount = one2.fee_amount.split("|")
+        else:
+            amount = []
+        if one2.file_url:
+            file_url = one2.file_url.split("|")
+        else:
+            file_url = []
+        file_url_y = []
+        fee_no_y = []
+        amount_y = []
+        for l1 in fee_no:
+            if l1:
+                fee_no_y.append(l1)
+        for l2 in amount:
+            if l2:
+                amount_y.append(Decimal(l2))
+        for l3 in file_url:
+            if l3:
+                file_url_y.append(Decimal(l2))
+        temp['fee_no'] = fee_no_y
+        temp['fee_amount'] = amount_y
+        temp['file_url'] = file_url_y
+        temp['fee_no_status'] = one2.fee_no_status
+        if one2.fee_amount:
+            other_fee_num +=1
+        samp.append(temp)
+    return samp,other_num,other_fee_num
 
 # 日期之差
 def downDay(d1,d2):
