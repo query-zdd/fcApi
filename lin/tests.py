@@ -1,5 +1,5 @@
 from django.test import TestCase
-
+import datetime
 # Create your tests here.
-a=["2021-05-15","2021-07-15",None]
-print(min(a))
+a=datetime.datetime(2018, 1, 1, 12, 50, 12, 10)
+print(a)

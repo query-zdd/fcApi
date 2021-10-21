@@ -2,6 +2,7 @@
 from django.urls import path
 from django.conf.urls import url
 
+
 from lin import views
 urlpatterns = [
     #文件上传-获取token
@@ -203,7 +204,14 @@ urlpatterns = [
     url('^orderDateSet$', views.orderDateSetView.as_view()),
     url('^orderDateSet/(?P<nid>\d+)', views.orderDateSetOneView.as_view()),
     url('^orderDateSet/sort/(?P<bid>\d+)', views.orderDateSetSortView.as_view()),
+    # 财务分析
     url('^basic/financeCat$', views.financeCatView.as_view()),
 
+    url('^financeMouth$', views.financeMouthView.as_view()),
+
+    url('^financeStatic$', views.financeStaticView.as_view()),
+
+    #权限管理
+    url('^showAuthority$', views.showAuthorityView.as_view()),
 
 ]

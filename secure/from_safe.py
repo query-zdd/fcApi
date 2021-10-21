@@ -1173,6 +1173,35 @@ class financeCatSerializer(serializers.Serializer):
     finance_son_name = serializers.CharField(error_messages={'required': '必须传入月薪'})
     active_2 = serializers.IntegerField(error_messages={'required': '必须传入科目名称激活状态'})
     s_id = serializers.IntegerField(error_messages={'required': '必须传入科目名称id'})
-    finance_sub_name = serializers.CharField(error_messages={'required': '必须传入科目分类'})
-    active_3 = serializers.IntegerField(error_messages={'required': '必须传入科目分类激活状态'})
-    sub_id = serializers.IntegerField(error_messages={'required': '必须传入科目分类id'})
+    # finance_sub_name = serializers.CharField(allow_null=True,allow_blank=True)
+    # active_3 = serializers.IntegerField(allow_null=True)
+    # sub_id = serializers.IntegerField(allow_null=True)
+
+class financeMouthSerializer(serializers.Serializer):
+    finance_son_id = serializers.CharField(error_messages={'required': '必须传入科目名称id'})
+    finance_sub_id = serializers.CharField(error_messages={'required': '必须传入科目分类id'})
+    amount = serializers.CharField(error_messages={'required': '必须传入收支金额'})
+    comments = serializers.CharField(error_messages={'required': '必须传入费用说明'})
+    department = serializers.CharField(error_messages={'required': '必须传入报账部门'})
+    post = serializers.CharField(error_messages={'required': '必须传入报账岗位'})
+    worker = serializers.CharField(error_messages={'required': '必须传入报账人员'})
+    learder = serializers.CharField(error_messages={'required': '必须传入审核人'})
+    fee_info_name = serializers.CharField(error_messages={'required': '必须传入发票信息'})
+    amount_type_name = serializers.CharField(error_messages={'required': '必须传入收支属性名称'})
+    amount_type = serializers.IntegerField(error_messages={'required': '必须传入收支属性状态'})
+    id = serializers.IntegerField(error_messages={'required': '必须传入月财务项目报账id'})
+
+class financeMouthOneSerializer(serializers.Serializer):
+    year = serializers.CharField(allow_blank=True,allow_null=True,default="")
+    mouth = serializers.CharField(allow_blank=True,allow_null=True,default="")
+
+class financeStaticOneSerializer(serializers.Serializer):
+    start_year = serializers.CharField(allow_blank=True,allow_null=True,default="")
+    start_mouth = serializers.CharField(allow_blank=True,allow_null=True,default="")
+    end_year = serializers.CharField(allow_blank=True, allow_null=True, default="")
+    end_mouth = serializers.CharField(allow_blank=True, allow_null=True, default="")
+
+class showAuthoritySerializer(serializers.Serializer):
+    authority_name = serializers.CharField(error_messages={'required': '必须传入权限分类名称！'})
+    father_id = serializers.IntegerField(error_messages={'required': '必须传入分类父级id！'})
+    id= serializers.IntegerField(error_messages={'required': '必须传入权限列表id！'})

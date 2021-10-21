@@ -8,7 +8,7 @@ from order.utils import *
 import requests
 from datetime import *
 
-
+import datetime
 from lin.utils import *
 from secure.from_safe import *
 from lin.models import *
@@ -12030,25 +12030,28 @@ class financeCatView(APIView):
                         sObj.f_id = fid
                         sObj.save()
                         sid = FinanceCatSon.objects.filter(finance_son_name=done['finance_son_name'])[0].id
-                    sub_id = done['sub_id']
-                    sub_num = FinanceCatSub.objects.filter(s_id=sid).count() + 1
-                    if sub_id:
-                        subObj = FinanceCatSub.objects.get(id=sub_id)
-                        subObj.update_time = dt
-                        subObj.finance_sub_name = done['finance_sub_name']
-                        subObj.active = done['active_3']
-                        subObj.f_id = fid
-                        subObj.s_id = sid
-                        subObj.save()
-                    else:
-                        subObj = FinanceCatSub()
-                        subObj.create_time = dt
-                        subObj.weight = sub_num
-                        subObj.finance_sub_name = done['finance_sub_name']
-                        subObj.active = done['active_3']
-                        subObj.f_id = fid
-                        subObj.s_id = sid
-                        subObj.save()
+                    try:
+                        sub_id = done['sub_id']
+                        sub_num = FinanceCatSub.objects.filter(s_id=sid).count() + 1
+                        if sub_id:
+                            subObj = FinanceCatSub.objects.get(id=sub_id)
+                            subObj.update_time = dt
+                            subObj.finance_sub_name = done['finance_sub_name']
+                            subObj.active = done['active_3']
+                            subObj.f_id = fid
+                            subObj.s_id = sid
+                            subObj.save()
+                        else:
+                            subObj = FinanceCatSub()
+                            subObj.create_time = dt
+                            subObj.weight = sub_num
+                            subObj.finance_sub_name = done['finance_sub_name']
+                            subObj.active = done['active_3']
+                            subObj.f_id = fid
+                            subObj.s_id = sid
+                            subObj.save()
+                    except:
+                        pass
 
                 except:
                     msg = "id参数错误"
@@ -12080,27 +12083,20 @@ class financeCatView(APIView):
             }
             return Response(post_result)
 
-    #批量删除 面辅料采购
+    # 财务项目
     @csrf_exempt
     def delete(self, request):
         try:
             data = request.data
             ids = data['ids']
+            dt = datetime.now()
             for nid in ids:
-                bObj = OrderCloth.objects.get(id=nid)
-                dt = datetime.now()
-                subObj = OrderClothLine.objects.filter(order_cloth_id=bObj.id)
-                for one in subObj:
-                    one.delete_time = dt
-                    one.save()
-                sbObj = OrderClothShip.objects.filter(order_cloth_id=nid)
-                for one1 in sbObj:
-                    one1.delete_time = dt
-                    one1.save()
-                subsbObj = OrderClothLineShip.objects.filter(order_cloth_id=nid)
-                for one2 in subsbObj:
-                    one2.delete_time = dt
-                    one2.save()
+                bObj = FinanceCatSub.objects.get(id=nid)
+                cObj= FinanceCatSub.objects.filter(s_id=bObj.s_id,delete_time=None)
+                if cObj.count()>0:
+                    fObj = FinanceCatSon.objects.get(id=bObj.s_id)
+                    fObj.delete_time = dt
+                    fObj.save()
                 bObj.delete_time = dt
                 bObj.save()
             # 返回数据
@@ -12108,12 +12104,12 @@ class financeCatView(APIView):
             error_code = 0
             post_result = {
                 "error_code": error_code,
-                "message": "出货方案删除成功!",
+                "message": "财务项目删除成功!",
                 "request": request,
             }
             return Response(post_result)
         except:
-            msg = "面辅料方案不存在!",
+            msg = "财务项目不存在!",
             error_code = 10020
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -12123,3 +12119,633 @@ class financeCatView(APIView):
             }
             return Response(post_result)
 
+    # 查询财务项目设置
+    @csrf_exempt
+    def get(self, request):
+        data = request.query_params
+        result = []
+        try:
+            bTypeObj = BasicType.objects.filter(type="财务项目")
+            if bTypeObj.count() > 0:
+                rObj = Basic.objects.filter(type_id=bTypeObj[0].id, delete_time=None).order_by('weight')
+                for one in rObj:
+
+                    financeSon = FinanceCatSon.objects.filter(f_id=one.id,delete_time=None).order_by('weight')
+                    if financeSon.count()>0:
+                        for one1 in financeSon:
+                            financeSub = FinanceCatSub.objects.filter(s_id=one1.id,delete_time=None).order_by('weight')
+                            if financeSub.count()>0:
+                                for one2 in financeSub:
+                                    temp = {}
+                                    if one2.active == 1:
+                                        temp['active_3'] = True
+                                    else:
+                                        temp['active_3'] = False
+                                    temp["finance_sub_name"] = one2.finance_sub_name
+                                    temp['sub_id'] = one2.id
+                                    temp['weight3'] = one2.weight
+                                    if one1.active == 1:
+                                        temp['active_2'] = True
+                                    else:
+                                        temp['active_2'] = False
+                                    temp["finance_son_name"] = one1.finance_son_name
+                                    temp['s_id'] = one1.id
+                                    temp['weight2'] = one1.weight
+                                    if one.active == 1:
+                                        temp['active_1'] = True
+                                    else:
+                                        temp['active_1'] = False
+                                    temp["finance_name"] = one.basic_value_zh
+                                    temp['f_id'] = one.id
+                                    temp['weight1'] = one.weight
+                                    result.append(temp)
+                            else:
+                                temp = {}
+                                temp['active_3'] = False
+                                temp["finance_sub_name"] = None
+                                temp['sub_id'] = 0
+                                temp['weight3'] = None
+                                if one1.active == 1:
+                                    temp['active_2'] = True
+                                else:
+                                    temp['active_2'] = False
+                                temp["finance_son_name"] = one1.finance_son_name
+                                temp['s_id'] = one1.id
+                                temp['weight2'] = one1.weight
+                                if one.active == 1:
+                                    temp['active_1'] = True
+                                else:
+                                    temp['active_1'] = False
+                                temp["finance_name"] = one.basic_value_zh
+                                temp['f_id'] = one.id
+                                temp['weight1'] = one.weight
+                                result.append(temp)
+                    else:
+                        temp = {}
+                        temp['active_3'] = False
+                        temp["finance_sub_name"] = None
+                        temp['sub_id'] = 0
+                        temp['weight3'] = None
+                        temp['active_2'] = False
+                        temp["finance_son_name"] = None
+                        temp['s_id'] = 0
+                        temp['weight2'] = None
+                        if one.active == 1:
+                            temp['active_1'] = True
+                        else:
+                            temp['active_1'] = False
+                        temp["finance_name"] = one.basic_value_zh
+                        temp['f_id'] = one.id
+                        temp['weight1'] = one.weight
+                        result.append(temp)
+            return Response(result)
+        except:
+            msg = "系统繁忙"
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+
+# 本月财务设置
+class financeMouthView(APIView):
+    # 添加/编辑 本月财务设置
+    @csrf_exempt
+    def post(self, request):
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        dataone = request.data
+        for done in dataone:
+            d_num = d_num + 1
+            valObjline = financeMouthSerializer(data=done)
+            if not valObjline.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObjline.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
+        dt = datetime.now()
+        ##############保存装箱指示#############################
+        if d_flag == 0:
+            dt = datetime.now()
+            year = datetime.now().year
+            mouth = datetime.now().month
+            for done in dataone:
+                try:
+                    mid = done['id']
+                    if mid:
+                        sObj = FinanceMouthInfo.objects.get(id=mid)
+                        sObj.update_time = dt
+                    else:
+                        sObj = FinanceMouthInfo()
+                        sObj.create_time = dt
+                    sObj.finance_son_id = done['finance_son_id']
+                    sObj.finance_sub_id = done['finance_sub_id']
+                    sObj.amount = done['amount']
+                    sObj.comments = done['comments']
+                    sObj.department = done['department']
+                    sObj.post = done['post']
+                    sObj.worker = done['worker']
+                    sObj.learder = done['learder']
+                    sObj.amount_type_name = done['amount_type_name']
+                    sObj.amount_type = done['amount_type']
+                    sObj.fee_info_name = done['fee_info_name']
+                    sObj.year = year
+                    sObj.mouth = mouth
+                    sObj.save()
+                except:
+                    msg = "id参数错误"
+                    error_code = 10030
+                    request = request.method + '  ' + request.get_full_path()
+                    post_result = {
+                        "error_code": error_code,
+                        "message": msg,
+                        "request": request,
+                    }
+                    return Response(post_result)
+            msg = "保存本月财务收支"
+            error_code = 0
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+        else:
+            msg = l_msg
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+    #批量删除 本月财务设置
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for nid in ids:
+                bObj = FinanceMouthInfo.objects.get(id=nid)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "本月财务删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "本月财务不存在!",
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+    # 查询 本月财务设置
+    @csrf_exempt
+    def get(self, request):
+        data = request.query_params
+        valObj = financeMouthOneSerializer(data=request.query_params)
+        if valObj.is_valid():
+            result = []
+            try:
+                year = datetime.now().year
+                mouth = datetime.now().month
+                year = valObj.data['year'] if valObj.data['year'] is not None else year
+                mouth = valObj.data['mouth'] if valObj.data['mouth'] is not None else mouth
+                bTypeObj = BasicType.objects.filter(type="财务项目")
+                if bTypeObj.count() > 0:
+                    rObj = Basic.objects.filter(type_id=bTypeObj[0].id, delete_time=None).order_by('weight')
+                    for one in rObj:
+
+                        financeSon = FinanceCatSon.objects.filter(f_id=one.id,delete_time=None).order_by('weight')
+                        if financeSon.count()>0:
+                            for one1 in financeSon:
+                                financeSub = FinanceCatSub.objects.filter(s_id=one1.id,delete_time=None).order_by('weight')
+                                if financeSub.count()>0:
+                                    for one2 in financeSub:
+                                        temp = {}
+                                        financeInfo = FinanceMouthInfo.objects.filter(finance_sub_id=one2.id,delete_time=None,year=year,mouth=mouth)
+                                        temp['sub_data'] = financeInfo.values()
+                                        if one2.active == 1:
+                                            temp['active_3'] = True
+                                        else:
+                                            temp['active_3'] = False
+                                        temp["finance_sub_name"] = one2.finance_sub_name
+                                        temp['sub_id'] = one2.id
+                                        temp['weight3'] = one2.weight
+                                        if one1.active == 1:
+                                            temp['active_2'] = True
+                                        else:
+                                            temp['active_2'] = False
+                                        temp["finance_son_name"] = one1.finance_son_name
+                                        temp['s_id'] = one1.id
+                                        temp['weight2'] = one1.weight
+                                        if one.active == 1:
+                                            temp['active_1'] = True
+                                        else:
+                                            temp['active_1'] = False
+                                        temp["finance_name"] = one.basic_value_zh
+                                        temp['f_id'] = one.id
+                                        temp['weight1'] = one.weight
+                                        result.append(temp)
+                                else:
+                                    temp = {}
+                                    temp['active_3'] = False
+                                    temp["finance_sub_name"] = None
+                                    temp['sub_id'] = 0
+                                    temp['weight3'] = None
+                                    if one1.active == 1:
+                                        temp['active_2'] = True
+                                    else:
+                                        temp['active_2'] = False
+                                    temp["finance_son_name"] = one1.finance_son_name
+                                    temp['s_id'] = one1.id
+                                    temp['weight2'] = one1.weight
+                                    if one.active == 1:
+                                        temp['active_1'] = True
+                                    else:
+                                        temp['active_1'] = False
+                                    temp["finance_name"] = one.basic_value_zh
+                                    temp['f_id'] = one.id
+                                    temp['weight1'] = one.weight
+                                    result.append(temp)
+                        else:
+                            temp = {}
+                            temp['active_3'] = False
+                            temp["finance_sub_name"] = None
+                            temp['sub_id'] = 0
+                            temp['weight3'] = None
+                            temp['active_2'] = False
+                            temp["finance_son_name"] = None
+                            temp['s_id'] = 0
+                            temp['weight2'] = None
+                            if one.active == 1:
+                                temp['active_1'] = True
+                            else:
+                                temp['active_1'] = False
+                            temp["finance_name"] = one.basic_value_zh
+                            temp['f_id'] = one.id
+                            temp['weight1'] = one.weight
+                            result.append(temp)
+                return Response(result)
+            except:
+                msg = "系统繁忙"
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+
+# 本月财务分析
+class financeStaticView(APIView):
+    # 查询 本月财务设置
+    @csrf_exempt
+    def get(self, request):
+        data = request.query_params
+        valObj = financeStaticOneSerializer(data=request.query_params)
+        if valObj.is_valid():
+            result = []
+            try:
+                start_year = valObj.data['start_year'] if valObj.data['start_year'] is not None else ""
+                start_mouth = valObj.data['start_mouth'] if valObj.data['start_mouth'] is not None else ""
+                end_year = valObj.data['end_year'] if valObj.data['end_year'] is not None else ""
+                end_mouth = valObj.data['end_mouth'] if valObj.data['end_mouth'] is not None else ""
+                bTypeObj = BasicType.objects.filter(type="财务项目")
+                if bTypeObj.count() > 0:
+                    rObj = Basic.objects.filter(type_id=bTypeObj[0].id, delete_time=None).order_by('weight')
+                    for one in rObj:
+
+                        financeSon = FinanceCatSon.objects.filter(f_id=one.id, delete_time=None).order_by('weight')
+                        if financeSon.count() > 0:
+                            for one1 in financeSon:
+                                financeSub = FinanceCatSub.objects.filter(s_id=one1.id, delete_time=None).order_by(
+                                    'weight')
+                                temp={}
+                                zemp = []
+                                # 总金额
+                                s_amount = Decimal(0)
+                                # 支出
+                                s_a_amount = Decimal(0)
+                                s_d_amount = Decimal(0)
+                                if financeSub.count() > 0:
+                                    for one2 in financeSub:
+                                        samp = {}
+                                        financeInfo = FinanceMouthInfo.objects.filter(finance_sub_id=one2.id,
+                                                                                      delete_time=None)
+                                        if start_year:
+                                            if start_mouth:
+                                                start_time = datetime(int(start_year),int(start_mouth),1,0,0,0,10)
+                                            else:
+                                                start_time = datetime(int(start_year), int(start_mouth), 1, 0, 0, 0, 10)
+                                            financeInfo = financeInfo.filter(create_time__gt=start_time)
+                                        if end_year:
+                                            if end_mouth:
+                                                if end_mouth==2:
+                                                    end_time =  datetime(int(end_year),int(end_mouth),28,23,59,59,10)
+                                                else:
+                                                    end_time = datetime(int(end_year), int(end_mouth), 30, 23, 59, 59,
+                                                                                 10)
+                                            else:
+                                                end_time = datetime(end_year, 12, 30, 23, 59, 59, 10)
+                                            financeInfo = financeInfo.filter(create_time__lte=end_time)
+                                        # 总金额
+                                        sub_amount = Decimal(0)
+                                        # 支出
+                                        a_amount = Decimal(0)
+                                        d_amount = Decimal(0)
+                                        for one3 in financeInfo:
+                                            if one3.amount_type==0:
+                                                d_amount +=one3.amount
+                                                s_d_amount += one3.amount
+                                                sub_amount = sub_amount - one3.amount
+                                                s_amount = s_amount - one3.amount
+                                            else:
+                                                a_amount +=one3.amount
+                                                s_amount += one3.amount
+                                                sub_amount = sub_amount + one3.amount
+                                                s_amount = s_amount + one3.amount
+                                        samp["sub_amount"] = sub_amount
+                                        try:
+                                            samp['sub_income_pay'] = a_amount/(a_amount+d_amount)
+                                        except:
+                                            samp['sub_income_pay'] = None
+                                        samp["finance_sub_name"] = one2.finance_sub_name
+                                        samp['sub_id'] = one2.id
+                                        samp['weight3'] = one2.weight
+                                        zemp.append(samp)
+
+                                else:
+                                    financeInfo = FinanceMouthInfo.objects.filter(finance_son_id=one1.id,
+                                                                                  delete_time=None)
+                                    if start_year:
+                                        if start_mouth:
+                                            start_time = datetime(int(start_year), int(start_mouth), 1, 0, 0, 0, 10)
+                                        else:
+                                            start_time = datetime(int(start_year), 1, 1, 0, 0, 0, 10)
+                                        financeInfo = financeInfo.filter(create_time__gt=start_time)
+                                    if end_year:
+                                        if end_mouth:
+                                            if end_mouth == 2:
+                                                end_time = datetime(int(end_year), int(end_mouth), 28, 23, 59, 59, 10)
+                                            else:
+                                                end_time = datetime(int(end_year), int(end_mouth), 30, 23, 59, 59,
+                                                                             10)
+                                        else:
+                                            end_time = datetime(end_year, 12, 30, 23, 59, 59, 10)
+                                        financeInfo = financeInfo.filter(create_time__lte=end_time)
+                                    for one3 in financeInfo:
+                                        if one3.amount_type == 0:
+                                            s_d_amount += one3.amount
+                                            s_amount = s_amount - one3.amount
+                                        else:
+                                            s_a_amount += one3.amount
+                                            s_amount = s_amount + one3.amount
+
+                                temp["finance_name"] = one.basic_value_zh
+                                temp['f_id'] = one.id
+                                temp['weight1'] = one.weight
+                                temp["finance_son_name"] = one1.finance_son_name
+                                temp['s_id'] = one1.id
+                                temp['weight2'] = one1.weight
+                                temp['s_amount'] = s_amount
+                                try:
+                                    temp['s_income_pay'] = s_a_amount/(s_a_amount+s_d_amount)
+                                except:
+                                    temp['s_income_pay'] = None
+                                temp['sub_data'] = zemp
+                                result.append(temp)
+                        else:
+                            temp = {}
+                            temp["finance_name"] = one.basic_value_zh
+                            temp['f_id'] = one.id
+                            temp['weight1'] = one.weight
+                            temp["finance_son_name"] = None
+                            temp['s_id'] = 0
+                            temp['weight2'] = None
+                            temp['s_amount'] = None
+                            temp["s_income_pay"] = None
+                            temp["finance_sub_name"] = None
+                            temp['sub_id'] = 0
+                            temp['weight3'] = None
+                            temp['sub_data'] = zemp
+                            result.append(temp)
+                jamp={}
+                jamp['data'] = result
+                jamp['order_amount'] = 0
+                jamp['error_code'] = 0
+                jamp['message'] = "检索成功"
+                return Response(jamp)
+            except:
+                msg = "系统繁忙"
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+#####################权限管理########################
+class showAuthorityView(APIView):
+    #查询权限管理
+    @csrf_exempt
+    def get(self, request):
+        # data = request.query_params
+        # valObj = BasicTypeSerializer(data=request.query_params)
+        result = []
+        try:
+            aObj = AuthorityInfo.objects.filter(father_id=0)
+            zemp1 = aObj.values()
+            for o1 in zemp1:
+                s1 = AuthorityInfo.objects.filter(father_id=o1['id'])
+                zemp2 = s1.values()
+                for o2 in zemp2:
+                    s2 = AuthorityInfo.objects.filter(father_id=o2["id"])
+                    zemp3 = s2.values()
+                    for o3 in zemp3:
+                        s3 = AuthorityInfo.objects.filter(father_id=o3["id"])
+                        zemp4 = s3.values()
+                        for o4 in zemp4:
+                            s4 = AuthorityInfo.objects.filter(father_id=o4["id"])
+                            zemp5 = s4.values()
+                            for o5 in zemp5:
+                                s5 = AuthorityInfo.objects.filter(father_id=o5["id"])
+                                o5["son_data"] = s5.values()
+                            o4["son_data"] = zemp5
+                        o3["son_data"] = zemp4
+                    o2["son_data"] = zemp3
+                o1["son_data"] = zemp2
+            temp = {}
+            request = request.method + '  ' + request.get_full_path()
+            temp["data"] = zemp1
+            temp['message'] ="检索数据成功"
+            temp['error_code'] = 10030
+            temp["request"] = request
+            return Response(temp)
+        except:
+            msg = "系统繁忙"
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+    #添加权限管理
+    @csrf_exempt
+    def post(self, request):
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认api接口名称！"
+            samp['key_num'] = "api_name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = showAuthoritySerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
+        if d_flag == 0:
+            for done in data:
+                try:
+                    f_id = done["father_id"]
+                    m_id = done["id"]
+                    if m_id:
+                        aObj = AuthorityInfo.objects.get(id=m_id)
+                        aObj.father_id = f_id
+                        aObj.authority_name = done['authority_name']
+                        aObj.save()
+                    else:
+                        if f_id == 0:
+                            sn = AuthorityInfo.objects.filter(father_id=0).count()+1
+                        else:
+                            fObj = AuthorityInfo.objects.get(id=f_id)
+                            s_sn = AuthorityInfo.objects.filter(father_id=f_id).count()+1
+                            if s_sn < 10:
+                                s_sn = "0"+str(s_sn)
+                            else:
+                                s_sn = str(s_sn)
+                            sn = str(fObj.authority_sn)+s_sn
+                        aObj = AuthorityInfo()
+                        aObj.father_id = f_id
+                        aObj.authority_name = done['authority_name']
+                        aObj.authority_sn = str(sn)
+                        aObj.level = fObj.level + 1
+                        aObj.save()
+                except:
+                    msg = "参数错误"
+                    error_code = 10030
+                    request = request.method + '  ' + request.get_full_path()
+                    post_result = {
+                        "error_code": error_code,
+                        "message": msg,
+                        "request": request,
+                    }
+                    return Response(post_result)
+            msg = "添加基础资料成功"
+            error_code = 0
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+        else:
+            msg = l_msg
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = Basic.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "权限删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "权限删除成功!"
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request
+            }
+            return Response(post_result)

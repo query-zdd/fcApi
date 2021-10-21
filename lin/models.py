@@ -119,6 +119,17 @@ class Authority(models.Model):
         db_table = 'authority'
 
 
+class AuthorityInfo(models.Model):
+    authority_name = models.CharField(max_length=255, blank=True, null=True)
+    authority_sn = models.CharField(max_length=255, blank=True, null=True)
+    level = models.IntegerField(blank=True, null=True)
+    father_id = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'authority_info'
+
+
 class BaseWarm(models.Model):
     create_time = models.DateTimeField(blank=True, null=True)
     update_time = models.DateTimeField(blank=True, null=True)
@@ -552,6 +563,29 @@ class FinanceCatSub(models.Model):
     class Meta:
         managed = False
         db_table = 'finance_cat_sub'
+
+
+class FinanceMouthInfo(models.Model):
+    create_time = models.DateTimeField(blank=True, null=True)
+    update_time = models.DateTimeField(blank=True, null=True)
+    delete_time = models.DateTimeField(blank=True, null=True)
+    finance_sub_id = models.IntegerField(blank=True, null=True)
+    finance_son_id = models.IntegerField(blank=True, null=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    comments = models.CharField(max_length=255, blank=True, null=True)
+    department = models.CharField(max_length=255, blank=True, null=True)
+    post = models.CharField(max_length=255, blank=True, null=True)
+    worker = models.CharField(max_length=255, blank=True, null=True)
+    learder = models.CharField(max_length=255, blank=True, null=True)
+    fee_info_name = models.CharField(max_length=255, blank=True, null=True)
+    year = models.CharField(max_length=255, blank=True, null=True)
+    mouth = models.CharField(max_length=255, blank=True, null=True)
+    amount_type = models.IntegerField(blank=True, null=True)
+    amount_type_name = models.CharField(max_length=255, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'finance_mouth_info'
 
 
 class GarmentSampleRecord(models.Model):
