@@ -203,6 +203,7 @@ urlpatterns = [
     url('^orderDateSet$', views.orderDateSetView.as_view()),
     url('^orderDateSet/(?P<nid>\d+)', views.orderDateSetOneView.as_view()),
     url('^orderDateSet/sort/(?P<bid>\d+)', views.orderDateSetSortView.as_view()),
+    url('^basic/financeCat$', views.financeCatView.as_view()),
 
 
 ]

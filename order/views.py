@@ -15,6 +15,7 @@ from secure.upload.upload_image.config import  access_key,secret_key,base_url
 from secure.serializers import zddpaginate
 import math
 from order.utils import *
+from django.db.models import Sum
 # Create your views here.
 ############################订单管理-出货方案###############################################
 
@@ -10172,3 +10173,540 @@ class showSurrenderView(APIView):
                 "request": request,
             }
             return Response(post_result)
+
+
+###################################工资管理##############################
+
+class showSalaryStandardView(APIView):
+    # 获取工资标准
+    @csrf_exempt
+    def get(self, request):
+        data = request.query_params
+        valObj = showStandSalaryOneSerializer(data=request.query_params)
+        if valObj.is_valid():
+            start, page_size, flag = zddpaginate(int(valObj.data['page']), int(valObj.data['page_size']))
+            status = valObj.data['status'] if valObj.data['status'] is not None else 0
+            department_id = valObj.data['department_id'] if valObj.data['department_id'] is not None else 0
+            post_id = valObj.data['post_id'] if valObj.data['post_id'] is not None else 0
+            name = valObj.data['name'] if valObj.data['name'] is not None else ""
+            start_time = valObj.data['start'] if valObj.data['start'] is not None else ""
+            end_time = valObj.data['end'] if valObj.data['end'] is not None else ""
+            if not flag:
+                msg = "访问页码错误，请确认"
+                error_code = 10100
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+            result = []
+            try:
+                dt = datetime.now()
+                rObj = Archives.objects.filter(delete_time=None).order_by("job_number", "id")
+                if department_id:
+                    rObj = rObj.filter(department_id = department_id)
+                if status:
+                    rObj = rObj.filter(status = status)
+                if post_id:
+                    rObj = rObj.filter(post_id = post_id)
+                if name:
+                    rObj = rObj.filter(name = name)
+
+                total = rObj.count()
+                if rObj.count() > start:
+                    rObj = rObj.all()[start:start + page_size]
+                    for o1 in rObj:
+                        samp = {}
+                        samp['id'] = o1.id
+                        samp['job_number'] = o1.job_number
+                        samp['name'] = o1.name
+                        samp['gender'] = o1.gender
+                        depObj = Department.objects.get(id=o1.department_id)
+                        samp['department_name'] = depObj.department_name
+                        postObj = Post.objects.get(id=o1.post_id)
+                        samp['post_name'] = postObj.post_name
+                        arcstand = ArchivesSalaryStandard.objects.filter(archives_id=o1.id)
+                        if arcstand.count()>0:
+                            samp['annual_salary'] = arcstand[0].annual_salary
+                            samp['payment'] = arcstand[0].payment
+                            samp['social_insurance_id'] = arcstand[0].social_insurance_id
+                            samp['social_insurance_level'] = arcstand[0].social_insurance_level
+                            samp['social_insurance_company'] = arcstand[0].social_insurance_company
+                            samp['social_insurance_person'] = arcstand[0].social_insurance_person
+                            samp['other_contributions_company'] = arcstand[0].other_contributions_company
+                            samp['other_contributions_person'] = arcstand[0].other_contributions_person
+                            samp['surplu_id'] = arcstand[0].surplu_id
+                            samp['surplu_level'] = arcstand[0].surplu_level
+                            samp['surplu_company'] = arcstand[0].surplu_company
+                            samp['surplu_person'] = arcstand[0].surplu_person
+
+                        else:
+                            samp['annual_salary'] = None
+                            samp['payment'] = None
+                            samp['social_insurance_id'] = None
+                            samp['social_insurance_level'] = None
+                            samp['social_insurance_company'] = None
+                            samp['social_insurance_person'] = None
+                            samp['other_contributions_company'] = None
+                            samp['other_contributions_person'] = None
+                            samp['surplu_id'] = None
+                            samp['surplu_level'] = None
+                            samp['surplu_company'] = None
+                            samp['surplu_person'] = None
+                        samp["status"] = o1.status
+                        result.append(samp)
+                    temp = {}
+                    temp["data"] = result
+                    temp['page_size'] = page_size
+                    temp['total'] = total
+                    temp['error_code'] = 0
+                    temp['message'] = "成功"
+                    temp['request'] = request.method + '  ' + request.get_full_path()
+                    return Response(temp)
+                else:
+                    temp = {}
+                    temp["data"] = []
+                    temp['page_size'] = page_size
+                    temp['total'] = total
+                    temp['error_code'] = 0
+                    temp['message'] = "成功"
+                    temp['request'] = request.method + '  ' + request.get_full_path()
+                    return Response(temp)
+            except:
+                msg = "未找到对应的工号"
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+    # 新增工资标准
+    @csrf_exempt
+    def post(self, request):
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        dataone =request.data
+        for done in dataone:
+            d_num = d_num + 1
+            valObjline = showSalaryStandardSerializer(data=done)
+            if not valObjline.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObjline.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
+        dt = datetime.now()
+        ##############保存装箱指示#############################
+        if d_flag == 0:
+            for done in dataone:
+                try:
+                    mid = done['id']
+                    if mid:
+                        bObj = ArchivesSalaryStandard.objects.get(id=mid)
+                        bObj.update_time = dt
+                    else:
+                        cObj = ArchivesSalaryStandard.objects.filter(archives_id=done['archives_id'])
+                        if cObj.count()>0:
+                            bObj = cObj[0]
+                            bObj.update_time = dt
+                        else:
+                            bObj = ArchivesSalaryStandard()
+                            bObj.create_time = dt
+                    bObj.archives_id = done['archives_id']
+                    bObj.annual_salary = done['annual_salary']
+                    bObj.payment = done['payment']
+                    bObj.social_insurance_id = done['social_insurance_id']
+                    bObj.social_insurance_company = done['social_insurance_company']
+                    bObj.social_insurance_person = done['social_insurance_person']
+                    bObj.other_contributions_company = done['other_contributions_company']
+                    bObj.other_contributions_person = done['other_contributions_person']
+                    bObj.surplu_id = done['surplu_id']
+                    bObj.surplu_company = done['surplu_company']
+                    bObj.surplu_person = done['surplu_person']
+                    bObj.save()
+                except:
+                    msg = "id参数错误"
+                    error_code = 10030
+                    request = request.method + '  ' + request.get_full_path()
+                    post_result = {
+                        "error_code": error_code,
+                        "message": msg,
+                        "request": request,
+                    }
+                    return Response(post_result)
+            msg = "保存员工工资标准"
+            error_code = 0
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+        else:
+            msg = l_msg
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+class showMouthSalaryView(APIView):
+    # 获取本月工资
+    @csrf_exempt
+    def get(self, request):
+        data = request.query_params
+        valObj = showMouthSalaryOneSerializer(data=request.query_params)
+        if valObj.is_valid():
+            start, page_size, flag = zddpaginate(int(valObj.data['page']), int(valObj.data['page_size']))
+            status = valObj.data['status'] if valObj.data['status'] is not None else 0
+            if not flag:
+                msg = "访问页码错误，请确认"
+                error_code = 10100
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+            result = []
+            try:
+                dt = datetime.now()
+                year = dt.year
+                mouth = dt.month
+                rObj = Archives.objects.filter(delete_time=None).order_by("job_number", "id")
+                total = rObj.count()
+                if rObj.count() > start:
+                    rObj = rObj.all()[start:start + page_size]
+                    for o1 in rObj:
+                        samp = {}
+                        samp['id'] = o1.id
+                        samp['job_number'] = o1.job_number
+                        samp['name'] = o1.name
+                        samp['gender'] = o1.gender
+                        depObj = Department.objects.get(id=o1.department_id)
+                        samp['department_name'] = depObj.department_name
+                        postObj = Post.objects.get(id=o1.post_id)
+                        samp['post_name'] = postObj.post_name
+                        arcDetail = ArchivesSalaryDetail.objects.filter(archives_id=o1.id,year=year,mouth=mouth)
+                        if arcDetail.count()>0:
+                            samp['payment'] = arcDetail[0].payment
+                            samp['social_insurance_person'] = arcDetail[0].social_insurance_person
+                            samp['other_contributions_person'] = arcDetail[0].other_contributions_person
+                            samp['surplu_person'] = arcDetail[0].surplu_person
+                            samp['calculated_salary'] = arcDetail[0].calculated_salary
+                            samp['other_salary'] = arcDetail[0].other_salary
+                            samp['deduction'] = arcDetail[0].deduction
+                            samp['comments'] = arcDetail[0].comments
+                            samp['real_salary'] = arcDetail[0].real_salary
+                        else:
+                            arcstand = ArchivesSalaryStandard.objects.filter(archives_id=o1.id)
+                            if arcstand.count()>0:
+                                samp['payment'] = arcstand[0].payment
+                                samp['social_insurance_person'] = arcstand[0].social_insurance_person
+                                samp['other_contributions_person'] = arcstand[0].other_contributions_person
+                                samp['surplu_person'] = arcstand[0].surplu_person
+                                samp['calculated_salary'] = arcstand[0].payment - arcstand[0].social_insurance_person - arcstand[0].other_contributions_person - arcstand[0].surplu_person
+                                samp['other_salary'] = None
+                                samp['deduction'] = None
+                                samp['comments'] = None
+                                samp['real_salary'] = None
+                            else:
+                                samp['payment'] = None
+                                samp['social_insurance_person'] = None
+                                samp['other_contributions_person'] = None
+                                samp['surplu_person'] = None
+                                samp['calculated_salary'] = None
+                                samp['other_salary'] = None
+                                samp['deduction'] = None
+                                samp['comments'] = None
+                                samp['real_salary'] = None
+                        result.append(samp)
+                    arcDetail = ArchivesSalaryDetail.objects.filter(year=year, mouth=mouth).aggregate(nums=Sum('calculated_salary'))
+                    temp = {}
+                    temp["data"] = result
+                    temp["year"] = year
+                    temp["mouth"] = mouth
+                    temp["worker_num"] = total
+                    temp["salary_num"] = arcDetail['nums']
+                    temp['page_size'] = page_size
+                    temp['total'] = total
+                    temp['error_code'] = 0
+                    temp['message'] = "成功"
+                    temp['request'] = request.method + '  ' + request.get_full_path()
+                    return Response(temp)
+                else:
+                    temp = {}
+                    temp["data"] = []
+                    temp['page_size'] = page_size
+                    temp['total'] = total
+                    temp['error_code'] = 0
+                    temp['message'] = "成功"
+                    temp['request'] = request.method + '  ' + request.get_full_path()
+                    return Response(temp)
+            except:
+                msg = "未找到对应的工号"
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+    # 添加本月工资
+    @csrf_exempt
+    def post(self, request):
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        dataone =request.data
+        for done in dataone:
+            d_num = d_num + 1
+            valObjline = showMouthSalarySerializer(data=done)
+            if not valObjline.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObjline.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
+        dt = datetime.now()
+        ##############保存装箱指示#############################
+        if d_flag == 0:
+            for done in dataone:
+                try:
+                    mid = done['id']
+                    if mid:
+                        bObj = ArchivesSalaryDetail.objects.get(id=mid)
+                        bObj.update_time = dt
+                    else:
+                        cObj = ArchivesSalaryDetail.objects.filter(archives_id=done['archives_id'],year=done['year'],mouth=done['mouth'])
+                        if cObj.count()>0:
+                            bObj = cObj[0]
+                            bObj.update_time = dt
+                        else:
+                            bObj = ArchivesSalaryDetail()
+                            bObj.create_time = dt
+                    bObj.archives_id = done['archives_id']
+                    bObj.year = done['year']
+                    bObj.mouth = done['mouth']
+                    bObj.payment = done['payment']
+                    bObj.social_insurance_person = done['social_insurance_person']
+                    bObj.other_contributions_person = done['other_contributions_person']
+                    bObj.surplu_person = done['surplu_person']
+                    bObj.calculated_salary = done['calculated_salary']
+                    bObj.other_salary = done['other_salary']
+                    bObj.deduction = done['deduction']
+                    bObj.comments = done['comments']
+                    bObj.real_salary = done['real_salary']
+                    bObj.save()
+                except:
+                    msg = "id参数错误"
+                    error_code = 10030
+                    request = request.method + '  ' + request.get_full_path()
+                    post_result = {
+                        "error_code": error_code,
+                        "message": msg,
+                        "request": request,
+                    }
+                    return Response(post_result)
+            msg = "保存员工本月工资"
+            error_code = 0
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+        else:
+            msg = l_msg
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+
+class showSalaryInfoView(APIView):
+    # 获取工资档案
+    @csrf_exempt
+    def get(self, request):
+        data = request.query_params
+        valObj = showStandSalaryOneSerializer(data=request.query_params)
+        if valObj.is_valid():
+            start, page_size, flag = zddpaginate(int(valObj.data['page']), int(valObj.data['page_size']))
+            status = valObj.data['status'] if valObj.data['status'] is not None else 0
+            department_id = valObj.data['department_id'] if valObj.data['department_id'] is not None else 0
+            post_id = valObj.data['post_id'] if valObj.data['post_id'] is not None else 0
+            name = valObj.data['name'] if valObj.data['name'] is not None else ""
+            start_time = valObj.data['start'] if valObj.data['start'] is not None else ""
+            end_time = valObj.data['end'] if valObj.data['end'] is not None else ""
+            if not flag:
+                msg = "访问页码错误，请确认"
+                error_code = 10100
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+            result = []
+            try:
+                dt = datetime.now()
+                rObj = Archives.objects.filter(delete_time=None).order_by("job_number", "id")
+                if department_id:
+                    rObj = rObj.filter(department_id = department_id)
+                if status:
+                    rObj = rObj.filter(status = status)
+                if post_id:
+                    rObj = rObj.filter(post_id = post_id)
+                if name:
+                    rObj = rObj.filter(name = name)
+
+                total = rObj.count()
+                if rObj.count() > start:
+                    rObj = rObj.all()[start:start + page_size]
+                    for o1 in rObj:
+                        samp = {}
+                        samp['id'] = o1.id
+                        samp['job_number'] = o1.job_number
+                        samp['name'] = o1.name
+                        samp['gender'] = o1.gender
+                        depObj = Department.objects.get(id=o1.department_id)
+                        samp['department_name'] = depObj.department_name
+                        postObj = Post.objects.get(id=o1.post_id)
+                        samp['post_name'] = postObj.post_name
+                        arcstand = ArchivesSalaryStandard.objects.filter(archives_id=o1.id)
+                        if arcstand.count()>0:
+                            annual_salary = arcstand[0].annual_salary
+                            samp['annual_salary'] = arcstand[0].annual_salary
+                            samp['payment'] = arcstand[0].payment
+                            samp['social_insurance_id'] = arcstand[0].social_insurance_id
+                            samp['social_insurance_level'] = arcstand[0].social_insurance_level
+                            samp['social_insurance_company'] = arcstand[0].social_insurance_company
+                            samp['social_insurance_person'] = arcstand[0].social_insurance_person
+                            samp['other_contributions_company'] = arcstand[0].other_contributions_company
+                            samp['other_contributions_person'] = arcstand[0].other_contributions_person
+                            samp['surplu_id'] = arcstand[0].surplu_id
+                            samp['surplu_level'] = arcstand[0].surplu_level
+                            samp['surplu_company'] = arcstand[0].surplu_company
+                            samp['surplu_person'] = arcstand[0].surplu_person
+
+                        else:
+                            annual_salary = Decimal(0)
+                            samp['annual_salary'] = None
+                            samp['payment'] = None
+                            samp['social_insurance_id'] = None
+                            samp['social_insurance_level'] = None
+                            samp['social_insurance_company'] = None
+                            samp['social_insurance_person'] = None
+                            samp['other_contributions_company'] = None
+                            samp['other_contributions_person'] = None
+                            samp['surplu_id'] = None
+                            samp['surplu_level'] = None
+                            samp['surplu_company'] = None
+                            samp['surplu_person'] = None
+                        arcDetail = ArchivesSalaryDetail.objects.filter(archives_id=o1.id)
+                        if start_time:
+                            arcDetail = arcDetail.filter(create_time__gt=start_time)
+                        if end_time:
+                            arcDetail = arcDetail.filter(create_time__gt=end_time)
+                        calculated_salary = Decimal(0)
+                        other_salary = Decimal(0)
+                        deduction = Decimal(0)
+                        comments = ''
+                        real_salary = Decimal(0)
+                        for one in arcDetail:
+                            calculated_salary += one.calculated_salary
+                            other_salary += one.other_salary
+                            comments =comments + one.comments +"|"
+                            real_salary += one.real_salary
+                        samp['calculated_salary'] = calculated_salary
+                        samp['other_salary'] = other_salary
+                        samp['deduction'] = deduction
+                        samp['comments'] = comments
+                        samp['real_salary'] = real_salary
+                        if annual_salary:
+                            samp['de_annual_salary'] = annual_salary - real_salary
+                        else:
+                            samp['de_annual_salary'] = 0
+                        samp["status"] = o1.status
+                        result.append(samp)
+                    temp = {}
+                    temp["data"] = result
+                    temp['page_size'] = page_size
+                    temp['total'] = total
+                    temp['error_code'] = 0
+                    temp['message'] = "成功"
+                    temp['request'] = request.method + '  ' + request.get_full_path()
+                    return Response(temp)
+                else:
+                    temp = {}
+                    temp["data"] = []
+                    temp['page_size'] = page_size
+                    temp['total'] = total
+                    temp['error_code'] = 0
+                    temp['message'] = "成功"
+                    temp['request'] = request.method + '  ' + request.get_full_path()
+                    return Response(temp)
+            except:
+                msg = "未找到对应的工号"
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+

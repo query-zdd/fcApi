@@ -14,7 +14,7 @@ class BasicTypeUpdateSerializer(serializers.Serializer):
 
 #订单类型update
 class BasicInsertSerializer(serializers.Serializer):
-    basic_value_en = serializers.CharField(error_messages={'required':'必须传入基础资料英文！'})
+    basic_value_en = serializers.CharField(allow_null=True,allow_blank=True)
     basic_value_zh = serializers.CharField(error_messages={'required': '必须传入基础资料信息！'})
     active = serializers.CharField(error_messages={'required': '数据参数不可为空！'})
     type_name = serializers.CharField(error_messages={'required': '必须传入基础类型名称！'})
@@ -1122,3 +1122,57 @@ class showSurrenderSerializer(serializers.Serializer):
     sur_bp = serializers.CharField(error_messages={'required': '必须传入结汇返点'})
     bp_amount = serializers.CharField(error_messages={'required': '必须传入返点金额'})
     id = serializers.IntegerField(default=0)
+
+class showSalaryStandardSerializer(serializers.Serializer):
+    archives_id = serializers.CharField(error_messages={'required': '必须传入员工id'})
+    annual_salary = serializers.CharField(error_messages={'required': '必须传入年薪'})
+    payment = serializers.CharField(error_messages={'required': '必须传入月薪'})
+    social_insurance_id = serializers.CharField(error_messages={'required': '必须传入社保基数id'})
+    social_insurance_company = serializers.CharField(error_messages={'required': '必须传入社保缴纳（公司）'})
+    social_insurance_person = serializers.CharField(error_messages={'required': '必须传入社保缴纳（个人）'})
+    other_contributions_company = serializers.CharField(error_messages={'required': '必须传入其他缴纳（公司）'})
+    other_contributions_person = serializers.CharField(error_messages={'required': '必须传入其他缴纳（个人）'})
+    surplu_id = serializers.CharField(error_messages={'required': '必须传入公积金基数id'})
+    surplu_company = serializers.CharField(error_messages={'required': '必须传入公积金缴纳（公司）'})
+    surplu_person = serializers.CharField(error_messages={'required': '必须传入公积金缴纳（个人）'})
+    id = serializers.IntegerField(default=0)
+
+class showMouthSalarySerializer(serializers.Serializer):
+    archives_id = serializers.CharField(error_messages={'required': '必须传入员工id'})
+    year = serializers.CharField(error_messages={'required': '必须传入本月工资年份'})
+    mouth = serializers.CharField(error_messages={'required': '必须传入本月工资月份'})
+    payment = serializers.CharField(error_messages={'required': '必须传入月薪'})
+    social_insurance_person = serializers.CharField(error_messages={'required': '必须传入社保缴纳（个人）'})
+    other_contributions_person = serializers.CharField(error_messages={'required': '必须传入其他缴纳（个人）'})
+    surplu_person = serializers.CharField(error_messages={'required': '必须传入公积金缴纳（个人）'})
+    calculated_salary = serializers.CharField(error_messages={'required': '必须传入计发工资'})
+    other_salary = serializers.CharField(error_messages={'required': '必须传入其他薪资'})
+    deduction = serializers.CharField(error_messages={'required': '必须传入扣减金额'})
+    comments = serializers.CharField(default="",allow_blank=True,allow_null=True)
+    real_salary = serializers.CharField(error_messages={'required': '必须传入实发工资'})
+    id = serializers.IntegerField(default=0)
+
+class showStandSalaryOneSerializer(serializers.Serializer):
+    page_size = serializers.IntegerField(default=10)
+    page = serializers.IntegerField(default=1)
+    status = serializers.CharField(default=1)
+    department_id = serializers.IntegerField(default=0)
+    post_id = serializers.IntegerField(default=0)
+    name = serializers.CharField(default="")
+    start = serializers.CharField(default="")
+    end = serializers.CharField(default="")
+
+class showMouthSalaryOneSerializer(serializers.Serializer):
+    page_size = serializers.IntegerField(default=10)
+    page = serializers.IntegerField(default=1)
+
+class financeCatSerializer(serializers.Serializer):
+    finance_name = serializers.CharField(error_messages={'required': '必须传入财务项目'})
+    active_1 = serializers.IntegerField(error_messages={'required': '必须传入财务项目激活状态'})
+    f_id = serializers.IntegerField(error_messages={'required': '必须传入财务项目id'})
+    finance_son_name = serializers.CharField(error_messages={'required': '必须传入月薪'})
+    active_2 = serializers.IntegerField(error_messages={'required': '必须传入科目名称激活状态'})
+    s_id = serializers.IntegerField(error_messages={'required': '必须传入科目名称id'})
+    finance_sub_name = serializers.CharField(error_messages={'required': '必须传入科目分类'})
+    active_3 = serializers.IntegerField(error_messages={'required': '必须传入科目分类激活状态'})
+    sub_id = serializers.IntegerField(error_messages={'required': '必须传入科目分类id'})

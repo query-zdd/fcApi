@@ -132,13 +132,11 @@ urlpatterns = [
     url('^getOtherReceipt/(?P<nid>\d+)', views.getOtherReceiptOneView.as_view()),
     # 成衣样品
     url('^getSampReceipt/(?P<nid>\d+)', views.getSampReceiptOneView.as_view()),
-
+    # 结汇管理
     url('^showSurrender$', views.showSurrenderView.as_view()),
-
-
-
-
-
-
+    # 工资管理
+    url('^showSalaryStandard$', views.showSalaryStandardView.as_view()),
+    url('^showMouthSalary$', views.showMouthSalaryView.as_view()),
+    url('^showSalaryInfo$', views.showSalaryInfoView.as_view()),
 
 ]

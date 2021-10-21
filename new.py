@@ -33,6 +33,78 @@ class Archives(models.Model):
         db_table = 'archives'
 
 
+class ArchivesSalaryDetail(models.Model):
+    create_time = models.DateTimeField(blank=True, null=True)
+    update_time = models.DateTimeField(blank=True, null=True)
+    delete_time = models.DateTimeField(blank=True, null=True)
+    archives_id = models.IntegerField(blank=True, null=True)
+    year = models.IntegerField(blank=True, null=True)
+    mouth = models.IntegerField(blank=True, null=True)
+    payment = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    social_insurance_person = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    other_contributions_person = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    surplu_person = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    calculated_salary = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    other_salary = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    deduction = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    comments = models.CharField(max_length=255, blank=True, null=True)
+    real_salary = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'archives_salary_detail'
+
+
+class ArchivesSalaryInfo(models.Model):
+    create_time = models.DateTimeField(blank=True, null=True)
+    update_time = models.DateTimeField(blank=True, null=True)
+    delete_time = models.DateTimeField(blank=True, null=True)
+    archives_id = models.IntegerField(blank=True, null=True)
+    social_insurance_level = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    annual_salary = models.IntegerField(blank=True, null=True)
+    payment = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    social_insurance_company = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    social_insurance_person = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    other_contributions_company = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    other_contributions_person = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    surplu_level = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    surplu_company = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    surplu_person = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    calculated_salary = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    other_salary = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    deduction = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    comments = models.CharField(max_length=255, blank=True, null=True)
+    real_salary = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    deducton_salary = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'archives_salary_info'
+
+
+class ArchivesSalaryStandard(models.Model):
+    create_time = models.DateTimeField(blank=True, null=True)
+    update_time = models.DateTimeField(blank=True, null=True)
+    delete_time = models.DateTimeField(blank=True, null=True)
+    archives_id = models.IntegerField(blank=True, null=True)
+    social_insurance_id = models.IntegerField(blank=True, null=True)
+    social_insurance_level = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    annual_salary = models.IntegerField(blank=True, null=True)
+    payment = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    social_insurance_company = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    social_insurance_person = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    other_contributions_company = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    other_contributions_person = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    surplu_id = models.IntegerField(blank=True, null=True)
+    surplu_level = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    surplu_company = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    surplu_person = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'archives_salary_standard'
+
+
 class Authority(models.Model):
     create_time = models.DateTimeField(blank=True, null=True)
     update_time = models.DateTimeField(blank=True, null=True)
@@ -451,6 +523,35 @@ class FeeNo(models.Model):
     class Meta:
         managed = False
         db_table = 'fee_no'
+
+
+class FinanceCatSon(models.Model):
+    create_time = models.DateTimeField(blank=True, null=True)
+    update_time = models.DateTimeField(blank=True, null=True)
+    delete_time = models.DateTimeField(blank=True, null=True)
+    finance_son_name = models.CharField(max_length=100)
+    f_id = models.IntegerField()
+    active = models.SmallIntegerField()
+    weight = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'finance_cat_son'
+
+
+class FinanceCatSub(models.Model):
+    create_time = models.DateTimeField(blank=True, null=True)
+    update_time = models.DateTimeField(blank=True, null=True)
+    delete_time = models.DateTimeField(blank=True, null=True)
+    finance_sub_name = models.CharField(max_length=100)
+    f_id = models.IntegerField()
+    s_id = models.IntegerField(blank=True, null=True)
+    active = models.SmallIntegerField()
+    weight = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'finance_cat_sub'
 
 
 class GarmentSampleRecord(models.Model):

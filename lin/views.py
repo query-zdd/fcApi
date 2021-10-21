@@ -197,12 +197,12 @@ class basicView(APIView):
             error_code = 0
             post_result = {
                 "error_code": error_code,
-                "message": "样品分类删除成功!",
+                "message": "基础删除成功!",
                 "request": request,
             }
             return Response(post_result)
         except:
-            msg = "样品分类不存在!"
+            msg = "基础资料不存在!"
             error_code = 10020
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -11970,6 +11970,151 @@ class orderDateSetSortView(APIView):
         else:
             msg = valObj.errors
             error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+
+# 财务项目设置
+class financeCatView(APIView):
+    # 添加/编辑 财务项目设置
+    @csrf_exempt
+    def post(self, request):
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        dataone = request.data
+        for done in dataone:
+            d_num = d_num + 1
+            valObjline = financeCatSerializer(data=done)
+            if not valObjline.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObjline.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
+        dt = datetime.now()
+        ##############保存装箱指示#############################
+        if d_flag == 0:
+            dt = datetime.now()
+            for done in dataone:
+                try:
+                    fid = done['f_id']
+                    bObj = Basic.objects.filter(id=fid)
+                    sid = done['s_id']
+                    s_num = FinanceCatSon.objects.filter(f_id=fid).count() + 1
+                    if sid:
+                        sObj = FinanceCatSon.objects.get(id=sid)
+                        sObj.update_time = dt
+                        sObj.finance_son_name = done['finance_son_name']
+                        sObj.active = done['active_2']
+                        sObj.f_id = fid
+                        sObj.save()
+                    else:
+                        sOne = FinanceCatSon.objects.filter(finance_son_name = done['finance_son_name'])
+                        if sOne.count()>0:
+                            sObj = sOne[0]
+                            sObj.update_time = dt
+                        else:
+                            sObj = FinanceCatSon()
+                            sObj.create_time = dt
+                            sObj.weight = s_num
+                        sObj.finance_son_name = done['finance_son_name']
+                        sObj.active = done['active_2']
+                        sObj.f_id = fid
+                        sObj.save()
+                        sid = FinanceCatSon.objects.filter(finance_son_name=done['finance_son_name'])[0].id
+                    sub_id = done['sub_id']
+                    sub_num = FinanceCatSub.objects.filter(s_id=sid).count() + 1
+                    if sub_id:
+                        subObj = FinanceCatSub.objects.get(id=sub_id)
+                        subObj.update_time = dt
+                        subObj.finance_sub_name = done['finance_sub_name']
+                        subObj.active = done['active_3']
+                        subObj.f_id = fid
+                        subObj.s_id = sid
+                        subObj.save()
+                    else:
+                        subObj = FinanceCatSub()
+                        subObj.create_time = dt
+                        subObj.weight = sub_num
+                        subObj.finance_sub_name = done['finance_sub_name']
+                        subObj.active = done['active_3']
+                        subObj.f_id = fid
+                        subObj.s_id = sid
+                        subObj.save()
+
+                except:
+                    msg = "id参数错误"
+                    error_code = 10030
+                    request = request.method + '  ' + request.get_full_path()
+                    post_result = {
+                        "error_code": error_code,
+                        "message": msg,
+                        "request": request,
+                    }
+                    return Response(post_result)
+            msg = "保存财务项目设置"
+            error_code = 0
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+        else:
+            msg = l_msg
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+    #批量删除 面辅料采购
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for nid in ids:
+                bObj = OrderCloth.objects.get(id=nid)
+                dt = datetime.now()
+                subObj = OrderClothLine.objects.filter(order_cloth_id=bObj.id)
+                for one in subObj:
+                    one.delete_time = dt
+                    one.save()
+                sbObj = OrderClothShip.objects.filter(order_cloth_id=nid)
+                for one1 in sbObj:
+                    one1.delete_time = dt
+                    one1.save()
+                subsbObj = OrderClothLineShip.objects.filter(order_cloth_id=nid)
+                for one2 in subsbObj:
+                    one2.delete_time = dt
+                    one2.save()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "出货方案删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "面辅料方案不存在!",
+            error_code = 10020
             request = request.method + '  ' + request.get_full_path()
             post_result = {
                 "error_code": error_code,
