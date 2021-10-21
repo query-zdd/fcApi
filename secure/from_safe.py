@@ -1205,3 +1205,10 @@ class showAuthoritySerializer(serializers.Serializer):
     authority_name = serializers.CharField(error_messages={'required': '必须传入权限分类名称！'})
     father_id = serializers.IntegerField(error_messages={'required': '必须传入分类父级id！'})
     id= serializers.IntegerField(error_messages={'required': '必须传入权限列表id！'})
+
+#角色处理
+class RoleInsertSerializer(serializers.Serializer):
+    role_name = serializers.CharField(error_messages={'required': '必须传入角色名称！'})
+    active = serializers.CharField(error_messages={'required': '数据参数不可为空！'})
+    authority_list = serializers.ListField(error_messages={'required': '必须传入角色列表！'})
+    id = serializers.IntegerField(error_messages={'required': '必须传入角色id！'})

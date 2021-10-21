@@ -12749,3 +12749,183 @@ class showAuthorityView(APIView):
                 "request": request
             }
             return Response(post_result)
+
+
+#################角色管理
+class showAuthorityRoleView(APIView):
+    #查询角色管理
+    @csrf_exempt
+    def get(self, request):
+        # data = request.query_params
+        # valObj = BasicTypeSerializer(data=request.query_params)
+        result = []
+        try:
+            bObj = Role.objects.filter(delete_time=None)
+            temp = {}
+            request = request.method + '  ' + request.get_full_path()
+            temp["data"] = bObj.values()
+            temp['message'] = "检索数据成功"
+            temp['error_code'] = 10030
+            temp["request"] = request
+            return Response(temp)
+        except:
+            msg = "系统繁忙"
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+    #添加角色管理
+    @csrf_exempt
+    def post(self, request):
+        # data = request.query_params
+        # valObj = BasicInsertSerializer(data=request.query_params)
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认api接口名称！"
+            samp['key_num'] = "api_name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = RoleInsertSerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
+        result = []
+        dt = datetime.now()
+        if d_flag == 0:
+            for done in data:
+
+                try:
+                    num = Role.objects.all().count()+1
+                    mid = done["id"]
+                    if mid:
+                        bObj = Role.objects.get(id=mid)
+                        bObj.update_time = dt
+                    else:
+                        bObj = Role()
+                        bObj.create_time = dt
+                    bObj.role_name = done['role_name']
+                    bObj.authority_list = done['authority_list']
+                    bObj.active = done['active']
+
+                    if not mid:
+                        bObj.weight = num
+                    bObj.save()
+                except:
+                    msg = "参数校验不通过！"
+                    error_code = 10030
+                    request = request.method + '  ' + request.get_full_path()
+                    post_result = {
+                        "error_code": error_code,
+                        "message": msg,
+                        "request": request,
+                    }
+                    return Response(post_result)
+            msg = "添加基础资料成功"
+            error_code = 0
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+        else:
+            msg = l_msg
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = Role.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "账户角色删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "账户角色不存在!"
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request
+            }
+            return Response(post_result)
+
+
+class showAuthorityRoleSortView(APIView):
+    #基础资料排序
+    def put(self,request,bid):
+        data = request.query_params
+        valObj = BasicSortSerializer(data=request.query_params)
+        if valObj.is_valid():
+            obj = Role.objects.all()
+            offset = int(data['offset'])
+            bid = bid
+            begin_weight = Role.objects.get(id=bid).weight
+            result = Msort(obj, offset, bid, begin_weight)
+            if result:
+                # 返回数据
+                request = request.method + '  ' + request.get_full_path()
+                error_code = 0
+                post_result = {
+                    "error_code": error_code,
+                    "message": "账户角色排序成功!",
+                    "request": request,
+                }
+                return Response(post_result)
+            else:
+                # 返回数据
+                request = request.method + '  ' + request.get_full_path()
+                error_code = 0
+                post_result = {
+                    "error_code": error_code,
+                    "message": "偏移量超出范围!",
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)

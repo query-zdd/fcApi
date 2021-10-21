@@ -1598,6 +1598,7 @@ class Role(models.Model):
     role_name = models.CharField(max_length=25)
     active = models.SmallIntegerField()
     weight = models.IntegerField()
+    authority_list = models.TextField(blank=True, null=True)
 
     class Meta:
         managed = False

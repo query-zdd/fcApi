@@ -214,4 +214,7 @@ urlpatterns = [
     #权限管理
     url('^showAuthority$', views.showAuthorityView.as_view()),
 
+    url('^showAuthorityRole$', views.showAuthorityRoleView.as_view()),
+    url('^showAuthorityRole/sort/(?P<bid>\d+)', views.showAuthorityRoleSortView.as_view()),
+
 ]
