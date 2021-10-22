@@ -1609,10 +1609,14 @@ class RoleMenu(models.Model):
     create_time = models.DateTimeField(blank=True, null=True)
     update_time = models.DateTimeField(blank=True, null=True)
     delete_time = models.DateTimeField(blank=True, null=True)
-    menu_name = models.CharField(max_length=25)
-    menu_key = models.CharField(max_length=25)
-    parent_id = models.IntegerField(blank=True, null=True)
+    archives_id = models.IntegerField()
+    name = models.CharField(max_length=255)
+    role_id = models.IntegerField(blank=True, null=True)
     active = models.SmallIntegerField()
+    password = models.CharField(max_length=255, blank=True, null=True)
+    pc_client = models.SmallIntegerField(blank=True, null=True)
+    app_client = models.SmallIntegerField(blank=True, null=True)
+    weight = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False

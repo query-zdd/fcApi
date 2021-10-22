@@ -49,7 +49,11 @@ REST_FRAMEWORK = {
     "ALLOWED_VERSIONS": ['v1', 'v2'],  # 允许的版本
     "VERSION_PARAM": 'version',  # GET方式url中参数的名字  ?version=xxx
     "DEFAULT_PAGINATION_CLASS":'rest_framework.pagination.PageNumberPagination',
-    "PAGE_SIZE": 10,  # 每页最多显示两条数据
+    "PAGE_SIZE": 10,  # 每页最多显示两条数据,
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+            'rest_framework.authentication.SessionAuthentication',
+            'rest_framework.authentication.TokenAuthentication',
+        )
 }
 
 MIDDLEWARE = [

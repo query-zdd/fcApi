@@ -1212,3 +1212,14 @@ class RoleInsertSerializer(serializers.Serializer):
     active = serializers.CharField(error_messages={'required': '数据参数不可为空！'})
     authority_list = serializers.ListField(error_messages={'required': '必须传入角色列表！'})
     id = serializers.IntegerField(error_messages={'required': '必须传入角色id！'})
+
+#账户管理
+class RegisterRoleInsertSerializer(serializers.Serializer):
+    archives_id = serializers.IntegerField(error_messages={'required': '必须传入员工id！'})
+    name = serializers.CharField(error_messages={'required': '必须传入账户名称！'})
+    role_id = serializers.IntegerField(error_messages={'required': '必须传入角色id！'})
+    password = serializers.CharField(error_messages={'required': '必须传入账户密码！'})
+    active = serializers.IntegerField(error_messages={'required': '激活数据参数不可为空！'})
+    pc_client = serializers.IntegerField(error_messages={'required': '必须传入电脑端是否可用！'})
+    app_client = serializers.IntegerField(error_messages={'required': '必须传入移动端是否可用！'})
+    id = serializers.IntegerField(error_messages={'required': '必须传入账户id！'})

@@ -216,5 +216,8 @@ urlpatterns = [
 
     url('^showAuthorityRole$', views.showAuthorityRoleView.as_view()),
     url('^showAuthorityRole/sort/(?P<bid>\d+)', views.showAuthorityRoleSortView.as_view()),
+    # 账户管理
+    url('^showRegisterRole$', views.showRegisterRoleView.as_view()),
+    url('^showRegisterRole/sort/(?P<bid>\d+)', views.showRegisterRoleSortView.as_view()),
 
 ]
