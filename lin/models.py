@@ -1617,6 +1617,7 @@ class RoleMenu(models.Model):
     pc_client = models.SmallIntegerField(blank=True, null=True)
     app_client = models.SmallIntegerField(blank=True, null=True)
     weight = models.IntegerField(blank=True, null=True)
+    phone = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1851,3 +1852,16 @@ class WarehouseClassification(models.Model):
     class Meta:
         managed = False
         db_table = 'warehouse_classification'
+
+
+class ZToken(models.Model):
+    create_time = models.DateTimeField(blank=True, null=True)
+    user = models.CharField(max_length=255, blank=True, null=True)
+    pwd = models.CharField(max_length=255, blank=True, null=True)
+    token = models.CharField(max_length=255, blank=True, null=True)
+    type = models.CharField(max_length=255, blank=True, null=True)
+    archi_list = models.TextField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'z_token'

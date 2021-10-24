@@ -8,7 +8,7 @@ from decimal import *
 
 from django.db.models import Q
 from django.db.models.base import ModelState
-from datetime import datetime, date
+from datetime import datetime, date,timedelta
 
 from django.forms import model_to_dict
 from django.views.decorators.csrf import csrf_exempt
@@ -21,6 +21,8 @@ import json
 # from PIL import Image,ImageDraw,ImageFont
 import random
 import functools
+
+
 from lin.models import *
 # 获取注意事项数据以及确认数据
 def getNotesNum(plan_id=None,order_id=None):
@@ -699,3 +701,41 @@ def downDay(d1,d2):
     else:
         dayNum = None
     return dayNum
+
+def getInSn(sn):
+    num = len(sn)
+    result = []
+    for i in range(num):
+        result.append(sn)
+        sn = sn[:-1]
+    return result
+
+def checkPermission(request):
+    url = request.get_full_path()
+    try:
+        token = request.META.get("HTTP_AUTHORIZATION","")
+        sn = request.META.get("HTTP_AUTHSN", "")
+        result = getInSn(sn)
+        if not token:
+            msg = "未登录，请先登录系统"
+            return False,msg
+        else:
+            td = datetime.now()-timedelta(seconds=3600)
+            tObj = ZToken.objects.filter(token=token,create_time__gt=td)
+            if tObj.count()>0:
+                userObj = RoleMenu.objects.get(id=tObj[0].type)
+                role = Role.objects.get(id=userObj.role_id)
+                ach_list = role.authority_list
+                flag = False
+                msg = "当前账户无此权限！"
+                for s_num in result:
+                    if s_num in ach_list:
+                        flag = True
+                        msg = "权限通过"
+                return flag,msg
+            else:
+                msg = "token已经过期，请重新登录！"
+                return False, msg
+    except:
+        msg = "系统繁忙！"
+        return False, msg

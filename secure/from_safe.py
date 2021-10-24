@@ -1223,3 +1223,8 @@ class RegisterRoleInsertSerializer(serializers.Serializer):
     pc_client = serializers.IntegerField(error_messages={'required': '必须传入电脑端是否可用！'})
     app_client = serializers.IntegerField(error_messages={'required': '必须传入移动端是否可用！'})
     id = serializers.IntegerField(error_messages={'required': '必须传入账户id！'})
+
+#账户管理
+class LoginSerializer(serializers.Serializer):
+    name = serializers.CharField(error_messages={'required': '必须传入账户名称！'})
+    password = serializers.CharField(error_messages={'required': '必须传入账户密码！'})

@@ -1,3 +1,4 @@
+from django.contrib.auth import authenticate
 from django.http import HttpResponse,request
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
@@ -16,7 +17,9 @@ from lin.exception import Error
 from secure.upload.upload_image.config import  access_key,secret_key,base_url
 from secure.serializers import zddpaginate
 import random
-
+from rest_framework.authtoken.models import Token
+from django.contrib.auth import authenticate
+import uuid
 # Create your views here.
 #############################  基础资料  #########################################
 from secure.upload.upload_image.token import get_token
@@ -12752,13 +12755,24 @@ class showAuthorityView(APIView):
 
 
 #################角色管理
+
+
 class showAuthorityRoleView(APIView):
     #查询角色管理
     @csrf_exempt
     def get(self, request):
-        # data = request.query_params
-        # valObj = BasicTypeSerializer(data=request.query_params)
-        result = []
+        ret, msg = checkPermission(request)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
         try:
             bObj = Role.objects.filter(delete_time=None)
             temp = {}
@@ -13102,6 +13116,92 @@ class showRegisterRoleSortView(APIView):
                 post_result = {
                     "error_code": error_code,
                     "message": "偏移量超出范围!",
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+
+#################账户登录
+class showLoginView(APIView):
+    #查询角色管理
+    @csrf_exempt
+    def get(self, request):
+        # data = request.query_params
+        # valObj = BasicTypeSerializer(data=request.query_params)
+        result = []
+        try:
+            bObj = RoleMenu.objects.filter(delete_time=None)
+            cObj =  bObj.values()
+            for one in cObj:
+                one["password"] = "xxxxxxxx"
+            temp = {}
+            request = request.method + '  ' + request.get_full_path()
+            temp["data"] = cObj
+            temp['message'] = "检索数据成功"
+            temp['error_code'] = 10030
+            temp["request"] = request
+            return Response(temp)
+        except:
+            msg = "系统繁忙"
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+    #账户登录
+    @csrf_exempt
+    def post(self, request):
+        data = request.data
+        valObj = LoginSerializer(data=data)
+        if valObj.is_valid():
+            user = RoleMenu.objects.filter(name=data['name'],password=data['password'],active=1)
+
+            if user.count()>0:
+                role = Role.objects.get(id=user[0].role_id)
+                dt = datetime.now()
+                old_token = ZToken.objects.filter(user=data['name'])
+                for one in old_token:
+                    one.delete()
+                # 创建新的token并传递给前端
+                token = uuid.uuid4()
+                new_token = ZToken()
+                new_token.create_time = dt
+                new_token.user = data['name']
+                new_token.pwd = data['password']
+                new_token.type = user[0].id
+                new_token.token = token
+                new_token.save()
+                msg = "添加/编辑账户资料成功"
+                error_code = 0
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                    "token":token,
+                    "authority":role.authority_list,
+                }
+                return Response(post_result)
+            else:
+                msg = "账户或者密码错误"
+                error_code = 0
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
                     "request": request,
                 }
                 return Response(post_result)
