@@ -10380,7 +10380,7 @@ class showMouthSalaryView(APIView):
         valObj = showMouthSalaryOneSerializer(data=request.query_params)
         if valObj.is_valid():
             start, page_size, flag = zddpaginate(int(valObj.data['page']), int(valObj.data['page_size']))
-            status = valObj.data['status'] if valObj.data['status'] is not None else 0
+            # status = valObj.data['status'] if valObj.data['status'] is not None else 0
             if not flag:
                 msg = "访问页码错误，请确认"
                 error_code = 10100
