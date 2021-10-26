@@ -13215,3 +13215,386 @@ class showLoginView(APIView):
                 "request": request,
             }
             return Response(post_result)
+
+
+#################社保基数
+
+
+class showSociInsuranceView(APIView):
+    #查询角色管理
+    @csrf_exempt
+    def get(self, request):
+        ret, msg = checkPermission(request)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+        try:
+            bObj = SocialInsurance.objects.filter(delete_time=None).order_by("weight")
+            temp = {}
+            request = request.method + '  ' + request.get_full_path()
+            temp["data"] = bObj.values()
+            temp['message'] = "检索数据成功"
+            temp['error_code'] = 10030
+            temp["request"] = request
+            return Response(temp)
+        except:
+            msg = "系统繁忙"
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+    #添加角色管理
+    @csrf_exempt
+    def post(self, request):
+        # data = request.query_params
+        # valObj = BasicInsertSerializer(data=request.query_params)
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认api接口名称！"
+            samp['key_num'] = "api_name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = showSociInsuranceSerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
+        result = []
+        dt = datetime.now()
+        if d_flag == 0:
+            for done in data:
+
+                try:
+                    num = SocialInsurance.objects.all().count()+1
+                    mid = done["id"]
+                    if mid:
+                        bObj = SocialInsurance.objects.get(id=mid)
+                        bObj.update_time = dt
+                    else:
+                        bObj = SocialInsurance()
+                        bObj.create_time = dt
+                    bObj.social_insurance_level = done['social_insurance_level']
+                    bObj.social_insurance_company = done['social_insurance_company']
+                    bObj.social_insurance_person = done['social_insurance_person']
+                    bObj.active = done['active']
+                    if not mid:
+                        bObj.weight = num
+                    bObj.save()
+                except:
+                    msg = "参数校验不通过！"
+                    error_code = 10030
+                    request = request.method + '  ' + request.get_full_path()
+                    post_result = {
+                        "error_code": error_code,
+                        "message": msg,
+                        "request": request,
+                    }
+                    return Response(post_result)
+            msg = "添加基础资料成功"
+            error_code = 0
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+        else:
+            msg = l_msg
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = SocialInsurance.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "社保基数删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "社保基数不存在!"
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request
+            }
+            return Response(post_result)
+
+
+class showSociInsuranceSortView(APIView):
+    #基础资料排序
+    def put(self,request,bid):
+        data = request.query_params
+        valObj = BasicSortSerializer(data=request.query_params)
+        if valObj.is_valid():
+            obj = SocialInsurance.objects.all()
+            offset = int(data['offset'])
+            bid = bid
+            begin_weight = SocialInsurance.objects.get(id=bid).weight
+            result = Msort(obj, offset, bid, begin_weight)
+            if result:
+                # 返回数据
+                request = request.method + '  ' + request.get_full_path()
+                error_code = 0
+                post_result = {
+                    "error_code": error_code,
+                    "message": "社保基数排序成功!",
+                    "request": request,
+                }
+                return Response(post_result)
+            else:
+                # 返回数据
+                request = request.method + '  ' + request.get_full_path()
+                error_code = 0
+                post_result = {
+                    "error_code": error_code,
+                    "message": "偏移量超出范围!",
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+
+#################公积金
+
+
+class showSurPluView(APIView):
+    #查询角色管理
+    @csrf_exempt
+    def get(self, request):
+        ret, msg = checkPermission(request)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+        try:
+            bObj = Surplu.objects.filter(delete_time=None).order_by("weight")
+            temp = {}
+            request = request.method + '  ' + request.get_full_path()
+            temp["data"] = bObj.values()
+            temp['message'] = "检索数据成功"
+            temp['error_code'] = 10030
+            temp["request"] = request
+            return Response(temp)
+        except:
+            msg = "系统繁忙"
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+    #添加角色管理
+    @csrf_exempt
+    def post(self, request):
+        # data = request.query_params
+        # valObj = BasicInsertSerializer(data=request.query_params)
+        data = request.data
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        api_name = data['name']
+        if not isinstance(api_name, str):
+            d_flag = 1
+            samp = {}
+            samp['msg'] = "请确认api接口名称！"
+            samp['key_num'] = "api_name"
+            l_msg.append(samp)
+        data = data['data']
+        for done in data:
+            d_num = d_num + 1
+            valObj = showSurpleSerializer(data=done)
+            if not valObj.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObj.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
+        result = []
+        dt = datetime.now()
+        if d_flag == 0:
+            for done in data:
+
+                try:
+                    num = Surplu.objects.all().count()+1
+                    mid = done["id"]
+                    if mid:
+                        bObj = Surplu.objects.get(id=mid)
+                        bObj.update_time = dt
+                    else:
+                        bObj = Surplu()
+                        bObj.create_time = dt
+                    bObj.surplu_level = done['surplu_level']
+                    bObj.surplu_company = done['surplu_company']
+                    bObj.surplu_person = done['surplu_person']
+                    bObj.active = done['active']
+                    if not mid:
+                        bObj.weight = num
+                    bObj.save()
+                except:
+                    msg = "参数校验不通过！"
+                    error_code = 10030
+                    request = request.method + '  ' + request.get_full_path()
+                    post_result = {
+                        "error_code": error_code,
+                        "message": msg,
+                        "request": request,
+                    }
+                    return Response(post_result)
+            msg = "添加基础资料成功"
+            error_code = 0
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+        else:
+            msg = l_msg
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            data = request.data
+            ids = data['ids']
+            for one in ids:
+                bObj = Surplu.objects.get(id=one)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "公积金基数删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "公积金基数不存在!"
+            error_code = 10020
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request
+            }
+            return Response(post_result)
+
+
+class showSurPluSortView(APIView):
+    #基础资料排序
+    def put(self,request,bid):
+        data = request.query_params
+        valObj = BasicSortSerializer(data=request.query_params)
+        if valObj.is_valid():
+            obj = Surplu.objects.all()
+            offset = int(data['offset'])
+            bid = bid
+            begin_weight = Surplu.objects.get(id=bid).weight
+            result = Msort(obj, offset, bid, begin_weight)
+            if result:
+                # 返回数据
+                request = request.method + '  ' + request.get_full_path()
+                error_code = 0
+                post_result = {
+                    "error_code": error_code,
+                    "message": "公积金基数排序成功!",
+                    "request": request,
+                }
+                return Response(post_result)
+            else:
+                # 返回数据
+                request = request.method + '  ' + request.get_full_path()
+                error_code = 0
+                post_result = {
+                    "error_code": error_code,
+                    "message": "偏移量超出范围!",
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+

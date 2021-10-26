@@ -1772,6 +1772,22 @@ class Size(models.Model):
         db_table = 'size'
 
 
+class SocialInsurance(models.Model):
+    create_time = models.DateTimeField(blank=True, null=True)
+    update_time = models.DateTimeField(blank=True, null=True)
+    delete_time = models.DateTimeField(blank=True, null=True)
+    social_insurance_level = models.CharField(max_length=255, blank=True, null=True)
+    social_insurance_company = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    social_insurance_person = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    weight = models.IntegerField(blank=True, null=True)
+    active = models.IntegerField(blank=True, null=True)
+    merchant_id = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'social_insurance'
+
+
 class SubColour(models.Model):
     create_time = models.DateTimeField(blank=True, null=True)
     update_time = models.DateTimeField(blank=True, null=True)
@@ -1838,6 +1854,22 @@ class SubmissionInfo(models.Model):
     class Meta:
         managed = False
         db_table = 'submission_info'
+
+
+class Surplu(models.Model):
+    create_time = models.DateTimeField(blank=True, null=True)
+    update_time = models.DateTimeField(blank=True, null=True)
+    delete_time = models.DateTimeField(blank=True, null=True)
+    surplu_level = models.CharField(max_length=255, blank=True, null=True)
+    surplu_company = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    surplu_person = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    weight = models.IntegerField(blank=True, null=True)
+    active = models.IntegerField(blank=True, null=True)
+    merchant_id = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'surplu'
 
 
 class WarehouseClassification(models.Model):

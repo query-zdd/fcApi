@@ -221,5 +221,12 @@ urlpatterns = [
     url('^showRegisterRole/sort/(?P<bid>\d+)', views.showRegisterRoleSortView.as_view()),
     #账户登录
     url('^showLogin$', views.showLoginView.as_view()),
+    # 社保基数
+    url('^showSociInsurance$', views.showSociInsuranceView.as_view()),
+    url('^showSociInsurance/sort/(?P<bid>\d+)', views.showSociInsuranceSortView.as_view()),
+
+    # 社保基数
+    url('^showSurplu$', views.showSurPluView.as_view()),
+    url('^showSurplu/sort/(?P<bid>\d+)', views.showSurPluSortView.as_view()),
 
 ]

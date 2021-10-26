@@ -1228,3 +1228,19 @@ class RegisterRoleInsertSerializer(serializers.Serializer):
 class LoginSerializer(serializers.Serializer):
     name = serializers.CharField(error_messages={'required': '必须传入账户名称！'})
     password = serializers.CharField(error_messages={'required': '必须传入账户密码！'})
+
+# 社保基数
+class showSociInsuranceSerializer(serializers.Serializer):
+    social_insurance_level = serializers.CharField(error_messages={'required': '必须传入社保基数！'})
+    active = serializers.CharField(error_messages={'required': '数据参数不可为空！'})
+    social_insurance_company = serializers.CharField(error_messages={'required': '必须传入企业缴纳比例！'})
+    social_insurance_person = serializers.CharField(error_messages={'required': '必须传入个人缴纳比例！'})
+    id = serializers.IntegerField(error_messages={'required': '必须传入社保基数id！'})
+
+# 社保基数
+class showSurpleSerializer(serializers.Serializer):
+    surplu_level = serializers.CharField(error_messages={'required': '必须传入社保基数！'})
+    active = serializers.CharField(error_messages={'required': '数据参数不可为空！'})
+    surplu_company = serializers.CharField(error_messages={'required': '必须传入企业缴纳比例！'})
+    surplu_person = serializers.CharField(error_messages={'required': '必须传入个人缴纳比例！'})
+    id = serializers.IntegerField(error_messages={'required': '必须传入社保基数id！'})
