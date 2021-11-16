@@ -456,6 +456,21 @@ class Department(models.Model):
         db_table = 'department'
 
 
+class FMakeBNumData(models.Model):
+    create_time = models.DateTimeField(blank=True, null=True)
+    update_time = models.DateTimeField(blank=True, null=True)
+    delete_time = models.DateTimeField(blank=True, null=True)
+    out_stock_id = models.IntegerField(blank=True, null=True)
+    b_num = models.IntegerField(blank=True, null=True)
+    make_num = models.IntegerField(blank=True, null=True)
+    factory_make_id = models.IntegerField(blank=True, null=True)
+    order_id = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'f_make_b_num_data'
+
+
 class FactoryMake(models.Model):
     create_time = models.DateTimeField(blank=True, null=True)
     update_time = models.DateTimeField(blank=True, null=True)
@@ -485,6 +500,7 @@ class FactoryMake(models.Model):
     sample_sure_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     is_sure_pay_sample = models.IntegerField(blank=True, null=True)
     finish_sample_amount = models.CharField(max_length=255, blank=True, null=True)
+    b_num = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -510,6 +526,8 @@ class FactoryMakeLine(models.Model):
     factory_make_id = models.IntegerField(blank=True, null=True)
     b_num = models.IntegerField(blank=True, null=True)
     is_b_sure = models.IntegerField(db_column='is_B_sure', blank=True, null=True)  # Field name made lowercase.
+    inspect_num = models.IntegerField(blank=True, null=True)
+    recover_b_num = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False

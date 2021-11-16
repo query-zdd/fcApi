@@ -999,6 +999,10 @@ class inspectinfoUrlSerializer(serializers.Serializer):
 
 class BqualitySerializer(serializers.Serializer):
     order_id = serializers.IntegerField(error_messages={'required': '必须传入订单id'})
+    factory_make_id = serializers.IntegerField(error_messages={'required': '必须传入加工工厂id'})
+    type = serializers.IntegerField(allow_null=True,default=1)
+
+class getBqualitySerializer(serializers.Serializer):
     type = serializers.IntegerField(allow_null=True,default=1)
 
 class showContractSerializer(serializers.Serializer):
@@ -1244,3 +1248,12 @@ class showSurpleSerializer(serializers.Serializer):
     surplu_company = serializers.CharField(error_messages={'required': '必须传入企业缴纳比例！'})
     surplu_person = serializers.CharField(error_messages={'required': '必须传入个人缴纳比例！'})
     id = serializers.IntegerField(error_messages={'required': '必须传入社保基数id！'})
+
+class showOrderStaticSerializer(serializers.Serializer):
+    brand = serializers.CharField(default="")
+    order_type = serializers.IntegerField(default=0)
+    order_custom = serializers.CharField(default="")
+    price_code = serializers.CharField(default="")
+    dhkhao = serializers.CharField(default="")
+    page_size = serializers.IntegerField(default=10)
+    page = serializers.IntegerField(default=1)

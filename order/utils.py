@@ -710,29 +710,36 @@ def getInSn(sn):
         sn = sn[:-1]
     return result
 
-def checkPermission(request):
+def checkPermission(request,sn="0"):
     url = request.get_full_path()
     try:
         token = request.META.get("HTTP_AUTHORIZATION","")
-        sn = request.META.get("HTTP_AUTHSN", "")
         result = getInSn(sn)
         if not token:
             msg = "未登录，请先登录系统"
             return False,msg
         else:
-            td = datetime.now()-timedelta(seconds=3600)
+
+            td = datetime.now()-timedelta(seconds=360000000)
             tObj = ZToken.objects.filter(token=token,create_time__gt=td)
             if tObj.count()>0:
-                userObj = RoleMenu.objects.get(id=tObj[0].type)
-                role = Role.objects.get(id=userObj.role_id)
-                ach_list = role.authority_list
-                flag = False
-                msg = "当前账户无此权限！"
-                for s_num in result:
-                    if s_num in ach_list:
-                        flag = True
-                        msg = "权限通过"
-                return flag,msg
+                # 未设置权限的接口
+                if sn == "0":
+                    flag = True
+                    msg = "权限通过"
+                    return flag, msg
+                # 设置权限的接口
+                else:
+                    userObj = RoleMenu.objects.get(id=tObj[0].type)
+                    role = Role.objects.get(id=userObj.role_id)
+                    ach_list = role.authority_list
+                    flag = False
+                    msg = "当前账户无此权限！"
+                    for s_num in result:
+                        if s_num in ach_list:
+                            flag = True
+                            msg = "权限通过"
+                    return flag,msg
             else:
                 msg = "token已经过期，请重新登录！"
                 return False, msg

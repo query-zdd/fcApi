@@ -6,6 +6,7 @@ urlpatterns = [
 
     url('^showOutStock$', views.showOutStockView.as_view()),
     url('^showOutStock/(?P<nid>\d+)', views.showOutStockOneView.as_view()),
+    url('^showFXOutStock/(?P<nid>\d+)', views.showFXOutStockOneView.as_view()),
 
     url('^factoryMake$', views.factoryMakeView.as_view()),
     url('^factoryMake/(?P<nid>\d+)', views.factoryMakeOneView.as_view()),
@@ -138,5 +139,12 @@ urlpatterns = [
     url('^showSalaryStandard$', views.showSalaryStandardView.as_view()),
     url('^showMouthSalary$', views.showMouthSalaryView.as_view()),
     url('^showSalaryInfo$', views.showSalaryInfoView.as_view()),
+
+    # 订单分析
+    url('^showOrderStatic$', views.showOrderStaticView.as_view()),
+    #生产汇总分析
+    url('^showFXFactoryMake/(?P<nid>\d+)', views.showFXFactoryMakeOneView.as_view()),
+    #生产用料
+    url('^shipmentFXCloth/(?P<nid>\d+)', views.shipmentFXSureOneView.as_view()),
 
 ]

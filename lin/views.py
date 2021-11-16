@@ -8629,6 +8629,18 @@ def getPlanHistory(plan_id,edition):
 class planView(APIView):
     @csrf_exempt
     def get(self, request):
+        sn = "101"
+        ret, msg = checkPermission(request,sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = planSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -8737,7 +8749,7 @@ class planView(APIView):
                     temp['request'] = request.method + '  ' + request.get_full_path()
                     return Response(temp)
             except:
-                msg = "未找到对应的工号"
+                msg = "未找到对应的企划"
                 error_code = 10030
                 request = request.method + '  ' + request.get_full_path()
                 post_result = {
@@ -8760,6 +8772,18 @@ class planView(APIView):
     # 添加员工档案
     @csrf_exempt
     def post(self, request):
+        sn = "10101"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = planOneSerializer(data=request.query_params)
         dt = datetime.now()
@@ -8837,6 +8861,18 @@ class planView(APIView):
     #删除企划以及相关的企划内容
     @csrf_exempt
     def delete(self, request):
+        sn = "101"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids= data['ids']
@@ -8871,6 +8907,18 @@ class planOneView(APIView):
     #企划更新-active
     @csrf_exempt
     def put(self, request, nid):
+        sn = "10101"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = planOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -8911,6 +8959,18 @@ class planOneView(APIView):
 
     @csrf_exempt
     def delete(self, request, nid):
+        # sn = "101"
+        ret, msg = checkPermission(request)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = Plan.objects.get(id=nid)
             dt = datetime.now()
@@ -8939,6 +8999,18 @@ class planOneView(APIView):
 
     @csrf_exempt
     def get(self, request, nid):
+        # sn = "101"
+        ret, msg = checkPermission(request)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = planSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -9045,6 +9117,18 @@ class planPlanerView(APIView):
     # 添加企划
     @csrf_exempt
     def post(self, request):
+        sn = "1010201"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.data
         #################校验数据################################
         d_flag = 0
@@ -9143,6 +9227,18 @@ class planPlanerView(APIView):
 
     @csrf_exempt
     def delete(self, request):
+        sn = "1010201"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -9206,6 +9302,18 @@ class planMaterialView(APIView):
     # 添加企划
     @csrf_exempt
     def post(self, request):
+        sn = "1010202"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.data
         #################校验数据################################
         d_flag = 0
@@ -9313,6 +9421,18 @@ class planMaterialOneView(APIView):
 
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "1010202"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = PlanMaterial.objects.get(id=nid)
             dt = datetime.now()
@@ -9344,6 +9464,18 @@ class planPriceSubView(APIView):
     # 添加企划
     @csrf_exempt
     def post(self, request):
+        sn = "1010204"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.data
         #################校验数据################################
         d_flag = 0
@@ -9430,6 +9562,18 @@ class planPriceSubView(APIView):
     # 批量删除用料单位
     @csrf_exempt
     def delete(self, request):
+        sn = "1010204"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -9462,6 +9606,18 @@ class planPriceSubOneView(APIView):
     # 删除用料单位
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "1010204"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = PlanPriceSub.objects.get(id=nid)
             dt = datetime.now()
@@ -9493,6 +9649,18 @@ class planPriceView(APIView):
     # 添加企划报价
     @csrf_exempt
     def post(self, request):
+        sn = "1010205"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = planpriceOneSerializer(data=request.query_params)
         dt = datetime.now()
@@ -9574,6 +9742,18 @@ class planPriceOneView(APIView):
     # 设置更新-active
     @csrf_exempt
     def put(self, request, nid):
+        sn = "1010205"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = planpriceOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -9642,6 +9822,18 @@ class planPriceOneView(APIView):
     @csrf_exempt
     def delete(self, request, nid):
         try:
+            sn = "1010205"
+            ret, msg = checkPermission(request, sn)
+            if ret == False:
+                msg = msg
+                error_code = 10001
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
             bObj = PlanPrice.objects.get(id=nid)
             dt = datetime.now()
             bObj.delete_time = dt
@@ -9669,6 +9861,18 @@ class planPriceOneView(APIView):
     #报价历史记录
     @csrf_exempt
     def get(self, request, nid):
+        sn = "1010205"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         try:
             rObj = PlanPriceCopy.objects.filter(delete_time=None,plan_id=nid)
@@ -9808,6 +10012,18 @@ def maxInt(intArray):
 class planOrderView(APIView):
     @csrf_exempt
     def get(self, request):
+        sn = "102"
+        ret, msg = checkPermission(request,sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = planOrderSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -10031,6 +10247,18 @@ class planOrderView(APIView):
     # 添加企划订单
     @csrf_exempt
     def post(self, request):
+        sn = "1020102"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.data
         valObj = planOrderOneSerializer(data=request.data)
         if valObj.is_valid():
@@ -10204,6 +10432,18 @@ class planOrderView(APIView):
     #订单批量删除
     @csrf_exempt
     def delete(self, request):
+        sn = "1020102"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -10240,6 +10480,18 @@ class planOrderView(APIView):
 class planOrderOneView(APIView):
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "1020102"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -10270,6 +10522,18 @@ class planOrderOneView(APIView):
 
     @csrf_exempt
     def put(self, request, nid):
+        sn = "1020102"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             one = PlanOrder.objects.get(id=nid)
             dt = datetime.now()
@@ -10297,6 +10561,18 @@ class planOrderOneView(APIView):
 
     @csrf_exempt
     def get(self, request, nid):
+        # sn = "1020102"
+        ret, msg = checkPermission(request)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = planOrderGetOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -10370,6 +10646,18 @@ class planClothSampleView(APIView):
     # 获取成衣样品信息
     @csrf_exempt
     def get(self, request):
+        sn = "1010207"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = planClothgetSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -10431,6 +10719,18 @@ class planClothSampleView(APIView):
     # 添加企划成衣样品
     @csrf_exempt
     def post(self, request):
+        sn = "1010207"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.data
         valObj = planClothOneSerializer(data=request.data)
         if valObj.is_valid():
@@ -10533,6 +10833,18 @@ class planClothSampleView(APIView):
 
     @csrf_exempt
     def delete(self, request):
+        sn = "1010207"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -10565,6 +10877,18 @@ class planClothSampleView(APIView):
 class planClothSampleOneView(APIView):
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "1010207"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = PlanClothSampleLine.objects.get(id=nid)
             dt = datetime.now()
@@ -10590,9 +10914,21 @@ class planClothSampleOneView(APIView):
             }
             return Response(post_result)
 
-    # 订单类型更新-active
+    # 成衣样品
     @csrf_exempt
     def put(self, request, nid):
+        sn = "1010207"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = planClothOne1Serializer(data=request.query_params)
         if valObj.is_valid():
@@ -10631,6 +10967,18 @@ class planColorSpecsView(APIView):
     # 获取成衣样品数量信息
     @csrf_exempt
     def get(self, request):
+        sn = "1010207"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = planColorSpecsGetOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -10671,6 +11019,18 @@ class planColorSpecsView(APIView):
     # 添加成衣样品信息
     @csrf_exempt
     def post(self, request):
+        sn = "1010207"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.data
         #################校验数据################################
         d_flag = 0
@@ -10756,6 +11116,18 @@ class planColorSpecsView(APIView):
 
     @csrf_exempt
     def delete(self, request):
+        sn = "1010207"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -10788,7 +11160,20 @@ class planColorSpecsView(APIView):
 class planColorSpecsOneView(APIView):
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "1010207"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
+
             bObj = PlanClothSampleNumber.objects.get(id=nid)
             dt = datetime.now()
             bObj.delete_time = dt
@@ -10819,6 +11204,18 @@ class sampleCatalogueView(APIView):
     # 获取式样书
     @csrf_exempt
     def get(self, request):
+        sn = "1010208"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = sampleCataGetOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -10859,6 +11256,18 @@ class sampleCatalogueView(APIView):
     # 添加样式书
     @csrf_exempt
     def post(self, request):
+        sn = "1010208"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.data
         #################校验数据################################
         d_flag = 0
@@ -10936,6 +11345,18 @@ class sampleCatalogueView(APIView):
     #批量删除
     @csrf_exempt
     def delete(self, request):
+        sn = "1010208"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids =data['ids']
@@ -10968,6 +11389,18 @@ class sampleCatalogueView(APIView):
 class sampleCatalogueOneView(APIView):
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "1010208"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = SampleCatalogue.objects.get(id=nid)
             dt = datetime.now()
@@ -10999,6 +11432,18 @@ class plateMakingView(APIView):
     # 获取式样书
     @csrf_exempt
     def get(self, request):
+        sn = "1010209"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = plateMakingGetOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -11039,6 +11484,18 @@ class plateMakingView(APIView):
     # 添加样式书
     @csrf_exempt
     def post(self, request):
+        sn = "1010209"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.data
         #################校验数据################################
         d_flag = 0
@@ -11116,6 +11573,18 @@ class plateMakingView(APIView):
     #批量删除
     @csrf_exempt
     def delete(self, request):
+        sn = "1010209"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -11149,6 +11618,18 @@ class plateMakingOneView(APIView):
 
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "1010209"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = PlateMaking.objects.get(id=nid)
             dt = datetime.now()
@@ -12761,7 +13242,7 @@ class showAuthorityRoleView(APIView):
     #查询角色管理
     @csrf_exempt
     def get(self, request):
-        ret, msg = checkPermission(request)
+        ret, msg = checkPermission(request,"903")
         if ret == False:
             msg = msg
             error_code = 10001

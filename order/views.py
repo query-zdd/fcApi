@@ -335,6 +335,121 @@ class showOutStockOneView(APIView):
 
 
 
+
+class showFXOutStockOneView(APIView):
+    # 获取订单 订单出货方案
+    @csrf_exempt
+    def get(self, request, nid):
+        data = request.query_params
+        valObj = orderOutstockGetOneSerializer(data=request.query_params)
+        if valObj.is_valid():
+            try:
+                orderObj = PlanOrder.objects.get(id=nid)
+                orderline = PlanOrderLine.objects.filter(delete_time=None,order_id=nid)
+                samplist=[]
+                for one in orderline:
+                    samp={}
+                    samp['order_custom'] = one.order_custom
+                    samp['order_type'] = one.order_type
+                    samp['contract_num'] = one.contract_num
+                    samp['order_line_id'] = one.id
+                    samp['order_price_type'] = one.order_price_type
+                    samp['is_sure_price'] = one.is_sure_price
+                    samp['order_price'] = one.order_price
+                    samp['pay_y_amount'] = one.pay_y_amount
+                    rObj = OutStock.objects.filter(delete_time=None, order_line_id=one.id).order_by('color', 'specs')
+                    if rObj.count()>0:
+                        zemp = []
+                        for one1 in rObj:
+                            jamp={}
+                            jamp['color'] = one1.color
+                            jamp['color_name'] = one1.color_name
+                            jamp['color_num'] = one1.color_num
+                            jamp['specs'] = one1.specs
+                            jamp['contract_num'] = one1.contract_num
+                            jamp['short_overflow'] = one1.short_overflow
+                            jamp['short_overflow_direct'] = one1.short_overflow_direct
+                            jamp['order_num'] = one1.order_num
+                            # 送检数量
+                            # b品数量
+                            faclineObj = FactoryMakeLine.objects.filter(order_line_id=one.id,color=one1.color,color_num=one1.color_num,specs=one1.specs)
+                            make_num = 0
+                            inspect_num = 0
+                            b_num = 0
+                            for one2 in faclineObj:
+                                if one2.make_num:
+                                    make_num += one2.make_num
+                                if one2.b_num:
+                                    b_num += one2.b_num
+                                if one2.inspect_num:
+                                    inspect_num += one2.inspect_num
+
+
+                            jamp['inspect_num'] = inspect_num
+                            jamp['b_num'] = b_num
+                            a_num = make_num -b_num
+                            jamp['a_b_lv'] =a_num/b_num
+                            # 船样数量
+                            cysamp_num = 0
+                            planSamp = PlanClothSampleLine.objects.filter(sample_type="船样",plan_id=orderObj.plan_id)
+                            for one3 in planSamp:
+                                plansampNum = PlanClothSampleNumber.objects.filter(pcsl_id=one3.id,sub_color_name=one1.color,sub_specs_name=one1.specs)
+                                for one4 in plansampNum:
+                                    if one4.num:
+                                        cysamp_num +=one4.num
+                            jamp['cysamp_num'] = cysamp_num
+                            zemp.append(jamp)
+                        samp['out_stock'] = zemp
+                    else:
+                        samp['out_stock'] = []
+                        samp['short_overflow'] = one.short_overflow
+                    samplist.append(samp)
+
+                temp = {}
+                temp["data"] = samplist
+                facmObj = FactoryMake.objects.filter(order_id = nid)
+                coop_mood = ""
+                make_factory = ""
+                ticketing_custom = ""
+
+                for one5 in facmObj:
+                    coop_mood += one5.coop_mode
+                    ticketing_custom += one5.ticketing_custom
+                    make_factory += one5.make_factory
+
+                temp['work_type'] = orderObj.work_type
+                temp['o_order_type'] = orderObj.order_type
+                temp['coop_mood'] = coop_mood
+                temp['ticketing_custom'] = ticketing_custom
+                temp['make_factory'] = make_factory
+                temp['merchant'] = "南通风尚国际"
+                temp['error_code'] = 0
+                temp['message'] = "成功"
+                temp['request'] = request.method + '  ' + request.get_full_path()
+                return Response(temp)
+            except:
+                msg = "未找到对应的出货方案"
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+
+
 ############################订单管理-录入工厂方案###############################################
 
 class factoryMakeView(APIView):
@@ -6154,17 +6269,26 @@ class BqualityView(APIView):
             ##############保存出货方案#############################
             type = data['type']
             order_id = data['order_id']
+            factory_make_id = data['factory_make_id']
             if type == 1:
-                outObj = OutStock.objects.filter(order_id = order_id)
-                for one in outObj:
-                    one.b_num = 0
-                    one.save()
+                facObj = FactoryMake.objects.get(id = factory_make_id)
+                facObj.is_b_sure = 1
+                facObj.b_num = 0
+                facObj.save()
             elif type == 0:
                 try:
+                    b_num = 0
                     for done in data['data']:
-                        outOne = OutStock.objects.get(id=done['id'])
-                        outOne.b_num = done['b_num']
-                        outOne.save()
+                        b_num += done['b_num']
+                        faclineObj = FactoryMakeLine.objects.get(id=done['factory_make_line_id'])
+                        faclineObj.b_num = done['b_num']
+                        faclineObj.inspect_num = done['inspect_num']
+                        faclineObj.recover_b_num = done['recover_b_num']
+                        faclineObj.save()
+                    facObj = FactoryMake.objects.get(id=factory_make_id)
+                    facObj.is_b_sure = 1
+                    facObj.b_num = b_num
+                    facObj.save()
                 except:
                     msg = "参数错误"
                     error_code = 10030
@@ -6208,29 +6332,74 @@ class BqualityView(APIView):
             return Response(post_result)
 
 class BqualityOneView(APIView):
-    # 包箱信息
+    # b品数量
     @csrf_exempt
     def get(self, request, nid):
-        try:
-            outObj = OutStock.objects.filter(order_id = nid,delete_time=None).order_by("color_name","color_num","specs")
-            temp = {}
+        data = request.query_params
+        valObj = getBqualitySerializer(data=request.query_params)
+        if valObj.is_valid():
+            tyep = valObj.data['type']
+            facObj = FactoryMake.objects.get(id=nid)
             zamp = []
-            for one in outObj:
-                samp = {}
-                samp['id'] = one.id
-                samp['color_name'] = one.color_name
-                samp['color_num'] = one.color_num
-                samp['specs'] = one.specs
-                samp['b_num'] = one.b_num
-                zamp.append(samp)
+            temp = {}
+            if type == 1:
+                outObj = OutStock.objects.filter(order_id = facObj.order_id,delete_time=None).order_by("color_name","color_num","specs")
+                for one in outObj:
+                    f_make_line = FactoryMakeLine.objects.filter(order_id=facObj.order_id, factory_make_id=nid,
+                                                                 color_name=one.color_name, color_num=one.color_num,
+                                                                 specs=one.specs)
+                    make_num = 0
+                    b_num = 0
+                    inspect_num = 0
+                    recover_b_num = 0
+                    for o in f_make_line:
+                        if o.make_num:
+                            make_num = make_num + o.make_num
+                        if o.inspect_num:
+                            inspect_num = inspect_num + o.inspect_num
+                        if o.recover_b_num:
+                            recover_b_num = recover_b_num + o.recover_b_num
+                        if o.b_num:
+                            b_num = b_num + o.b_num
+                    samp = {}
+                    samp['out_stock_id'] = one.id
+                    samp['order_line_id'] = 0
+                    samp['factory_make_line_id'] = 0
+                    samp['order_id'] = facObj.order_id
+                    samp['color_name'] = one.color_name
+                    samp['color_num'] = one.color_num
+                    samp['specs'] = one.specs
+                    samp['b_num'] = b_num
+                    samp['inspect_num'] = inspect_num
+                    samp['recover_b_num'] = recover_b_num
+                    samp['make_num'] = make_num
+                    zamp.append(samp)
+            else:
+                f_make_line = FactoryMakeLine.objects.filter(factory_make_id=nid).order_by("order_line_id","color_name","color_num","specs")
+                for one in f_make_line:
+                    samp = {}
+                    samp['out_stock_id'] = 0
+                    samp['order_line_id'] = one.order_line_id
+                    samp['factory_make_line_id'] = one.id
+                    samp['order_id'] = one.order_id
+                    samp['color_name'] = one.color_name
+                    samp['color_num'] = one.color_num
+                    samp['specs'] = one.specs
+                    samp['b_num'] = one.b_num
+                    samp['inspect_num'] = one.inspect_num
+                    samp['recover_b_num'] = one.recover_b_num
+                    samp['make_num'] = one.make_num
+                    zamp.append(samp)
             temp['bObj'] = zamp
-            temp['order_id'] = nid
+            temp['order_id'] = facObj.order_id
+            temp['factory_make_id'] = int(nid)
+            temp['factory_b_num'] = facObj.b_num
             temp['error_code'] = 0
             temp['message'] = "成功"
             temp['request'] = request.method + '  ' + request.get_full_path()
             return Response(temp)
-        except:
-            msg = "未找到对应包箱信息"
+        else:
+            msg = "未找到对应加工工厂信息"
             error_code = 10030
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -10701,6 +10870,233 @@ class showSalaryInfoView(APIView):
                 return Response(post_result)
         else:
             msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+
+# 订单分析
+class showOrderStaticView(APIView):
+    # 获取确认报价
+    @csrf_exempt
+    def get(self, request):
+        data = request.query_params
+        valObj = showOrderStaticSerializer(data=request.query_params)
+        if valObj.is_valid():
+            try:
+                rObj = PlanOrder.objects.filter(delete_time=None)
+                order_type = valObj.data['order_type'] if valObj.data['order_type'] is not None else 0
+                order_custom = valObj.data['order_custom'] if valObj.data['order_custom'] is not None else ""
+                price_code = valObj.data['price_code'] if valObj.data['price_code'] is not None else ""
+                dhkhao = valObj.data['dhkhao'] if valObj.data['dhkhao'] is not None else ""
+                brand = valObj.data['brand'] if valObj.data['brand'] is not None else ""
+                if order_type != 0:
+                    rObj = rObj.filter(order_type=order_type)
+                if order_custom:
+                    rObj = rObj.filter(custom=order_custom)
+                if price_code:
+                    rObj = rObj.filter(price_code=price_code)
+                if dhkhao:
+                    rObj = rObj.filter(dhkhao=dhkhao)
+                if brand:
+                    rObj = rObj.filter(brand=brand)
+
+                samp = []
+                for one in rObj:
+                    zamp = {}
+                    zamp["order_id"] = one.id
+                    zamp["create_time"] = one.create_time
+                    zamp["indicate_time"] = one.indicate_time
+                    zamp["order_type"] = one.order_type
+                    zamp["custom"] = one.custom
+                    zamp["price_code"] = one.price_code
+                    zamp["dhkhao"] = one.dhkhao
+                    zamp["brand"] = one.brand
+                    zamp["goods_name"] = one.goods_name
+                    zamp["receivable"] = "未确认"
+                    zamp["payable "] = "未确认"
+                    zamp["invoice_status "] = "未确认"
+                    zamp["status"] = "订单状态"
+                    samp.append(zamp)
+
+                temp = {}
+                temp["data"] = samp
+                temp['error_code'] = 0
+                temp['message'] = "成功"
+                temp['request'] = request.method + '  ' + request.get_full_path()
+                return Response(temp)
+
+            except:
+                msg = "未找到对应的订单"
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+# 工厂生产汇总
+
+
+class showFXFactoryMakeOneView(APIView):
+    # 获取订单 订单出货方案
+    @csrf_exempt
+    def get(self, request, nid):
+        data = request.query_params
+        valObj = orderOutstockGetOneSerializer(data=request.query_params)
+        if valObj.is_valid():
+            try:
+                orderObj = PlanOrder.objects.get(id=nid)
+                facObj = FactoryMake.objects.filter(delete_time=None,order_id=nid)
+                coop_mode = ""
+                make_factory = ""
+                ticketing_custom = ""
+
+                samplist=[]
+                for one in facObj:
+                    coop_mode += one.coop_mode
+                    ticketing_custom += one.ticketing_custom
+                    make_factory += one.make_factory
+                    samp={}
+                    samp['coop_mode'] = one.coop_mode
+                    samp['make_factory'] = one.make_factory
+                    samp['ticketing_custom'] = one.ticketing_custom
+
+                    rObj = FactoryMakeLine.objects.filter(delete_time=None,factory_make_id =one.id).order_by('order_line_id','color', 'specs')
+                    if rObj.count()>0:
+                        zemp = []
+                        for one1 in rObj:
+                            jamp={}
+                            jamp['color'] = one1.color
+                            jamp['color_name'] = one1.color_name
+                            jamp['color_num'] = one1.color_num
+                            jamp['specs'] = one1.specs
+                            jamp['contract_num'] = one1.contract_num
+                            jamp['short_overflow'] = one1.short_overflow
+                            jamp['short_overflow_direct'] = one1.short_overflow_direct
+                            jamp['short_overflow_send'] = 0.05
+                            jamp['order_num'] = one1.order_num
+                            jamp['make_num'] = one1.make_num
+                            jamp['inspect_num'] = one1.inspect_num
+                            jamp['b_num'] = one1.b_num
+                            try:
+                                jamp['a_num'] = one1.make_num - one1.b_num
+                                jamp['recover_b_num'] = one1.recover_b_num
+                                jamp['all_b_num'] = one1.recover_b_num + one1.b_num
+                                jamp['in_a_b_lv'] = jamp['a_num']/one1.b_num
+                                jamp['make_a_b_lv'] = one1.make_num/jamp['all_b_num']
+                            except:
+                                jamp['a_num'] = 0
+                                jamp['recover_b_num'] = 0
+                                jamp['all_b_num'] = 0
+                                jamp['in_a_b_lv'] = None
+                                jamp['make_a_b_lv'] = None
+                            zemp.append(jamp)
+                        samp['out_stock'] = zemp
+                    else:
+                        samp['out_stock'] = []
+                        samp['short_overflow'] = one.short_overflow
+                    samplist.append(samp)
+
+                temp = {}
+                temp["data"] = samplist
+                temp['work_type'] = orderObj.work_type
+                temp['o_order_type'] = orderObj.order_type
+                temp['coop_mode'] = coop_mode
+                temp['ticketing_custom'] = ticketing_custom
+                temp['make_factory'] = make_factory
+                temp['merchant'] = "南通风尚国际"
+                temp['error_code'] = 0
+                temp['message'] = "成功"
+                temp['request'] = request.method + '  ' + request.get_full_path()
+                return Response(temp)
+            except:
+                msg = "未找到对应的出货方案"
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+
+class shipmentFXSureOneView(APIView):
+    # 获取生产用料分析
+    @csrf_exempt
+    def get(self, request, nid):
+        try:
+            orderClothOne = OrderClothShip.objects.filter(order_id=nid,delete_time=None)
+            orderObj = PlanOrder.objects.get(delete_time=None, id=nid)
+            orderClothShip = OrderClothShip.objects.filter(delete_time=None,order_id=nid).order_by("order_cloth_id","supplier")
+            samplist=[]
+            for one in orderClothShip:
+                samp={}
+                samp['cloth_type'] = one.cloth_type
+                samp['cloth_cat'] = one.cloth_cat
+                samp['cloth_name'] = one.cloth_name
+                samp['delivery_type'] = one.delivery_type
+                samp['delivery_name'] = one.delivery_name
+                samp['is_inspect'] = one.is_inspect
+                samp['buy_all_num'] = one.buy_all_num
+                samp['loss_lv'] = one.loss_lv
+                samp['supplier'] = one.supplier
+                samp['order_cloth_ship_id'] = one.id
+                rObj = OrderClothLineShip.objects.filter(delete_time=None, order_cloth_id=one.order_cloth_id,order_cloth_ship_id=one.id).order_by('color', 'specs')
+                sub_data = []
+                for one1 in rObj:
+                    zamp = {}
+                    zamp["order_cloth_ship_line_id"] = one1.id
+                    zamp['color'] = one1.color
+                    zamp['color_num'] = one1.color_num
+                    zamp['guige'] = one1.guige
+                    zamp['specs'] = one1.specs
+                    zamp['buy_num'] = one1.buy_num
+                    zamp['provide_num'] = one1.provide_num
+                    zamp['provide_time'] = one1.provide_time
+                    zamp['sample_send_time'] = one1.sample_send_time
+                    zamp['sure_comment'] = one1.sure_comment
+                    zamp['is_sure'] = one1.is_sure
+                    sub_data.append(zamp)
+                samp['sub_data'] = sub_data
+                samplist.append(samp)
+
+            temp = {}
+            temp["data"] = samplist
+            temp["orderObj"] = model_to_dict(orderObj)
+            temp['error_code'] = 0
+            temp['message'] = "成功"
+            temp['request'] = request.method + '  ' + request.get_full_path()
+            return Response(temp)
+        except:
+            msg = "未找到对应的面辅料采购"
             error_code = 10030
             request = request.method + '  ' + request.get_full_path()
             post_result = {
