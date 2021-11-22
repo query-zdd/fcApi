@@ -6,6 +6,7 @@ urlpatterns = [
 
     url('^showOutStock$', views.showOutStockView.as_view()),
     url('^showOutStock/(?P<nid>\d+)', views.showOutStockOneView.as_view()),
+
     url('^showFXOutStock/(?P<nid>\d+)', views.showFXOutStockOneView.as_view()),
 
     url('^factoryMake$', views.factoryMakeView.as_view()),

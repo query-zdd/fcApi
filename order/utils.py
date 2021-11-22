@@ -703,11 +703,13 @@ def downDay(d1,d2):
     return dayNum
 
 def getInSn(sn):
-    num = len(sn)
+    sn_list = sn.split(',')
     result = []
-    for i in range(num):
-        result.append(sn)
-        sn = sn[:-1]
+    for one in sn_list:
+        num = len(one)
+        for i in range(num):
+            result.append(one)
+            one = one[:-1]
     return result
 
 def checkPermission(request,sn="0"):

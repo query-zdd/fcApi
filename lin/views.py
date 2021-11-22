@@ -76,6 +76,18 @@ class basicView(APIView):
     #查询订单类型
     @csrf_exempt
     def get(self, request):
+        # sn = "101"
+        ret, msg = checkPermission(request)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = BasicTypeSerializer(data=request.query_params)
         result = []
@@ -108,6 +120,18 @@ class basicView(APIView):
     #添加用料单位
     @csrf_exempt
     def post(self, request):
+        # sn = "101"
+        ret, msg = checkPermission(request)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         # data = request.query_params
         # valObj = BasicInsertSerializer(data=request.query_params)
         data = request.data
@@ -187,6 +211,18 @@ class basicView(APIView):
 
     @csrf_exempt
     def delete(self, request):
+        # sn = "101"
+        ret, msg = checkPermission(request)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -220,6 +256,18 @@ class basicUpdateView(APIView):
     #订单类型更新-active
     @csrf_exempt
     def put(self, request, nid):
+        # sn = "101"
+        ret, msg = checkPermission(request)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = BasicTypeUpdateSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -254,6 +302,18 @@ class basicUpdateView(APIView):
     #删除用料单位
     @csrf_exempt
     def delete(self, request, nid):
+        # sn = "101"
+        ret, msg = checkPermission(request)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = Basic.objects.get(id=nid)
             dt = datetime.now()
@@ -283,6 +343,18 @@ class basicUpdateView(APIView):
 class basicSortView(APIView):
     #基础资料排序
     def put(self,request,bid):
+        # sn = "101"
+        ret, msg = checkPermission(request)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = BasicSortSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -327,6 +399,18 @@ class sampleTypeView(APIView):
     # 样品类型名称
     @csrf_exempt
     def get(self, request):
+        sn = "70108"
+        ret, msg = checkPermission(request,sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         result = []
         try:
             rObj = SampleType.objects.filter(delete_time=None).order_by('weight')
@@ -360,6 +444,18 @@ class sampleTypeView(APIView):
     # 添加样品类型
     @csrf_exempt
     def post(self, request):
+        sn = "70108"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         # data = request.query_params
         # valObj = SampleInsertSerializer(data=request.query_params)
         result = []
@@ -438,6 +534,18 @@ class sampleTypeView(APIView):
 
     @csrf_exempt
     def delete(self, request):
+        sn = "70108"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -470,6 +578,18 @@ class sampleOneView(APIView):
     #样品类型更新-active
     @csrf_exempt
     def put(self, request, nid):
+        sn = "70108"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = SampleInsertSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -503,6 +623,18 @@ class sampleOneView(APIView):
     #删除样品类型
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "70108"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = SampleType.objects.get(id=nid)
             dt = datetime.now()
@@ -531,6 +663,18 @@ class sampleOneView(APIView):
 class sampleSortView(APIView):
     #样品类型名称排序
     def put(self,request,bid):
+        sn = "70108"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = BasicSortSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -575,6 +719,18 @@ class harbourView(APIView):
     # 起运港/目的港
     @csrf_exempt
     def get(self, request):
+        sn = "70112"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = harborSerializer(data=request.query_params)
         result = []
@@ -630,6 +786,18 @@ class harbourView(APIView):
     # 添加起运港/目的港
     @csrf_exempt
     def post(self, request):
+        sn = "70112"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         # data = request.query_params
         # valObj = harborOneSerializer(data=request.query_params)
         data = request.data
@@ -729,6 +897,18 @@ class harbourView(APIView):
 
     @csrf_exempt
     def delete(self, request):
+        sn = "70112"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -761,6 +941,18 @@ class houbourOneView(APIView):
     #起运港-active
     @csrf_exempt
     def put(self, request, nid):
+        sn = "70112"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = harborOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -795,6 +987,18 @@ class houbourOneView(APIView):
     #删除起运港
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "70112"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = Harbour.objects.get(id=nid)
             dt = datetime.now()
@@ -823,6 +1027,18 @@ class houbourOneView(APIView):
 class harbourSortView(APIView):
     #起运港排序
     def put(self,request,bid):
+        sn = "70112"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = BasicSortSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -866,6 +1082,18 @@ class harbourSortView(APIView):
 class sizeView(APIView):
     @csrf_exempt
     def get(self, request):
+        sn = "70117"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         result = []
         data = request.query_params
         valObj = goodsSizeSerializer(data=request.query_params)
@@ -911,6 +1139,18 @@ class sizeView(APIView):
     # 添加商品尺码
     @csrf_exempt
     def post(self, request):
+        sn = "70117"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         # data = request.query_params
         # valObj = sizeOneSerializer(data=request.query_params)
         data = request.data
@@ -1002,6 +1242,18 @@ class sizeView(APIView):
 
     @csrf_exempt
     def delete(self, request):
+        sn = "70117"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -1035,6 +1287,18 @@ class sizeOneView(APIView):
     #订单类型更新-active
     @csrf_exempt
     def put(self, request, nid):
+        sn = "70117"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = sizeOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -1066,6 +1330,18 @@ class sizeOneView(APIView):
     #删除用料单位
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "70117"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = GoodsSize.objects.get(id=nid)
             dt = datetime.now()
@@ -1094,6 +1370,18 @@ class sizeOneView(APIView):
 class sizeSortView(APIView):
     #样品类型名称排序
     def put(self,request,bid):
+        sn = "70117"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = BasicSortSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -1139,6 +1427,18 @@ class subsizeView(APIView):
     # 添加商品子尺码
     @csrf_exempt
     def post(self, request):
+        sn = "70117"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = subsizeOneSerializer(data=request.query_params)
         data = request.data
@@ -1233,6 +1533,18 @@ class subsizeView(APIView):
 
     @csrf_exempt
     def delete(self, request):
+        sn = "70117"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -1266,6 +1578,18 @@ class subsizeOneView(APIView):
     # 获取子尺码
     @csrf_exempt
     def get(self, request, nid):
+        sn = "70117"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         result = []
         try:
             rObj = Size.objects.filter(goods_size_id=nid, delete_time=None).order_by('weight')
@@ -1297,6 +1621,18 @@ class subsizeOneView(APIView):
     #子尺码更新-active
     @csrf_exempt
     def put(self, request, nid):
+        sn = "70117"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = subsizeOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -1330,6 +1666,18 @@ class subsizeOneView(APIView):
     #删除子尺码
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "70117"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = Size.objects.get(id=nid)
             dt = datetime.now()
@@ -1358,6 +1706,18 @@ class subsizeOneView(APIView):
 class subsizeSortView(APIView):
     #样品类型名称排序
     def put(self,request,bid):
+        sn = "70117"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = BasicSortSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -1402,6 +1762,18 @@ class subsizeSortView(APIView):
 class receivingView(APIView):
     @csrf_exempt
     def get(self, request):
+        sn = "70118"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         result = []
         try:
             rObj = ReceivingGoodsMethod.objects.filter(delete_time=None).order_by('weight')
@@ -1444,6 +1816,18 @@ class receivingView(APIView):
     # 添加收货方式
     @csrf_exempt
     def post(self, request):
+        sn = "70118"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         # data = request.query_params
         # valObj = receivingOneSerializer(data=request.query_params)
         data = request.data
@@ -1535,6 +1919,18 @@ class receivingView(APIView):
 
     @csrf_exempt
     def delete(self, request):
+        sn = "70118"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -1568,6 +1964,18 @@ class receivingOneView(APIView):
     # 收货方式-更新
     @csrf_exempt
     def put(self, request, nid):
+        sn = "70118"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = receivingOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -1599,6 +2007,18 @@ class receivingOneView(APIView):
     #删除用料单位
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "70118"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = ReceivingGoodsMethod.objects.get(id=nid)
             dt = datetime.now()
@@ -1627,6 +2047,18 @@ class receivingOneView(APIView):
 class receivingSortView(APIView):
     # 收货方式排序
     def put(self,request,bid):
+        sn = "70118"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = BasicSortSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -1668,9 +2100,21 @@ class receivingSortView(APIView):
 
 ############################ 子仓库###############################################
 class warehouseView(APIView):
-    # 添加商品子尺码
+    # 添加 子仓库
     @csrf_exempt
     def post(self, request):
+        sn = "70118"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         # data = request.query_params
         # valObj = warehouseSerializer(data=request.query_params)
         data = request.data
@@ -1765,6 +2209,18 @@ class warehouseView(APIView):
 
     @csrf_exempt
     def delete(self, request):
+        sn = "70118"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -1799,6 +2255,18 @@ class warehouseOneView(APIView):
     # 获取子尺码
     @csrf_exempt
     def get(self, request, nid):
+        sn = "70118"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         result = []
         try:
             rObj = WarehouseClassification.objects.filter(method_id=nid, delete_time=None).order_by('weight')
@@ -1830,6 +2298,18 @@ class warehouseOneView(APIView):
     #子尺码更新-active
     @csrf_exempt
     def put(self, request, nid):
+        sn = "70118"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = warehouseSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -1863,6 +2343,18 @@ class warehouseOneView(APIView):
     #删除子仓库
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "70118"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = WarehouseClassification.objects.get(id=nid)
             dt = datetime.now()
@@ -1891,6 +2383,18 @@ class warehouseOneView(APIView):
 class warehouseSortView(APIView):
     #样品类型名称排序
     def put(self,request,bid):
+        sn = "70118"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = BasicSortSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -1935,6 +2439,18 @@ class singlesetView(APIView):
     # 查询订单号
     @csrf_exempt
     def get(self, request):
+        sn = "70122"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = singleSetSerializer(data=request.query_params)
         result = []
@@ -1969,6 +2485,18 @@ class singlesetView(APIView):
     # 添加 订单号设置
     @csrf_exempt
     def post(self, request):
+        sn = "70122"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         # data = request.query_params
         # valObj = singleSetOneSerializer(data=request.query_params)
         data = request.data
@@ -2052,6 +2580,18 @@ class singlesetView(APIView):
 
     @csrf_exempt
     def delete(self, request):
+        sn = "70122"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -2085,6 +2625,18 @@ class singlesetOneView(APIView):
     #订单号更新-active
     @csrf_exempt
     def put(self, request, nid):
+        sn = "70122"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = singleSetOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -2128,6 +2680,18 @@ class singlesetOneView(APIView):
     #删除 订单号
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "70122"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = SingleSet.objects.get(id=nid)
             dt = datetime.now()
@@ -2158,6 +2722,18 @@ class invoiceView(APIView):
     # 查询 发票号
     @csrf_exempt
     def get(self, request):
+        sn = "70124"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         result = []
         try:
             bTypeObj = InvoiceSetting.objects.filter(delete_time=None)
@@ -2183,6 +2759,18 @@ class invoiceView(APIView):
     # 添加  发票号
     @csrf_exempt
     def post(self, request):
+        sn = "70124"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = invoiceSerializer(data=request.query_params)
         dt = datetime.now()
@@ -2240,6 +2828,18 @@ class invoiceOneView(APIView):
     # 发票号更新-active
     @csrf_exempt
     def put(self, request, nid):
+        sn = "70124"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = invoiceSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -2285,6 +2885,18 @@ class cloth_classView(APIView):
     # 面辅料类别
     @csrf_exempt
     def get(self, request):
+        sn = "70201"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = cloth_classSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -2332,6 +2944,18 @@ class cloth_classView(APIView):
     # 添加面辅料类别
     @csrf_exempt
     def post(self, request):
+        sn = "70201"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         # data = request.query_params
         # valObj = cloth_classOneSerializer(data=request.query_params)
         data = request.data
@@ -2424,6 +3048,18 @@ class cloth_classView(APIView):
 
     @csrf_exempt
     def delete(self, request):
+        sn = "70201"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -2457,6 +3093,18 @@ class cloth_classOneView(APIView):
     # 面辅料类别更新-active
     @csrf_exempt
     def put(self, request, nid):
+        sn = "70201"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = cloth_classOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -2514,8 +3162,20 @@ class cloth_classOneView(APIView):
             return Response(post_result)
 
 class cloth_classSortView(APIView):
-    #样品类型名称排序
+    #面辅料类别 排序
     def put(self,request,bid):
+        sn = "70201"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = BasicSortSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -2560,6 +3220,18 @@ class clothmaterialView(APIView):
     # 添加面辅料成分
     @csrf_exempt
     def post(self, request):
+        sn = "7030101"
+        ret, msg = checkPermission(request,sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         # data = request.query_params
         # valObj = clothMaterialOneSerializer(data=request.query_params)
         data = request.data
@@ -2652,6 +3324,18 @@ class clothmaterialView(APIView):
 
     @csrf_exempt
     def delete(self, request):
+        sn = "7030101"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -2685,6 +3369,18 @@ class clothmaterialOneView(APIView):
     # 面辅料类别
     @csrf_exempt
     def get(self, request, nid):
+        sn = "7030101"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         cloth = Cloth.objects.filter(id=nid,delete_time=None)
         if cloth.count()>0:
@@ -2732,6 +3428,18 @@ class clothmaterialOneView(APIView):
     # 面辅料类别更新-active
     @csrf_exempt
     def put(self, request, nid):
+        sn = "7030101"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = clothMaterialUOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -2763,6 +3471,18 @@ class clothmaterialOneView(APIView):
     #删除 面辅料类别
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "7030101"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = ClothMaterial.objects.get(id=nid)
             dt = datetime.now()
@@ -2791,6 +3511,18 @@ class clothmaterialOneView(APIView):
 class clothmaterialSortView(APIView):
     #样品类型名称排序
     def put(self,request,bid):
+        sn = "7030101"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = BasicSortSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -2835,6 +3567,18 @@ class clothView(APIView):
     # 面辅料名称
     @csrf_exempt
     def get(self, request):
+        sn = "70202"
+        ret, msg = checkPermission(request,sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = clothSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -2906,6 +3650,18 @@ class clothView(APIView):
     # 添加面辅料名称
     @csrf_exempt
     def post(self, request):
+        sn = "70202"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         # data = request.query_params
         # valObj = clothOneSerializer(data=request.query_params)
         data = request.data
@@ -3003,6 +3759,18 @@ class clothView(APIView):
 
     @csrf_exempt
     def delete(self, request):
+        sn = "70202"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -3036,6 +3804,18 @@ class clothOneView(APIView):
     # 面辅料类别更新-active
     @csrf_exempt
     def put(self, request, nid):
+        sn = "70202"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = clothOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -3069,6 +3849,18 @@ class clothOneView(APIView):
     #删除 面辅料
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "70202"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = Cloth.objects.get(id=nid)
             dt = datetime.now()
@@ -3097,6 +3889,18 @@ class clothOneView(APIView):
 class clothSortView(APIView):
     #样品类型名称排序
     def put(self,request,bid):
+        sn = "70202"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = BasicSortSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -3142,6 +3946,18 @@ class colourView(APIView):
     # 面辅料颜色
     @csrf_exempt
     def get(self, request):
+        sn = "70203"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = colourSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -3201,6 +4017,18 @@ class colourView(APIView):
     # 添加面辅料名称
     @csrf_exempt
     def post(self, request):
+        sn = "70203"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         # data = request.query_params
         # valObj = colourOneSerializer(data=request.query_params)
         data = request.data
@@ -3293,6 +4121,18 @@ class colourView(APIView):
 
     @csrf_exempt
     def delete(self, request):
+        sn = "70203"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -3326,6 +4166,18 @@ class colourOneView(APIView):
     # 面辅料类别更新-active
     @csrf_exempt
     def put(self, request, nid):
+        sn = "70203"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = colourOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -3357,6 +4209,18 @@ class colourOneView(APIView):
     #删除 面辅料
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "70203"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = ClothColour.objects.get(id=nid)
             dt = datetime.now()
@@ -3385,6 +4249,18 @@ class colourOneView(APIView):
 class colourSortView(APIView):
     #样品类型名称排序
     def put(self,request,bid):
+        sn = "70203"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = BasicSortSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -3429,6 +4305,18 @@ class sub_colourView(APIView):
     # 添加面辅料子颜色
     @csrf_exempt
     def post(self, request):
+        sn = "70203"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         # data = request.query_params
         # valObj = subcolourOneSerializer(data=request.query_params)
         data = request.data
@@ -3528,6 +4416,18 @@ class sub_colourView(APIView):
 
     @csrf_exempt
     def delete(self, request):
+        sn = "70203"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -3561,6 +4461,18 @@ class sub_colourOneView(APIView):
     # 面辅料子颜色
     @csrf_exempt
     def get(self, request, nid):
+        sn = "70203"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         cloth = ClothColour.objects.filter(id=nid,delete_time=None)
         if cloth.count()>0:
@@ -3604,6 +4516,18 @@ class sub_colourOneView(APIView):
     # 面辅料子颜色更新-active
     @csrf_exempt
     def put(self, request, nid):
+        sn = "70203"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = subcolourUOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -3635,6 +4559,18 @@ class sub_colourOneView(APIView):
     #删除 面辅料子颜色
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "70203"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = SubColour.objects.get(id=nid)
             dt = datetime.now()
@@ -3663,6 +4599,18 @@ class sub_colourOneView(APIView):
 class sub_colourSortView(APIView):
     #样品类型名称排序
     def put(self,request,bid):
+        sn = "70203"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = BasicSortSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -3707,6 +4655,18 @@ class specsView(APIView):
     # 面辅料规格
     @csrf_exempt
     def get(self, request):
+        sn = "70204"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = specsSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -3767,6 +4727,18 @@ class specsView(APIView):
     # 面辅料规格
     @csrf_exempt
     def post(self, request):
+        sn = "70204"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         # data = request.query_params
         # valObj = specsOneSerializer(data=request.query_params)
         data = request.data
@@ -3865,6 +4837,18 @@ class specsView(APIView):
 
     @csrf_exempt
     def delete(self, request):
+        sn = "70204"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -3898,6 +4882,18 @@ class specsOneView(APIView):
     # 面辅料类别更新-active
     @csrf_exempt
     def put(self, request, nid):
+        sn = "70204"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = specsOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -3930,6 +4926,18 @@ class specsOneView(APIView):
     #删除 面辅料
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "70204"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = ClothSpecs.objects.get(id=nid)
             dt = datetime.now()
@@ -3958,6 +4966,18 @@ class specsOneView(APIView):
 class specsSortView(APIView):
     #样品类型名称排序
     def put(self,request,bid):
+        sn = "70204"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = BasicSortSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -4002,6 +5022,18 @@ class sub_specsView(APIView):
     # 面辅料子规格
     @csrf_exempt
     def post(self, request):
+        sn = "70204"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         # data = request.query_params
         # valObj = subspecsSerializer(data=request.query_params)
         data = request.data
@@ -4097,6 +5129,18 @@ class sub_specsView(APIView):
 
     @csrf_exempt
     def delete(self, request):
+        sn = "70204"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -4131,6 +5175,18 @@ class sub_specsOneView(APIView):
     # 面辅料子规格
     @csrf_exempt
     def get(self, request, nid):
+        sn = "70204"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         cloth = ClothSpecs.objects.filter(id=nid,delete_time=None)
         if cloth.count()>0:
@@ -4175,6 +5231,18 @@ class sub_specsOneView(APIView):
     # 面辅料子规格更新-active
     @csrf_exempt
     def put(self, request, nid):
+        sn = "70204"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = subspecsUSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -4206,6 +5274,18 @@ class sub_specsOneView(APIView):
     #删除 面辅料子规格
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "70204"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = SubSpecs.objects.get(id=nid)
             dt = datetime.now()
@@ -4234,6 +5314,18 @@ class sub_specsOneView(APIView):
 class sub_specsSortView(APIView):
     #样品类型名称排序
     def put(self,request,bid):
+        sn = "70204"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = BasicSortSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -4281,6 +5373,18 @@ class customerTypeView(APIView):
     # 客户类型名称
     @csrf_exempt
     def get(self, request):
+        sn = "801"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = customerTypeSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -4330,6 +5434,18 @@ class customerTypeView(APIView):
     # 添加客户类型
     @csrf_exempt
     def post(self, request):
+        sn = "801"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         # data = request.query_params
         # valObj = customerOneSerializer(data=request.query_params)
         data = request.data
@@ -4425,6 +5541,18 @@ class customerTypeView(APIView):
 
     @csrf_exempt
     def delete(self, request):
+        sn = "801"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -4458,6 +5586,18 @@ class customerTypeOneView(APIView):
     #客户类型更新-active
     @csrf_exempt
     def put(self, request, nid):
+        sn = "801"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = customerOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -4486,9 +5626,21 @@ class customerTypeOneView(APIView):
                 "request": request,
             }
             return Response(post_result)
-    #删除用料单位
+    #删除
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "801"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = CustomerType.objects.get(id=nid)
             dt = datetime.now()
@@ -4515,8 +5667,20 @@ class customerTypeOneView(APIView):
             return Response(post_result)
 
 class customerTypeSortView(APIView):
-    #样品类型名称排序
+    #排序
     def put(self,request,bid):
+        sn="801"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = BasicSortSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -4561,6 +5725,18 @@ class customer_filesView(APIView):
     # 客户档案
     @csrf_exempt
     def get(self, request):
+        sn = "802"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = customer_filesSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -4626,6 +5802,18 @@ class customer_filesView(APIView):
     # 添加客户档案
     @csrf_exempt
     def post(self, request):
+        sn = "802"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         # data = request.query_params
         # valObj = customer_filesOneSerializer(data=request.query_params)
         data = request.data
@@ -4724,6 +5912,18 @@ class customer_filesView(APIView):
 
     @csrf_exempt
     def delete(self, request):
+        sn = "802"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -4757,6 +5957,18 @@ class customer_filesOneView(APIView):
     #客户类型更新-active
     @csrf_exempt
     def put(self, request, nid):
+        sn = "802"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = customer_filesOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -4789,9 +6001,21 @@ class customer_filesOneView(APIView):
                 "request": request,
             }
             return Response(post_result)
-    #删除用料单位
+    #删除
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "802"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = CustomerFiles.objects.get(id=nid)
             dt = datetime.now()
@@ -4822,6 +6046,18 @@ class contactView(APIView):
     # 添加联系方式
     @csrf_exempt
     def post(self, request):
+        sn = "80201"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         # data = request.query_params
         # valObj = contactOneSerializer(data=request.query_params)
         data = request.data
@@ -4930,6 +6166,18 @@ class contactView(APIView):
 
     @csrf_exempt
     def delete(self, request):
+        sn = "80201"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -4963,6 +6211,18 @@ class contactOneView(APIView):
     # 联系方式
     @csrf_exempt
     def get(self, request, nid):
+        sn = "80201"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         try:
             result = []
@@ -5001,9 +6261,21 @@ class contactOneView(APIView):
             }
             return Response(post_result)
 
-    #客户类型更新-active
+    #更新-active
     @csrf_exempt
     def put(self, request, nid):
+        sn = "80201"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = contactOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -5038,9 +6310,21 @@ class contactOneView(APIView):
                 "request": request,
             }
             return Response(post_result)
-    #删除用料单位
+    #删除
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "80201"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = CustomerContact.objects.get(id=nid)
             dt = datetime.now()
@@ -5071,6 +6355,18 @@ class namecardOneView(APIView):
     #  公司名片
     @csrf_exempt
     def get(self, request, nid):
+        sn = "80202"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         try:
             result = []
@@ -5237,6 +6533,18 @@ class namecardOneView(APIView):
     # 公司名片更新-active
     @csrf_exempt
     def put(self, request, nid):
+        sn = "80202"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = namecardOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -5272,6 +6580,18 @@ class namecardOneView(APIView):
     #删除 公司名片
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "80202"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -5305,6 +6625,18 @@ class marksOneView(APIView):
     #  唛头
     @csrf_exempt
     def get(self, request, nid):
+        sn = "80202"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         try:
             result = []
@@ -5348,6 +6680,18 @@ class marksOneView(APIView):
     # 添加 唛头
     @csrf_exempt
     def post(self, request, nid):
+        sn = "80202"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         # data = request.query_params
         # valObj = marksOneSerializer(data=request.query_params)
         data = request.data
@@ -5454,6 +6798,18 @@ class marksOneView(APIView):
     # 唛头更新-active
     @csrf_exempt
     def put(self, request, nid):
+        sn = "80202"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = marksOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -5487,6 +6843,18 @@ class marksOneView(APIView):
     #删除 唛头
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "80202"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -5522,6 +6890,18 @@ class departmentView(APIView):
     # 部门岗位
     @csrf_exempt
     def get(self, request):
+        sn = "90101"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = departmentSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -5580,6 +6960,18 @@ class departmentView(APIView):
     # 添加部门岗位
     @csrf_exempt
     def post(self, request):
+        sn = "90101"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         # data = request.query_params
         # valObj = departmentOneSerializer(data=request.query_params)
         data = request.data
@@ -5671,6 +7063,18 @@ class departmentView(APIView):
 
     @csrf_exempt
     def delete(self, request):
+        sn = "90101"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -5704,6 +7108,18 @@ class departmentOneView(APIView):
     #客户类型更新-active
     @csrf_exempt
     def put(self, request, nid):
+        sn = "90101"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = departmentOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -5735,6 +7151,18 @@ class departmentOneView(APIView):
     #删除用料单位
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "90101"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = Department.objects.get(id=nid)
             dt = datetime.now()
@@ -5763,6 +7191,18 @@ class departmentOneView(APIView):
 class departmentSortView(APIView):
     #样品类型名称排序
     def put(self,request,bid):
+        sn = "90101"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = BasicSortSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -5808,6 +7248,18 @@ class departmentPostView(APIView):
     # 添加部门岗位
     @csrf_exempt
     def post(self, request):
+        sn = "90101"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         # data = request.query_params
         # valObj = postOneSerializer(data=request.query_params)
         data = request.data
@@ -5903,6 +7355,18 @@ class departmentPostView(APIView):
 
     @csrf_exempt
     def delete(self, request):
+        sn = "90101"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -5936,6 +7400,18 @@ class departmentPostOneView(APIView):
     # 部门岗位
     @csrf_exempt
     def get(self, request, nid):
+        sn = "90101"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         fdeoart = Department.objects.filter(id=nid, delete_time=None)
         if fdeoart.count()>0:
@@ -5976,9 +7452,21 @@ class departmentPostOneView(APIView):
             }
             return Response(post_result)
 
-    #客户类型更新-active
+    #更新-active
     @csrf_exempt
     def put(self, request, nid):
+        sn = "90101"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = postUOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -6010,6 +7498,18 @@ class departmentPostOneView(APIView):
     #删除岗位
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "90101"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = Post.objects.get(id=nid)
             dt = datetime.now()
@@ -6038,6 +7538,18 @@ class departmentPostOneView(APIView):
 class departmentPostSortView(APIView):
     #样品类型名称排序
     def put(self,request,bid):
+        sn = "90101"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = BasicSortSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -6081,6 +7593,18 @@ class departmentPostSortView(APIView):
 class job_numberView(APIView):
     @csrf_exempt
     def get(self, request):
+        sn = "90102"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = jobnumberSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -6121,6 +7645,18 @@ class job_numberOneView(APIView):
     #工号设置更新-active
     @csrf_exempt
     def put(self, request, nid):
+        sn = "90102"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = jobnumOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -6158,6 +7694,18 @@ class templateOneView(APIView):
     # 入职资料
     @csrf_exempt
     def get(self, request, nid):
+        sn = "90103"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         result = []
         try:
             rObj = DataTemplate.objects.filter(type_id=nid, delete_time=None).order_by('weight')
@@ -6192,6 +7740,18 @@ class templateOneView(APIView):
     # 添加入职资料
     @csrf_exempt
     def post(self, request, nid):
+        sn = "90103"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         # data = request.query_params
         # valObj = templateOneSerializer(data=request.query_params)
         data = request.data
@@ -6296,6 +7856,18 @@ class templateOneView(APIView):
     #客户类型更新-active
     @csrf_exempt
     def put(self, request, nid):
+        sn = "90103"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = templateOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -6329,6 +7901,18 @@ class templateOneView(APIView):
     #删除用料单位
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "90103"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -6360,6 +7944,18 @@ class templateOneView(APIView):
 class templateSortView(APIView):
     #样品类型名称排序
     def put(self,request,bid):
+        sn = "90103"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = BasicSortSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -6403,6 +7999,18 @@ class templateSortView(APIView):
 class archiveView(APIView):
     @csrf_exempt
     def get(self, request):
+        sn = "902"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = archivesSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -6470,6 +8078,18 @@ class archiveView(APIView):
     # 添加员工档案
     @csrf_exempt
     def post(self, request):
+        sn = "902"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         # data = request.query_params
         # valObj = archivesOneSerializer(data=request.query_params)
         data = request.data
@@ -6581,6 +8201,18 @@ class archiveView(APIView):
 
     @csrf_exempt
     def delete(self, request):
+        sn = "902"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -6614,6 +8246,18 @@ class archiveOneView(APIView):
     #员工档案更新-active
     @csrf_exempt
     def put(self, request, nid):
+        sn = "902"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = archivesOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -6657,6 +8301,18 @@ class archiveOneView(APIView):
 
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "902"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = Archives.objects.get(id=nid)
             dt = datetime.now()
@@ -6687,6 +8343,18 @@ class archiveOneView(APIView):
 class archiveInFile(APIView):
     @csrf_exempt
     def get(self, request):
+        sn = "902"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = archivesFileOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -6745,6 +8413,18 @@ class archiveInFile(APIView):
     # 添加员工档案
     @csrf_exempt
     def post(self, request):
+        sn = "902"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.data
         #################校验数据################################
         d_flag = 0
@@ -6839,6 +8519,18 @@ class archiveInFile(APIView):
 
     @csrf_exempt
     def delete(self, request):
+        sn = "902"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -6872,6 +8564,18 @@ class archiveInFileOneView(APIView):
     #员工档案更新-active
     @csrf_exempt
     def post(self, request, nid):
+        sn = "902"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = archivesOneEditSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -6915,6 +8619,18 @@ class categoryView(APIView):
     # 类别设置
     @csrf_exempt
     def get(self, request):
+        sn = "7030102"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = categorySerializer(data=request.query_params)
         if valObj.is_valid():
@@ -6977,6 +8693,18 @@ class categoryView(APIView):
     # 添加
     @csrf_exempt
     def post(self, request):
+        sn = "7030102"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         # data = request.query_params
         # valObj = categoryOneSerializer(data=request.query_params)
         data = request.data
@@ -7071,6 +8799,18 @@ class categoryView(APIView):
 
     @csrf_exempt
     def delete(self, request):
+        sn = "7030102"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -7105,6 +8845,18 @@ class categoryOneView(APIView):
     #-active
     @csrf_exempt
     def put(self, request, nid):
+        sn = "7030102"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = categoryUOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -7136,6 +8888,18 @@ class categoryOneView(APIView):
     #删除用料单位
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "7030102"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = ClothCategory.objects.get(id=nid)
             dt = datetime.now()
@@ -7164,6 +8928,18 @@ class categoryOneView(APIView):
 class categorySortView(APIView):
     #注意事项类别排序
     def put(self,request,bid):
+        sn = "7030102"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = BasicSortSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -7208,6 +8984,18 @@ class notesView(APIView):
     # 注意事项
     @csrf_exempt
     def get(self, request):
+        sn = "7030103"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = categoryNoteGetSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -7270,6 +9058,18 @@ class notesView(APIView):
     # 添加
     @csrf_exempt
     def post(self, request):
+        sn = "7030103"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         # data = request.query_params
         # valObj = notesOneSerializer(data=request.query_params)
         data = request.data
@@ -7364,6 +9164,18 @@ class notesView(APIView):
 
     @csrf_exempt
     def delete(self, request):
+        sn = "7030103"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -7397,6 +9209,18 @@ class notesOneView(APIView):
     #-active
     @csrf_exempt
     def put(self, request, nid):
+        sn = "7030103"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = notesUOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -7428,6 +9252,18 @@ class notesOneView(APIView):
     #删除用料单位
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "7030103"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = ClothNotes.objects.get(id=nid)
             dt = datetime.now()
@@ -7456,6 +9292,18 @@ class notesOneView(APIView):
 class notesSortView(APIView):
     #注意事项类别排序
     def put(self,request,bid):
+        sn = "7030103"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = BasicSortSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -7495,11 +9343,23 @@ class notesSortView(APIView):
             }
             return Response(post_result)
 
-############################类别设置###############################################
+############################其他注意事项-类别设置###############################################
 class category_setView(APIView):
-    # 部门岗位
+    #
     @csrf_exempt
     def get(self, request):
+        sn = "7030202"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = othercategorySerializer(data=request.query_params)
         if valObj.is_valid():
@@ -7562,6 +9422,18 @@ class category_setView(APIView):
     # 添加
     @csrf_exempt
     def post(self, request):
+        sn = "7030202"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         # data = request.query_params
         # valObj = ocategoryOneSerializer(data=request.query_params)
         data = request.data
@@ -7656,6 +9528,18 @@ class category_setView(APIView):
 
     @csrf_exempt
     def delete(self, request):
+        sn = "7030202"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -7689,6 +9573,18 @@ class category_setOneView(APIView):
     #-active
     @csrf_exempt
     def put(self, request, nid):
+        sn = "7030202"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = ocategoryUOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -7720,6 +9616,18 @@ class category_setOneView(APIView):
     #删除用料单位
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "7030202"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = OtherCategorySetting.objects.get(id=nid)
             dt = datetime.now()
@@ -7748,6 +9656,18 @@ class category_setOneView(APIView):
 class category_setSortView(APIView):
     #注意事项类别排序
     def put(self,request,bid):
+        sn = "7030202"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = BasicSortSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -7787,11 +9707,23 @@ class category_setSortView(APIView):
             }
             return Response(post_result)
 
-############################其他类别设置###############################################
+############################其他注意事项-类别分类###############################################
 class other_categoryView(APIView):
     # 部门岗位
     @csrf_exempt
     def get(self, request):
+        sn = "7030201"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = othercategerSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -7851,6 +9783,18 @@ class other_categoryView(APIView):
     # 添加
     @csrf_exempt
     def post(self, request):
+        sn = "7030201"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         # data = request.query_params
         # valObj = othercategerOneSerializer(data=request.query_params)
         data = request.data
@@ -7943,6 +9887,18 @@ class other_categoryView(APIView):
 
     @csrf_exempt
     def delete(self, request):
+        sn = "7030201"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -7976,6 +9932,18 @@ class other_categoryOneView(APIView):
     #-active
     @csrf_exempt
     def put(self, request, nid):
+        sn = "7030201"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = othercategerOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -8007,6 +9975,18 @@ class other_categoryOneView(APIView):
     #删除用料单位
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "7030201"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = OtherCategory.objects.get(id=nid)
             dt = datetime.now()
@@ -8035,6 +10015,18 @@ class other_categoryOneView(APIView):
 class other_categorySortView(APIView):
     #注意事项类别排序
     def put(self,request,bid):
+        sn = "7030201"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = BasicSortSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -8074,12 +10066,23 @@ class other_categorySortView(APIView):
             }
             return Response(post_result)
 
-############################其他类别名称###############################################
+############################其他类别名称---其他注意事项-类别子分类###############################################
 class sub_categoryView(APIView):
-
     # 添加
     @csrf_exempt
     def post(self, request):
+        sn = "7030201"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         # data = request.query_params
         # valObj = ocategorysubOneSerializer(data=request.query_params)
         data = request.data
@@ -8175,6 +10178,18 @@ class sub_categoryView(APIView):
 
     @csrf_exempt
     def delete(self, request):
+        sn = "7030201"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -8207,6 +10222,18 @@ class sub_categoryView(APIView):
 class sub_categoryOneView(APIView):
     @csrf_exempt
     def get(self, request, nid):
+        sn = "7030201"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         result = []
         try:
@@ -8240,6 +10267,18 @@ class sub_categoryOneView(APIView):
     #-active
     @csrf_exempt
     def put(self, request, nid):
+        sn = "7030201"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = ocategorysubUOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -8271,6 +10310,18 @@ class sub_categoryOneView(APIView):
     #删除用料单位
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "7030201"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = OtherSubCategory.objects.get(id=nid)
             dt = datetime.now()
@@ -8296,11 +10347,23 @@ class sub_categoryOneView(APIView):
             }
             return Response(post_result)
 
-############################类别设置###############################################
+############################其他类别设置---注意事项###############################################
 class other_notesView(APIView):
     # 注意事项
     @csrf_exempt
     def get(self, request):
+        sn = "7030203"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = othercategoryNoteGetSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -8371,6 +10434,18 @@ class other_notesView(APIView):
     # 添加
     @csrf_exempt
     def post(self, request):
+        sn = "7030203"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         # data = request.query_params
         # valObj = otherNotesSerializer(data=request.query_params)
         data = request.data
@@ -8465,6 +10540,18 @@ class other_notesView(APIView):
 
     @csrf_exempt
     def delete(self, request):
+        sn = "7030203"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -8498,6 +10585,18 @@ class other_notesOneView(APIView):
     #-active
     @csrf_exempt
     def put(self, request, nid):
+        sn = "7030203"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = otherNotesUSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -8529,6 +10628,18 @@ class other_notesOneView(APIView):
     #删除
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "7030203"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = OtherNotes.objects.get(id=nid)
             dt = datetime.now()
@@ -8557,6 +10668,18 @@ class other_notesOneView(APIView):
 class other_notesSortView(APIView):
     #注意事项类别排序
     def put(self,request,bid):
+        sn = "7030203"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = BasicSortSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -10012,7 +12135,7 @@ def maxInt(intArray):
 class planOrderView(APIView):
     @csrf_exempt
     def get(self, request):
-        sn = "102"
+        sn = "102,2"
         ret, msg = checkPermission(request,sn)
         if ret == False:
             msg = msg
@@ -10917,7 +13040,7 @@ class planClothSampleOneView(APIView):
     # 成衣样品
     @csrf_exempt
     def put(self, request, nid):
-        sn = "1010207"
+        sn = "1010207,403010101,403010201"
         ret, msg = checkPermission(request, sn)
         if ret == False:
             msg = msg
@@ -11659,6 +13782,18 @@ class plateMakingOneView(APIView):
 class warmSetView(APIView):
     @csrf_exempt
     def get(self, request):
+        sn = "0"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         result = []
         try:
             rObj = BaseWarm.objects.filter(delete_time=None).order_by('weight')
@@ -11695,6 +13830,18 @@ class warmSetView(APIView):
     # 添加预警方式
     @csrf_exempt
     def post(self, request):
+        sn = "0"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.data
         #################校验数据################################
         d_flag = 0
@@ -11791,6 +13938,18 @@ class warmSetView(APIView):
 
     @csrf_exempt
     def delete(self, request):
+        sn = "0"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -11823,6 +13982,18 @@ class warmSetOneView(APIView):
     #订单类型更新-active
     @csrf_exempt
     def put(self, request, nid):
+        sn = "0"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = setWarmSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -11857,6 +14028,18 @@ class warmSetOneView(APIView):
     #删除用料单位
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "0"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = BaseWarm.objects.get(id=nid)
             dt = datetime.now()
@@ -11885,6 +14068,18 @@ class warmSetOneView(APIView):
 class warmSetSortView(APIView):
     #样品类型名称排序
     def put(self,request,bid):
+        sn = "0"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = BasicSortSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -11930,6 +14125,18 @@ class shortShipView(APIView):
     # 样品类型名称
     @csrf_exempt
     def get(self, request):
+        sn = "0"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = shortShipSerializer(data=request.query_params)
         result = []
@@ -11979,6 +14186,18 @@ class shortShipView(APIView):
     # 添加用料单位
     @csrf_exempt
     def post(self, request):
+        sn = "0"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.data
         #################校验数据################################
         d_flag = 0
@@ -12067,6 +14286,18 @@ class shortShipView(APIView):
 
     @csrf_exempt
     def delete(self, request):
+        sn = "0"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -12099,6 +14330,18 @@ class shortShipOneView(APIView):
     #订单类型更新-active
     @csrf_exempt
     def put(self, request, nid):
+        sn = "0"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = shortShipOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -12131,6 +14374,18 @@ class shortShipOneView(APIView):
     #删除用料单位
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "0"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = ShortShip.objects.get(id=nid)
             dt = datetime.now()
@@ -12159,6 +14414,18 @@ class shortShipOneView(APIView):
 class shortShipSortView(APIView):
     #样品类型名称排序
     def put(self,request,bid):
+        sn = "0"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = BasicSortSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -12203,6 +14470,18 @@ class orderDateSetView(APIView):
     # 样品类型名称
     @csrf_exempt
     def get(self, request):
+        sn = "0"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = orderDateSetSerializer(data=request.query_params)
         result = []
@@ -12251,6 +14530,18 @@ class orderDateSetView(APIView):
     # 添加短溢装
     @csrf_exempt
     def post(self, request):
+        sn = "0"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.data
         #################校验数据################################
         d_flag = 0
@@ -12329,6 +14620,18 @@ class orderDateSetView(APIView):
     # 批量删除短溢装
     @csrf_exempt
     def delete(self, request):
+        sn = "0"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -12361,6 +14664,18 @@ class orderDateSetOneView(APIView):
     #短溢装更新-active
     @csrf_exempt
     def put(self, request, nid):
+        sn = "0"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = orderDateSetOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -12395,6 +14710,18 @@ class orderDateSetOneView(APIView):
     #删除短溢装
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "0"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = OrderDateSet.objects.get(id=nid)
             dt = datetime.now()
@@ -12423,6 +14750,18 @@ class orderDateSetOneView(APIView):
 class orderDateSetSortView(APIView):
     #短溢装排序
     def put(self,request,bid):
+        sn = "0"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = BasicSortSerializer(data=request.query_params)
         if valObj.is_valid():

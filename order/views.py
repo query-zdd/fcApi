@@ -23,6 +23,18 @@ class showOutStockView(APIView):
     # 添加/编辑 订单出货方案
     @csrf_exempt
     def post(self, request):
+        sn = "201"
+        ret, msg = checkPermission(request,sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.data
         valObj = orderOutstockSerializer(data=request.data)
         if valObj.is_valid():
@@ -197,6 +209,18 @@ class showOutStockView(APIView):
     #批量删除 订单出货方案showOutStock
     @csrf_exempt
     def delete(self, request):
+        sn = "201"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -230,6 +254,18 @@ class showOutStockOneView(APIView):
     # 单个删除 订单出货方案
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "201"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             valObj = orderOutstockDeleteOneSerializer(data=request.query_params)
             if valObj.is_valid():
@@ -276,6 +312,18 @@ class showOutStockOneView(APIView):
     # 获取订单 订单出货方案
     @csrf_exempt
     def get(self, request, nid):
+        sn = "201"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = orderOutstockGetOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -335,111 +383,17 @@ class showOutStockOneView(APIView):
 
 
 
+############################订单管理-录入工厂方案###############################################
 
-class showFXOutStockOneView(APIView):
-    # 获取订单 订单出货方案
+class factoryMakeView(APIView):
+    # 添加/编辑 录入工厂方案
     @csrf_exempt
-    def get(self, request, nid):
-        data = request.query_params
-        valObj = orderOutstockGetOneSerializer(data=request.query_params)
-        if valObj.is_valid():
-            try:
-                orderObj = PlanOrder.objects.get(id=nid)
-                orderline = PlanOrderLine.objects.filter(delete_time=None,order_id=nid)
-                samplist=[]
-                for one in orderline:
-                    samp={}
-                    samp['order_custom'] = one.order_custom
-                    samp['order_type'] = one.order_type
-                    samp['contract_num'] = one.contract_num
-                    samp['order_line_id'] = one.id
-                    samp['order_price_type'] = one.order_price_type
-                    samp['is_sure_price'] = one.is_sure_price
-                    samp['order_price'] = one.order_price
-                    samp['pay_y_amount'] = one.pay_y_amount
-                    rObj = OutStock.objects.filter(delete_time=None, order_line_id=one.id).order_by('color', 'specs')
-                    if rObj.count()>0:
-                        zemp = []
-                        for one1 in rObj:
-                            jamp={}
-                            jamp['color'] = one1.color
-                            jamp['color_name'] = one1.color_name
-                            jamp['color_num'] = one1.color_num
-                            jamp['specs'] = one1.specs
-                            jamp['contract_num'] = one1.contract_num
-                            jamp['short_overflow'] = one1.short_overflow
-                            jamp['short_overflow_direct'] = one1.short_overflow_direct
-                            jamp['order_num'] = one1.order_num
-                            # 送检数量
-                            # b品数量
-                            faclineObj = FactoryMakeLine.objects.filter(order_line_id=one.id,color=one1.color,color_num=one1.color_num,specs=one1.specs)
-                            make_num = 0
-                            inspect_num = 0
-                            b_num = 0
-                            for one2 in faclineObj:
-                                if one2.make_num:
-                                    make_num += one2.make_num
-                                if one2.b_num:
-                                    b_num += one2.b_num
-                                if one2.inspect_num:
-                                    inspect_num += one2.inspect_num
-
-
-                            jamp['inspect_num'] = inspect_num
-                            jamp['b_num'] = b_num
-                            a_num = make_num -b_num
-                            jamp['a_b_lv'] =a_num/b_num
-                            # 船样数量
-                            cysamp_num = 0
-                            planSamp = PlanClothSampleLine.objects.filter(sample_type="船样",plan_id=orderObj.plan_id)
-                            for one3 in planSamp:
-                                plansampNum = PlanClothSampleNumber.objects.filter(pcsl_id=one3.id,sub_color_name=one1.color,sub_specs_name=one1.specs)
-                                for one4 in plansampNum:
-                                    if one4.num:
-                                        cysamp_num +=one4.num
-                            jamp['cysamp_num'] = cysamp_num
-                            zemp.append(jamp)
-                        samp['out_stock'] = zemp
-                    else:
-                        samp['out_stock'] = []
-                        samp['short_overflow'] = one.short_overflow
-                    samplist.append(samp)
-
-                temp = {}
-                temp["data"] = samplist
-                facmObj = FactoryMake.objects.filter(order_id = nid)
-                coop_mood = ""
-                make_factory = ""
-                ticketing_custom = ""
-
-                for one5 in facmObj:
-                    coop_mood += one5.coop_mode
-                    ticketing_custom += one5.ticketing_custom
-                    make_factory += one5.make_factory
-
-                temp['work_type'] = orderObj.work_type
-                temp['o_order_type'] = orderObj.order_type
-                temp['coop_mood'] = coop_mood
-                temp['ticketing_custom'] = ticketing_custom
-                temp['make_factory'] = make_factory
-                temp['merchant'] = "南通风尚国际"
-                temp['error_code'] = 0
-                temp['message'] = "成功"
-                temp['request'] = request.method + '  ' + request.get_full_path()
-                return Response(temp)
-            except:
-                msg = "未找到对应的出货方案"
-                error_code = 10030
-                request = request.method + '  ' + request.get_full_path()
-                post_result = {
-                    "error_code": error_code,
-                    "message": msg,
-                    "request": request,
-                }
-                return Response(post_result)
-        else:
-            msg = valObj.errors
-            error_code = 10030
+    def post(self, request):
+        sn = "202"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
             request = request.method + '  ' + request.get_full_path()
             post_result = {
                 "error_code": error_code,
@@ -447,15 +401,6 @@ class showFXOutStockOneView(APIView):
                 "request": request,
             }
             return Response(post_result)
-
-
-
-############################订单管理-录入工厂方案###############################################
-
-class factoryMakeView(APIView):
-    # 添加/编辑 录入工厂方案
-    @csrf_exempt
-    def post(self, request):
         data = request.data
         valObj = factoryMakeSerializer(data=request.data)
         if valObj.is_valid():
@@ -598,6 +543,18 @@ class factoryMakeView(APIView):
     #批量删除 录入工厂方案
     @csrf_exempt
     def delete(self, request):
+        sn = "202"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -636,6 +593,18 @@ class factoryMakeOneView(APIView):
     # 获取订单 录入工厂方案
     @csrf_exempt
     def get(self, request, nid):
+        sn = "202"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = orderOutstockGetOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -706,6 +675,18 @@ class machiningView(APIView):
     # 添加/编辑 加工方案
     @csrf_exempt
     def post(self, request):
+        sn = "202"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.data
         valObj = machiningSerializer(data=request.data)
         if valObj.is_valid():
@@ -840,6 +821,18 @@ class machiningOneView(APIView):
     # 获取订单 加工方案
     @csrf_exempt
     def get(self, request, nid):
+        sn = "202"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = machiningGetOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -909,6 +902,18 @@ class orderClothView(APIView):
     # 添加/编辑 面辅料采购
     @csrf_exempt
     def post(self, request):
+        sn = "0"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.data
         valObj = orderClothSerializer(data=request.data)
         if valObj.is_valid():
@@ -1177,6 +1182,18 @@ class orderClothView(APIView):
     #批量删除 面辅料采购
     @csrf_exempt
     def delete(self, request):
+        sn = "0"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -1222,6 +1239,18 @@ class orderClothOneView(APIView):
     # 获取订单 面辅料采购
     @csrf_exempt
     def get(self, request, nid):
+        sn = "0"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = orderOutstockGetOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -1315,6 +1344,18 @@ class orderNotesView(APIView):
     # 添加/编辑 注意事项
     @csrf_exempt
     def post(self, request):
+        sn = "2040102,2040202,1010210,30101,30201"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.data
         valObj = orderNotesSerializer(data=request.data)
         if valObj.is_valid():
@@ -1442,6 +1483,18 @@ class orderNotesView(APIView):
     #批量删除 注意事项
     @csrf_exempt
     def delete(self, request):
+        sn = "2040102,2040202,1010210,30101,30201"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -1474,6 +1527,18 @@ class orderNotesView(APIView):
     # 获取订单 注意事项所有
     @csrf_exempt
     def get(self, request):
+        sn = "2040102,2040202,1010210,30101,30201"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = orderNotesOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -1603,6 +1668,18 @@ class orderNotesOneView(APIView):
     # 获取订单 注意事项（当前面辅料）
     @csrf_exempt
     def get(self, request, nid):
+        sn = "2040102,2040202,1010210,30101,30201"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = orderNotesOne1Serializer(data=request.query_params)
         if valObj.is_valid():
@@ -1754,6 +1831,18 @@ class orderNotesOtherView(APIView):
     # 添加/编辑 注意事项
     @csrf_exempt
     def post(self, request):
+        sn = "2040102,2040202,1010210"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.data
         valObj = orderNotesSerializer(data=request.data)
         if valObj.is_valid():
@@ -1881,6 +1970,18 @@ class orderNotesOtherView(APIView):
     #批量删除 注意事项
     @csrf_exempt
     def delete(self, request):
+        sn = "2040102,2040202,1010210"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -1913,6 +2014,18 @@ class orderNotesOtherView(APIView):
     # 获取订单 注意事项所有
     @csrf_exempt
     def get(self, request):
+        sn = "2040102,2040202,1010210"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = orderNotesOtherSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -2040,6 +2153,18 @@ class orderNotesOtherOneView(APIView):
     # 获取订单 注意事项（当前面辅料）
     @csrf_exempt
     def get(self, request, nid):
+        sn = "2040102,2040202,1010210"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = orderNotesOtherSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -2177,6 +2302,18 @@ class shipmentView(APIView):
     # 添加/编辑 发货方案
     @csrf_exempt
     def post(self, request):
+        sn = "0"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.data
         valObj = orderClothShipSerializer(data=request.data)
         if valObj.is_valid():
@@ -2317,6 +2454,18 @@ class shipmentView(APIView):
     #批量删除 发货方案
     @csrf_exempt
     def delete(self, request):
+        sn = "0"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -2354,6 +2503,18 @@ class shipmentOneView(APIView):
     # 获取订单 面辅料采购入库
     @csrf_exempt
     def get(self, request, nid):
+        sn = "0"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = orderOutstockGetOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -2415,6 +2576,18 @@ class shipmentOneView(APIView):
     # 面辅料采购入库
     @csrf_exempt
     def put(self, request, nid):
+        sn = "0"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             orderClothlineShip = OrderClothLineShip.objects.get(id=nid)
             orderClothlineShip.is_sure_in_store = 1
@@ -2647,6 +2820,18 @@ class managementOneView(APIView):
     # 获取订单 面辅料采购
     @csrf_exempt
     def get(self, request, nid):
+        sn = "0"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = orderOutstockGetOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -2704,6 +2889,18 @@ class packingView(APIView):
     # 添加/编辑 装箱要求
     @csrf_exempt
     def post(self, request):
+        sn = "20301,301,302"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.data
         valObj = packingSerializer(data=request.data)
         if valObj.is_valid():
@@ -2801,6 +2998,18 @@ class packingView(APIView):
     #批量删除 发货方案
     @csrf_exempt
     def delete(self, request):
+        sn = "20301,301,302"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -2838,6 +3047,18 @@ class packingOneView(APIView):
     # 获取订单 装箱要求
     @csrf_exempt
     def get(self, request, nid):
+        sn = "20301,301,302"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = orderOutstockGetOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -2917,6 +3138,18 @@ class packingLineView(APIView):
     # 添加/编辑 装箱指示
     @csrf_exempt
     def post(self, request):
+        sn = "20301,301,302"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.data
         for one in data:
             valObj = packingSublineSerializer(data=one)
@@ -3021,6 +3254,18 @@ class packingLineView(APIView):
     #批量删除 发货方案
     @csrf_exempt
     def delete(self, request):
+        sn = "20301,301"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -3058,6 +3303,18 @@ class packingLineOneView(APIView):
     # 获取订单 装箱要求
     @csrf_exempt
     def get(self, request, nid):
+        sn = "20301,301,302"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = orderOutstockGetOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -3118,6 +3375,18 @@ class shipmentSureView(APIView):
     # 添加/编辑 面辅料确认
     @csrf_exempt
     def post(self, request):
+        sn = "20302"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.data
         valObj = shipmentSureOneSerializer(data=request.data)
         if valObj.is_valid():
@@ -3236,6 +3505,18 @@ class shipmentSureOneView(APIView):
     # 获取订单 发货方案
     @csrf_exempt
     def get(self, request, nid):
+        sn = "20302"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = shipmentSureGetOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -3350,6 +3631,18 @@ class shipmentSureOneView(APIView):
 
     @csrf_exempt
     def post(self, request, nid):
+        sn = "20302"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.data
         dataone = data['data']
         l_msg = []
@@ -3414,6 +3707,18 @@ class dropView(APIView):
     # 添加/编辑 发货方案
     @csrf_exempt
     def post(self, request):
+        sn = "2040104,2040204"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.data
         valObj = dropSerializer(data=request.data)
         if valObj.is_valid():
@@ -3499,6 +3804,18 @@ class dropOneView(APIView):
     # 获取订单 发货方案
     @csrf_exempt
     def get(self, request, nid):
+        sn = "2040104,2040204"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = dropGetOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -3597,6 +3914,18 @@ class dropLableView(APIView):
     # 添加/编辑 发货方案
     @csrf_exempt
     def post(self, request):
+        sn = "2040104,2040204"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.data
         valObj = dropSerializer(data=request.data)
         if valObj.is_valid():
@@ -3702,6 +4031,18 @@ class dropLableOneView(APIView):
     # 获取订单 发货方案
     @csrf_exempt
     def get(self, request, nid):
+        sn = "2040104,2040204"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         # valObj = dropGetOneSerializer(data=request.query_params)
         try:
@@ -3746,6 +4087,18 @@ class purchasRecordsView(APIView):
     # 添加采购管理发货记录记录
     @csrf_exempt
     def post(self, request):
+        sn = "20303"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.data
         #################校验数据################################
         d_flag = 0
@@ -3831,6 +4184,18 @@ class purchasRecordsView(APIView):
 
     @csrf_exempt
     def delete(self, request):
+        sn = "20303"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -3862,6 +4227,18 @@ class purchasRecordsView(APIView):
 class purchasRecordsOneView(APIView):
     @csrf_exempt
     def get(self, request, nid):
+        sn = "20303"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             try:
                 purch_records_id = request.query_params['purch_records_id']
@@ -3908,6 +4285,18 @@ class purchasRecordsOneView(APIView):
 
     @csrf_exempt
     def put(self, request, nid):
+        sn = "20303"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             valObj = purchasRecordsUploadSerializer(data=request.data)
@@ -3956,6 +4345,18 @@ class shipmentInStockView(APIView):
     # 添加/编辑 面辅料入库
     @csrf_exempt
     def post(self, request):
+        sn = "20303,2040101,2040201,30102"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.data
         valObj = shipmentInStockOneSerializer(data=request.data)
         if valObj.is_valid():
@@ -4073,6 +4474,18 @@ class shipmentInStockOneView(APIView):
     # 获取订单 发货方案
     @csrf_exempt
     def get(self, request, nid):
+        sn = "20303,2040101,2040201,30102"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = orderOutstockGetOneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -4178,6 +4591,18 @@ class productReadyView(APIView):
     # 添加/编辑 生产准备
     @csrf_exempt
     def post(self, request):
+        sn = "301"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.data
         try:
             #################校验数据################################
@@ -4283,6 +4708,18 @@ class productReadyView(APIView):
     # 获取订单 生产准备
     @csrf_exempt
     def get(self, request):
+        sn = "301"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = productReadyoneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -4479,6 +4916,18 @@ class productReadyOneView(APIView):
     # 获取订单上手时间
     @csrf_exempt
     def get(self, request, nid):
+        sn = "301"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             planOrder =PlanOrder.objects.get(id = nid)
             fcObj = FactoryMake.objects.filter(order_id = nid)
@@ -4514,6 +4963,18 @@ class makeinReadyView(APIView):
     # 添加/编辑 生产准备
     @csrf_exempt
     def post(self, request):
+        sn = "302"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.data
         try:
             #################校验数据################################
@@ -4598,6 +5059,18 @@ class makeinReadyView(APIView):
     # 获取订单 生产准备
     @csrf_exempt
     def get(self, request):
+        sn = "302"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = productReadyoneSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -5283,6 +5756,18 @@ class reightSpaceView(APIView):
     # 添加/编辑 预定仓位
     @csrf_exempt
     def post(self, request):
+        sn = "402"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         #################校验数据################################
         d_flag = 0
         d_num = 0
@@ -5368,6 +5853,18 @@ class reightSpaceView(APIView):
     # 获取预定仓位
     @csrf_exempt
     def get(self, request):
+        sn = "402"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = reightSpaceLineSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -5400,9 +5897,12 @@ class reightSpaceView(APIView):
                         one['exporter_way'] = onespcace.exporter_way
                         one['transportation'] = onespcace.transportation
                         one['info_url'] = onespcace.info_url
+                        one['reight_s_time'] = onespcace.reight_s_time
                     else:
                         one["reight_space_status"] = 0
                         one['indicate_time'] = orderObj.indicate_time
+                        one['info_url'] = None
+                        one['reight_s_time'] = None
                     one['dhkhao'] = orderObj.dhkhao
                     one['price_code'] = orderObj.price_code
 
@@ -5437,6 +5937,18 @@ class reightSpaceOneView(APIView):
     # 获取预定仓位
     @csrf_exempt
     def get(self, request, nid):
+        sn = "402"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             rObj = ReightSpace.objects.get(id=nid)
             ids = rObj.order_line_ids.split(",")
@@ -5501,6 +6013,18 @@ class reightSpaceOneView(APIView):
     # 批量删除 订单出货方案showOutStock
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "402"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = ReightSpace.objects.get(id=nid)
             dt = datetime.now()
@@ -5528,6 +6052,18 @@ class reightSpaceOneView(APIView):
     #
     @csrf_exempt
     def post(self, request, nid):
+        sn = "402"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         valObj = reightSpaceOneSerializer(data=request.query_params)
         if valObj.is_valid():
             try:
@@ -5617,6 +6153,18 @@ class exportCustomsDeclarationView(APIView):
     # 获取报关理单
     @csrf_exempt
     def get(self, request):
+        sn = "403"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = exportCustomsDeclarationSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -5694,9 +6242,21 @@ class exportCustomsDeclarationView(APIView):
 
 # 样品
 class exportClothSampleView(APIView):
-    # 获取预定仓位
+    # 样品
     @csrf_exempt
     def get(self, request, nid):
+        sn = "403010101,403010201"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             orderLine = PlanOrderLine.objects.get(id=nid)
             order = PlanOrder.objects.get(id=orderLine.order_id)
@@ -5727,6 +6287,18 @@ class makeFactoryInspectView(APIView):
     # 添加/编辑 录入工厂送检情况
     @csrf_exempt
     def post(self, request):
+        sn = "30205"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.data
         valObj = inspectSerializer(data=request.data)
         if valObj.is_valid():
@@ -5851,6 +6423,18 @@ class makeFactoryInspectOneView(APIView):
     # 获取录入工厂送检情况
     @csrf_exempt
     def get(self, request, nid):
+        sn = "30205"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             order = PlanOrder.objects.get(id=nid)
             orderLine = PlanOrderLine.objects.filter(order_id=nid)
@@ -5948,6 +6532,18 @@ class makeFactoryInspectOneView(APIView):
     # 批量删除 订单出货方案showOutStock
     @csrf_exempt
     def delete(self, request, nid):
+        sn = "30205"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = MakeFatoryInspect.objects.get(id=nid)
             bObj.delete()
@@ -5973,6 +6569,18 @@ class makeFactoryInspectOneView(APIView):
 
     @csrf_exempt
     def post(self, request, nid):
+        sn = "30205"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         valObj = inspectinfoUrlSerializer(data=request.query_params)
         if valObj.is_valid():
             type = valObj.data['type'] if valObj.data['type'] is not None else 1
@@ -6147,6 +6755,18 @@ class PackInfoView(APIView):
     # 添加/编辑 包箱信息
     @csrf_exempt
     def post(self, request):
+        sn = "30202"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.data
         valObj = PackInfoSerializer(data=request.data)
         if valObj.is_valid():
@@ -6222,6 +6842,18 @@ class PackInfoOneView(APIView):
     # 包箱信息
     @csrf_exempt
     def get(self, request, nid):
+        sn = "30202"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             orderLine = PlanOrderLine.objects.get(id=nid)
             orderPackInfo = OrderPackInfo.objects.filter(order_line_id = nid)
@@ -6261,6 +6893,18 @@ class BqualityView(APIView):
     # 添加/编辑 包箱信息
     @csrf_exempt
     def post(self, request):
+        sn = "30206"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.data
         valObj = BqualitySerializer(data=request.data)
         if valObj.is_valid():
@@ -6335,6 +6979,18 @@ class BqualityOneView(APIView):
     # b品数量
     @csrf_exempt
     def get(self, request, nid):
+        sn = "30206"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = getBqualitySerializer(data=request.query_params)
         if valObj.is_valid():
@@ -11105,4 +11761,121 @@ class shipmentFXSureOneView(APIView):
                 "request": request,
             }
             return Response(post_result)
+
+
+
+
+class showFXOutStockOneView(APIView):
+    # 获取订单 订单出货方案
+    @csrf_exempt
+    def get(self, request, nid):
+        data = request.query_params
+        valObj = orderOutstockGetOneSerializer(data=request.query_params)
+        if valObj.is_valid():
+            try:
+                orderObj = PlanOrder.objects.get(id=nid)
+                orderline = PlanOrderLine.objects.filter(delete_time=None,order_id=nid)
+                samplist=[]
+                for one in orderline:
+                    samp={}
+                    samp['order_custom'] = one.order_custom
+                    samp['order_type'] = one.order_type
+                    samp['contract_num'] = one.contract_num
+                    samp['order_line_id'] = one.id
+                    samp['order_price_type'] = one.order_price_type
+                    samp['is_sure_price'] = one.is_sure_price
+                    samp['order_price'] = one.order_price
+                    samp['pay_y_amount'] = one.pay_y_amount
+                    rObj = OutStock.objects.filter(delete_time=None, order_line_id=one.id).order_by('color', 'specs')
+                    if rObj.count()>0:
+                        zemp = []
+                        for one1 in rObj:
+                            jamp={}
+                            jamp['color'] = one1.color
+                            jamp['color_name'] = one1.color_name
+                            jamp['color_num'] = one1.color_num
+                            jamp['specs'] = one1.specs
+                            jamp['contract_num'] = one1.contract_num
+                            jamp['short_overflow'] = one1.short_overflow
+                            jamp['short_overflow_direct'] = one1.short_overflow_direct
+                            jamp['order_num'] = one1.order_num
+                            # 送检数量
+                            # b品数量
+                            faclineObj = FactoryMakeLine.objects.filter(order_line_id=one.id,color=one1.color,color_num=one1.color_num,specs=one1.specs)
+                            make_num = 0
+                            inspect_num = 0
+                            b_num = 0
+                            for one2 in faclineObj:
+                                if one2.make_num:
+                                    make_num += one2.make_num
+                                if one2.b_num:
+                                    b_num += one2.b_num
+                                if one2.inspect_num:
+                                    inspect_num += one2.inspect_num
+
+
+                            jamp['inspect_num'] = inspect_num
+                            jamp['b_num'] = b_num
+                            a_num = make_num -b_num
+                            jamp['a_b_lv'] =a_num/b_num
+                            # 船样数量
+                            cysamp_num = 0
+                            planSamp = PlanClothSampleLine.objects.filter(sample_type="船样",plan_id=orderObj.plan_id)
+                            for one3 in planSamp:
+                                plansampNum = PlanClothSampleNumber.objects.filter(pcsl_id=one3.id,sub_color_name=one1.color,sub_specs_name=one1.specs)
+                                for one4 in plansampNum:
+                                    if one4.num:
+                                        cysamp_num +=one4.num
+                            jamp['cysamp_num'] = cysamp_num
+                            zemp.append(jamp)
+                        samp['out_stock'] = zemp
+                    else:
+                        samp['out_stock'] = []
+                        samp['short_overflow'] = one.short_overflow
+                    samplist.append(samp)
+
+                temp = {}
+                temp["data"] = samplist
+                facmObj = FactoryMake.objects.filter(order_id = nid)
+                coop_mood = ""
+                make_factory = ""
+                ticketing_custom = ""
+
+                for one5 in facmObj:
+                    coop_mood += one5.coop_mode
+                    ticketing_custom += one5.ticketing_custom
+                    make_factory += one5.make_factory
+
+                temp['work_type'] = orderObj.work_type
+                temp['o_order_type'] = orderObj.order_type
+                temp['coop_mood'] = coop_mood
+                temp['ticketing_custom'] = ticketing_custom
+                temp['make_factory'] = make_factory
+                temp['merchant'] = "南通风尚国际"
+                temp['error_code'] = 0
+                temp['message'] = "成功"
+                temp['request'] = request.method + '  ' + request.get_full_path()
+                return Response(temp)
+            except:
+                msg = "未找到对应的出货方案"
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+
 
