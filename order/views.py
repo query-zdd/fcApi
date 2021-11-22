@@ -6626,9 +6626,21 @@ class makeFactoryInspectOneView(APIView):
 ############################订单管理-报关理单###############################################
 
 class inportCustomsDeclarationView(APIView):
-    # 添加/编辑 预定仓位
+    # 添加/编辑 国内出货理单
     @csrf_exempt
     def post(self, request):
+        sn = "40302"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         #################校验数据################################
         d_flag = 0
         d_num = 0
@@ -6687,9 +6699,21 @@ class inportCustomsDeclarationView(APIView):
             }
             return Response(post_result)
 
-    # 获取报关理单
+    # 获取国内出货理单
     @csrf_exempt
     def get(self, request):
+        sn = "40302"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = exportCustomsDeclarationSerializer(data=request.query_params)
         if valObj.is_valid():

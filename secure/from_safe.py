@@ -488,6 +488,7 @@ class planClothOneSerializer(serializers.Serializer):
 class planClothOne1Serializer(serializers.Serializer):
     is_pay = serializers.IntegerField(default=0,allow_null=True)
     is_fee = serializers.IntegerField(default=0,allow_null=True)
+    is_export = serializers.IntegerField(default=0, allow_null=True)
     pay_custom = serializers.CharField(default="",allow_null=True,allow_blank=True)
 
 

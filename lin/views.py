@@ -13057,9 +13057,10 @@ class planClothSampleOneView(APIView):
         if valObj.is_valid():
             dt = datetime.now()
             bObj = PlanClothSampleLine.objects.get(id=nid)
-            bObj.is_fee = data['is_fee']
-            bObj.is_pay = data['is_pay']
-            bObj.pay_custom = data['pay_custom']
+            bObj.is_fee = valObj.data['is_fee']
+            bObj.is_pay = valObj.data['is_pay']
+            bObj.pay_custom = valObj.data['pay_custom']
+            bObj.is_export =valObj.data['is_export']
             bObj.is_sure = 1
             bObj.update_time = dt
             bObj.save()
