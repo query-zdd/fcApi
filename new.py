@@ -1389,6 +1389,9 @@ class PlanOrderLine(models.Model):
     pay_n_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     provide_custom = models.CharField(max_length=255, blank=True, null=True)
     is_finish_pay = models.IntegerField(blank=True, null=True)
+    fee_no = models.CharField(max_length=255, blank=True, null=True)
+    fee_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    fee_no_status = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1669,6 +1672,22 @@ class SampPayFeeInfo(models.Model):
         db_table = 'samp_pay_fee_info'
 
 
+class SampTools(models.Model):
+    create_time = models.DateTimeField(blank=True, null=True)
+    update_time = models.DateTimeField(blank=True, null=True)
+    delete_time = models.DateTimeField(blank=True, null=True)
+    tools_name = models.CharField(max_length=255, blank=True, null=True)
+    price_type = models.CharField(max_length=255, blank=True, null=True)
+    fee_lv_1 = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    fee_lv_2 = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    active = models.IntegerField(blank=True, null=True)
+    weight = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'samp_tools'
+
+
 class SampleCatalogue(models.Model):
     create_time = models.DateTimeField(blank=True, null=True)
     update_time = models.DateTimeField(blank=True, null=True)
@@ -1700,6 +1719,8 @@ class SamplePayInfoList(models.Model):
     order_id = models.IntegerField(blank=True, null=True)
     factory_make_id = models.IntegerField(blank=True, null=True)
     sample_static_id = models.IntegerField(blank=True, null=True)
+    samp_info_id = models.IntegerField(blank=True, null=True)
+    pay_custom = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         managed = False

@@ -95,6 +95,8 @@ urlpatterns = [
     url('^orderOtherAccounts/(?P<nid>\d+)', views.orderOtherAccountsOneView.as_view()),
     url('^orderInAccounts$', views.orderInAccountsView.as_view()),
     url('^orderInAccounts/(?P<nid>\d+)', views.orderInAccountsOneView.as_view()),
+    # 明细
+    url('^orderInALLAccounts$', views.orderInAllAccountsView.as_view()),
 
 
     url('^productAccounts$', views.productAccountsView.as_view()),
@@ -109,10 +111,15 @@ urlpatterns = [
     url('^productInAccounts$', views.productInAccountsView.as_view()),
     url('^productInAccounts/(?P<nid>\d+)', views.productInAccountsOneView.as_view()),
 
+    url('^productInALLAccounts$', views.productInALLAccountsView.as_view()),
+
     url('^productPayAccounts$', views.productPayAccountsView.as_view()),
     url('^productPayAccounts/(?P<nid>\d+)', views.productPayAccountsOneView.as_view()),
 
     url('^sampleAccounts$', views.sampleAccountsView.as_view()),
+
+    url('^sampleAccountsTools$', views.sampleAccountsToolsView.as_view()),
+    url('^sampleAccountsTools/(?P<nid>\d+)', views.sampleAccountsToolsOneView.as_view()),
 
     url('^sampleOtherAccounts$', views.sampleOtherAccountsView.as_view()),
     url('^sampleOtherAccounts/(?P<nid>\d+)', views.sampleOtherAccountsOneView.as_view()),
@@ -122,6 +129,8 @@ urlpatterns = [
 
     url('^sampleInAccounts$', views.sampleInAccountsView.as_view()),
     url('^sampleInAccounts/(?P<nid>\d+)', views.sampleInAccountsOneView.as_view()),
+
+    url('^sampleInAllAccounts$', views.sampleInAllAccountsView.as_view()),
 
     # 发票管理
     url('^showReceipt$', views.showReceiptView.as_view()),

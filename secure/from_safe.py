@@ -1050,6 +1050,21 @@ class orderInAccountsOneSerializer(serializers.Serializer):
     order_other_pay_id = serializers.IntegerField(error_messages={'required': '必须传入其他应收款id'})
     id = serializers.IntegerField(default=0)
 
+class sampInaccountSerializer(serializers.Serializer):
+    pay_time = serializers.CharField(error_messages={'required': '必须传入收款时间！'})
+    custom = serializers.CharField(error_messages={'required': '成衣出票客户（供货/收款方'})
+    pay_custom = serializers.CharField(error_messages={'required': '成衣采购方（付款方）'})
+    price_type = serializers.CharField(error_messages={'required': '必须传入报价币种'})
+    pay_mode = serializers.CharField(error_messages={'required': '必须传入首款性质'})
+    pay_amount = serializers.CharField(error_messages={'required': '必须传入收款金额'})
+    pay_y_amount = serializers.CharField(error_messages={'required': '必须传入累计已收'})
+    pay_n_amount_one = serializers.CharField(error_messages={'required': '必须传入本期未收'})
+    beizhun = serializers.CharField(error_messages={'required': '必须传入备注'})
+    account_type = serializers.IntegerField(error_messages={'required': '账目类别'})
+    samp_info_id = serializers.IntegerField(error_messages={'required': '必须传入成衣账目id'})
+    sample_static_id = serializers.IntegerField(error_messages={'required': '必须传入其他账目id'})
+    id = serializers.IntegerField(default=0)
+
 class productAccountOneSerializer(serializers.Serializer):
     price_type = serializers.CharField(error_messages={'required': '必须传入结算币种'})
     sure_price = serializers.CharField(error_messages={'required': '必须传入确定采购单价'})
@@ -1094,6 +1109,13 @@ class sampOtherAcountOneSerializer(serializers.Serializer):
     pay_num = serializers.CharField(error_messages={'required': '必须传入结算数量'})
     pay_price = serializers.CharField(error_messages={'required': '必须传入结算单价'})
     pay_amount = serializers.CharField(error_messages={'required': '必须传入结算金额'})
+    id = serializers.IntegerField(default=0)
+
+class samptoolsOneSerializer(serializers.Serializer):
+    tools_name = serializers.CharField(error_messages={'required': '计算方式名称！'})
+    price_type = serializers.CharField(error_messages={'required': '成衣开票结算币种！'})
+    fee_lv_1 = serializers.CharField(error_messages={'required': '开票汇率设定'})
+    fee_lv_2 = serializers.CharField(error_messages={'required': '开票税率设定'})
     id = serializers.IntegerField(default=0)
 
 class sampleMakeAccountOneSerializer(serializers.Serializer):
