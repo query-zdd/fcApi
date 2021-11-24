@@ -11052,6 +11052,18 @@ class sampleInAccountsOneView(APIView):
     # 获取确认报价
     @csrf_exempt
     def get(self, request, nid):
+        sn = "50301"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.query_params
             try:
@@ -11201,6 +11213,18 @@ class sampleInAccountsOneView(APIView):
 
     @csrf_exempt
     def put(self, request, nid):
+        sn = "50301"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             dt = datetime.now()
             # 订单项
