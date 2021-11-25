@@ -8425,6 +8425,7 @@ class orderInAllAccountsView(APIView):
         if valObj.is_valid():
             try:
                 rObj = PlanOrder.objects.filter(delete_time=None)
+                merchant_name = "南通风尚国际"
                 order_type = valObj.data['order_type'] if valObj.data['order_type'] is not None else 0
                 order_custom = valObj.data['order_custom'] if valObj.data['order_custom'] is not None else ""
                 price_code = valObj.data['price_code'] if valObj.data['price_code'] is not None else ""
@@ -8476,6 +8477,7 @@ class orderInAllAccountsView(APIView):
                         zamp["fee_num"] = one.fee_num
                         zamp["order_num"] = one.order_num
                         #
+                        zamp['merchant_name'] = merchant_name
                         zamp["price_type"] = order.order_price_type
                         zamp["order_price"] = order.order_price
                         try:
