@@ -1063,6 +1063,31 @@ class OrderSurBp(models.Model):
         db_table = 'order_sur_bp'
 
 
+class OtherAccountNew(models.Model):
+    create_time = models.DateTimeField(blank=True, null=True)
+    update_time = models.DateTimeField(blank=True, null=True)
+    delete_time = models.DateTimeField(blank=True, null=True)
+    order_id = models.IntegerField(blank=True, null=True)
+    custom = models.CharField(max_length=255, blank=True, null=True)
+    pay_custom = models.CharField(max_length=255, blank=True, null=True)
+    pay_comment = models.CharField(max_length=255, blank=True, null=True)
+    price_type = models.CharField(max_length=255, blank=True, null=True)
+    pay_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    pay_num = models.IntegerField(blank=True, null=True)
+    pay_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    finish_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    is_sure = models.IntegerField(blank=True, null=True)
+    is_finish_pay = models.IntegerField(blank=True, null=True)
+    fee_no = models.CharField(max_length=255, blank=True, null=True)
+    fee_amount = models.CharField(max_length=255, blank=True, null=True)
+    file_url = models.CharField(max_length=255, blank=True, null=True)
+    fee_no_status = models.CharField(max_length=255, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'other_account_new'
+
+
 class OtherCategory(models.Model):
     create_time = models.DateTimeField(blank=True, null=True)
     update_time = models.DateTimeField(blank=True, null=True)
@@ -1547,6 +1572,7 @@ class ProductPayStatic(models.Model):
     fee_amount = models.CharField(max_length=255, blank=True, null=True)
     file_url = models.CharField(max_length=255, blank=True, null=True)
     fee_no_status = models.CharField(max_length=255, blank=True, null=True)
+    set_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
 
     class Meta:
         managed = False

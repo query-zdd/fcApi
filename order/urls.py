@@ -162,4 +162,9 @@ urlpatterns = [
     #生产用料
     url('^shipmentFXCloth/(?P<nid>\d+)', views.shipmentFXSureOneView.as_view()),
 
+    url('^newOtherAccounts$', views.newOtherAccountsView.as_view()),
+
+    # 用料成本
+    url('^shipmentFXINCloth/(?P<nid>\d+)', views.shipmentFXInSureOneView.as_view()),
+
 ]

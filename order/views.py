@@ -9120,7 +9120,41 @@ class productMakeAccountsOneView(APIView):
                 "request": request,
             }
             return Response(post_result)
-
+    # 报价调整
+    @csrf_exempt
+    def put(self, request, nid):
+        sn = "502010102,502010202"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+        try:
+            set_amount = request.query_params['set_amount']
+            Obj = ProductPayStatic.objects.get(id=nid)
+            Obj.set_amount = set_amount
+            Obj.save()
+            temp = {}
+            temp['error_code'] = 0
+            temp['message'] = "成功"
+            temp['request'] = request.method + '  ' + request.get_full_path()
+            return Response(temp)
+        except:
+            msg = "未找到对应加工费报价"
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
 
 
 
@@ -13427,6 +13461,67 @@ class shipmentFXSureOneView(APIView):
 
 
 
+class shipmentFXInSureOneView(APIView):
+    # 获取生产用料分析
+    @csrf_exempt
+    def get(self, request, nid):
+        try:
+            orderClothOne = OrderClothShip.objects.filter(order_id=nid,delete_time=None)
+            orderObj = PlanOrder.objects.get(delete_time=None, id=nid)
+            orderClothShip = OrderClothShip.objects.filter(delete_time=None,order_id=nid).order_by("order_cloth_id","supplier")
+            samplist=[]
+            for one in orderClothShip:
+                samp={}
+                samp['cloth_type'] = one.cloth_type
+                samp['cloth_cat'] = one.cloth_cat
+                samp['cloth_name'] = one.cloth_name
+                samp['delivery_type'] = one.delivery_type
+                samp['delivery_name'] = one.delivery_name
+                samp['is_inspect'] = one.is_inspect
+                samp['buy_all_num'] = one.buy_all_num
+                samp['loss_lv'] = one.loss_lv
+                samp['supplier'] = one.supplier
+                samp['order_cloth_ship_id'] = one.id
+                rObj = OrderClothLineShip.objects.filter(delete_time=None, order_cloth_id=one.order_cloth_id,order_cloth_ship_id=one.id).order_by('color', 'specs')
+                sub_data = []
+                for one1 in rObj:
+                    zamp = {}
+                    zamp["order_cloth_ship_line_id"] = one1.id
+                    zamp['color'] = one1.color
+                    zamp['color_num'] = one1.color_num
+                    zamp['guige'] = one1.guige
+                    zamp['specs'] = one1.specs
+                    zamp['buy_num'] = one1.buy_num
+                    zamp['provide_num'] = one1.provide_num
+                    zamp['provide_time'] = one1.provide_time
+                    zamp['sample_send_time'] = one1.sample_send_time
+                    zamp['sure_comment'] = one1.sure_comment
+                    zamp['is_sure'] = one1.is_sure
+                    sub_data.append(zamp)
+                samp['sub_data'] = sub_data
+                samplist.append(samp)
+
+            temp = {}
+            temp["data"] = samplist
+            temp["orderObj"] = model_to_dict(orderObj)
+            temp['error_code'] = 0
+            temp['message'] = "成功"
+            temp['request'] = request.method + '  ' + request.get_full_path()
+            return Response(temp)
+        except:
+            msg = "未找到对应的面辅料采购"
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+
+
+
 class showFXOutStockOneView(APIView):
     # 获取订单 订单出货方案
     @csrf_exempt
@@ -13531,6 +13626,151 @@ class showFXOutStockOneView(APIView):
         else:
             msg = valObj.errors
             error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+
+
+
+##############################################################成衣应付-其他
+class newOtherAccountsView(APIView):
+    # 添加/编辑 生产组织其他应付
+    @csrf_exempt
+    def post(self, request):
+        sn = "50301"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+        #################校验数据################################
+        d_flag = 0
+        d_num = 0
+        l_msg = []
+        data  = request.data
+        try:
+            order_id = data['order_id']
+        except:
+            msg = "请输入订单id"
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+        dataone =data['data']
+        for done in dataone:
+            d_num = d_num + 1
+            valObjline = sampOtherAcountOneSerializer(data=done)
+            if not valObjline.is_valid():
+                d_flag = 1
+                samp = {}
+                samp['msg'] = valObjline.errors
+                samp['key_num'] = d_num
+                l_msg.append(samp)
+        #################校验数据################################
+        dt = datetime.now()
+        ##############保存装箱指示#############################
+        if d_flag == 0:
+            for done in dataone:
+                try:
+                    mid =done['id']
+                    if mid:
+                        bObj = OtherAccountNew.objects.get(id=mid)
+                        bObj.update_time = dt
+                    else:
+                        bObj = OtherAccountNew()
+                        bObj.create_time = dt
+                    bObj.order_id = data['order_id']
+                    bObj.custom = done['custom']
+                    bObj.pay_custom = done['pay_custom']
+                    bObj.pay_comment = done['pay_comment']
+                    bObj.price_type = done['price_type']
+                    bObj.pay_num = done['pay_num']
+                    bObj.pay_price = done['pay_price']
+                    bObj.pay_amount = done['pay_amount']
+                    bObj.finish_amount = Decimal(0)
+                    bObj.is_sure = 1
+                    bObj.is_finish_pay = 0
+                    bObj.save()
+                except:
+                    msg = "id参数错误"
+                    error_code = 10030
+                    request = request.method + '  ' + request.get_full_path()
+                    post_result = {
+                        "error_code": error_code,
+                        "message": msg,
+                        "request": request,
+                    }
+                    return Response(post_result)
+            msg = "编辑其他应收款"
+            error_code = 0
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+        else:
+            msg = l_msg
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+    #批量删除 生产组织其他应付
+    @csrf_exempt
+    def delete(self, request):
+        sn = "50301"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+        try:
+            data = request.data
+            ids = data['ids']
+            for nid in ids:
+                bObj = SamplePayStatic.objects.get(id=nid)
+                dt = datetime.now()
+                bObj.delete_time = dt
+                bObj.save()
+            # 返回数据
+            request = request.method + '  ' + request.get_full_path()
+            error_code = 0
+            post_result = {
+                "error_code": error_code,
+                "message": "生产组织其他应付删除成功!",
+                "request": request,
+            }
+            return Response(post_result)
+        except:
+            msg = "生产组织其他应付不存在!",
+            error_code = 10020
             request = request.method + '  ' + request.get_full_path()
             post_result = {
                 "error_code": error_code,
