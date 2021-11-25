@@ -11422,11 +11422,23 @@ class sampleInAllAccountsView(APIView):
 
 ##############################################
 
-
+# 未完成开票/已完成开票
 class showReceiptView(APIView):
     # 获取确认报价
     @csrf_exempt
     def get(self, request):
+        sn = "60101,60102"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = showReceiptSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -11493,6 +11505,500 @@ class showReceiptView(APIView):
                 "request": request,
             }
             return Response(post_result)
+
+# 采购发票档案
+class showReceiptBuyDataView(APIView):
+    @csrf_exempt
+    def get(self, request):
+        sn = "60104"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+        data = request.query_params
+        valObj = showReceiptDataSerializer(data=request.query_params)
+        if valObj.is_valid():
+            try:
+                rObj = PlanOrder.objects.filter(delete_time=None)
+                order_type = valObj.data['order_type'] if valObj.data['order_type'] is not None else 0
+                order_custom = valObj.data['order_custom'] if valObj.data['order_custom'] is not None else ""
+                price_code = valObj.data['price_code'] if valObj.data['price_code'] is not None else ""
+                dhkhao = valObj.data['dhkhao'] if valObj.data['dhkhao'] is not None else ""
+                sort_type = valObj.data['sort_type'] if valObj.data['sort_type'] is not None else 0
+                receip_custom = valObj.data['receip_custom'] if valObj.data['receip_custom'] is not None else ""
+                pay_custom = valObj.data['pay_custom'] if valObj.data['pay_custom'] is not None else ""
+                fee_no_status = valObj.data['fee_no_status'] if valObj.data['fee_no_status'] is not None else 0
+                if order_type != 0:
+                    rObj = rObj.filter(order_type=order_type)
+                if order_custom:
+                    rObj = rObj.filter(custom=order_custom)
+                if price_code:
+                    rObj = rObj.filter(price_code=price_code)
+                if dhkhao:
+                    rObj = rObj.filter(dhkhao=dhkhao)
+                if sort_type == 1:
+                    rObj = rObj.order_by("indicate_time")
+                if sort_type == 2:
+                    rObj = rObj.order_by("create_time")
+                samp = []
+
+                for one in rObj:
+                    prodObj = ProductPayStatic.objects.filter(~Q(order_cloth_ship_id=0),delete_time=None,order_id=one.id)
+                    if receip_custom:
+                        prodObj = prodObj.filter(custom=receip_custom)
+                    if pay_custom:
+                        prodObj = prodObj.filter(pay_custom=pay_custom)
+                    if fee_no_status:
+                        prodObj = prodObj.filter(fee_no_status=fee_no_status)
+                    for o1 in prodObj:
+                        orderClothObj = OrderClothShip.objects.get(id=o1.order_cloth_ship_id)
+                        planMObj = PlanMaterial.objects.get(id=orderClothObj.plan_material_id)
+                        zamp = {}
+                        zamp["order_id"] = one.id
+                        zamp["create_time"] = one.create_time
+                        zamp["indicate_time"] = one.indicate_time
+                        zamp["order_type"] = one.order_type
+                        zamp["custom"] = one.custom
+                        zamp["price_code"] = one.price_code
+                        zamp["dhkhao"] = one.dhkhao
+                        zamp["invoice_num"] = one.invoice_num
+                        zamp["fee_num"] = one.fee_num
+                        zamp["order_num"] = one.order_num
+                        zamp["status"] = "订单状态"
+                        zamp['cloth_name'] = orderClothObj.cloth_name
+                        zamp['m_unit'] = planMObj.m_unit
+                        zamp['provide_time'] = orderClothObj.update_time
+                        zamp['send_num'] = orderClothObj.buy_all_num
+
+                        zamp['pay_price'] = o1.pay_price
+                        zamp['pay_amount'] = o1.pay_amount
+                        zamp['receip_custom'] = o1.custom
+                        zamp['pay_custom'] = o1.pay_custom
+                        zamp['fee_no'] = o1.fee_no
+                        zamp['fee_amount'] = o1.fee_amount
+                        zamp['fee_no_status'] = o1.fee_no_status
+                        samp.append(zamp)
+
+                temp = {}
+                temp["data"] = samp
+                temp['error_code'] = 0
+                temp['message'] = "成功"
+                temp['request'] = request.method + '  ' + request.get_full_path()
+                return Response(temp)
+
+            except:
+                msg = "未找到对应的企划订单"
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+
+# 加工发票档案
+class showReceiptMakeDataView(APIView):
+    @csrf_exempt
+    def get(self, request):
+        sn = "60104"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+        data = request.query_params
+        valObj = showReceiptDataSerializer(data=request.query_params)
+        if valObj.is_valid():
+            try:
+                rObj = PlanOrder.objects.filter(delete_time=None)
+                order_type = valObj.data['order_type'] if valObj.data['order_type'] is not None else 0
+                order_custom = valObj.data['order_custom'] if valObj.data['order_custom'] is not None else ""
+                price_code = valObj.data['price_code'] if valObj.data['price_code'] is not None else ""
+                dhkhao = valObj.data['dhkhao'] if valObj.data['dhkhao'] is not None else ""
+                sort_type = valObj.data['sort_type'] if valObj.data['sort_type'] is not None else 0
+                receip_custom = valObj.data['receip_custom'] if valObj.data['receip_custom'] is not None else ""
+                pay_custom = valObj.data['pay_custom'] if valObj.data['pay_custom'] is not None else ""
+                fee_no_status = valObj.data['fee_no_status'] if valObj.data['fee_no_status'] is not None else 0
+                if order_type != 0:
+                    rObj = rObj.filter(order_type=order_type)
+                if order_custom:
+                    rObj = rObj.filter(custom=order_custom)
+                if price_code:
+                    rObj = rObj.filter(price_code=price_code)
+                if dhkhao:
+                    rObj = rObj.filter(dhkhao=dhkhao)
+                if sort_type == 1:
+                    rObj = rObj.order_by("indicate_time")
+                if sort_type == 2:
+                    rObj = rObj.order_by("create_time")
+                samp = []
+
+                for one in rObj:
+                    prodObj = ProductPayStatic.objects.filter(~Q(factory_make_id=0),delete_time=None,order_id=one.id)
+                    if receip_custom:
+                        prodObj = prodObj.filter(custom=receip_custom)
+                    if pay_custom:
+                        prodObj = prodObj.filter(pay_custom=pay_custom)
+                    if fee_no_status:
+                        prodObj = prodObj.filter(fee_no_status=fee_no_status)
+                    for o1 in prodObj:
+                        fmObj = FactoryMake.objects.get(id=o1.factory_make_id)
+                        fmlObj = FactoryMakeLine.objects.filter(factory_make_id=o1.factory_make_id)
+                        inspect_num = 0
+                        b_num = 0
+                        goods_num = 0
+                        make_num = 0
+                        recover_b_num = 0
+                        for o2 in fmlObj:
+                            if o2.inspect_num:
+                                inspect_num += o2.inspect_num
+                            if o2.b_num:
+                                b_num +=o2.b_num
+                            if o2.make_num:
+                                make_num +=o2.make_num
+                            if o2.recover_b_num:
+                                recover_b_num +=o2.recover_b_num
+                        zamp = {}
+                        zamp["order_id"] = one.id
+                        zamp["create_time"] = one.create_time
+                        zamp["indicate_time"] = one.indicate_time
+                        zamp["order_type"] = one.order_type
+                        zamp["custom"] = one.custom
+                        zamp["price_code"] = one.price_code
+                        zamp["dhkhao"] = one.dhkhao
+                        zamp["invoice_num"] = one.invoice_num
+                        zamp["fee_num"] = one.fee_num
+                        zamp["order_num"] = one.order_num
+                        zamp["status"] = "订单状态"
+                        zamp['goods_num'] = inspect_num-b_num
+                        zamp['b_num'] = b_num
+                        zamp['b_amount'] = round(Decimal(b_num / inspect_num) * o1.pay_amount,2)
+                        zamp['goods_amount'] = round(Decimal((inspect_num-b_num) / inspect_num) * o1.pay_amount,2)
+
+                        zamp['price_type'] = o1.price_type
+                        zamp['pay_price'] = o1.pay_price
+                        zamp['pay_amount'] = o1.pay_amount
+                        zamp['receip_custom'] = o1.custom
+                        zamp['pay_custom'] = o1.pay_custom
+                        zamp['fee_no'] = o1.fee_no
+                        zamp['fee_amount'] = o1.fee_amount
+                        zamp['fee_no_status'] = o1.fee_no_status
+                        samp.append(zamp)
+
+                temp = {}
+                temp["data"] = samp
+                temp['error_code'] = 0
+                temp['message'] = "成功"
+                temp['request'] = request.method + '  ' + request.get_full_path()
+                return Response(temp)
+
+            except:
+                msg = "未找到对应的企划订单"
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+
+
+# 成衣档案
+class showReceiptSampDataView(APIView):
+    @csrf_exempt
+    def get(self, request):
+        sn = "60104"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+        data = request.query_params
+        valObj = showReceiptDataSerializer(data=request.query_params)
+        if valObj.is_valid():
+            try:
+                rObj = PlanOrder.objects.filter(delete_time=None)
+                order_type = valObj.data['order_type'] if valObj.data['order_type'] is not None else 0
+                order_custom = valObj.data['order_custom'] if valObj.data['order_custom'] is not None else ""
+                price_code = valObj.data['price_code'] if valObj.data['price_code'] is not None else ""
+                dhkhao = valObj.data['dhkhao'] if valObj.data['dhkhao'] is not None else ""
+                sort_type = valObj.data['sort_type'] if valObj.data['sort_type'] is not None else 0
+                receip_custom = valObj.data['receip_custom'] if valObj.data['receip_custom'] is not None else ""
+                pay_custom = valObj.data['pay_custom'] if valObj.data['pay_custom'] is not None else ""
+                fee_no_status = valObj.data['fee_no_status'] if valObj.data['fee_no_status'] is not None else 0
+                if order_type != 0:
+                    rObj = rObj.filter(order_type=order_type)
+                if order_custom:
+                    rObj = rObj.filter(custom=order_custom)
+                if price_code:
+                    rObj = rObj.filter(price_code=price_code)
+                if dhkhao:
+                    rObj = rObj.filter(dhkhao=dhkhao)
+                if sort_type == 1:
+                    rObj = rObj.order_by("indicate_time")
+                if sort_type == 2:
+                    rObj = rObj.order_by("create_time")
+                samp = []
+
+                for one in rObj:
+                    orderLine = PlanOrderLine.objects.filter(order_id=one.id)
+                    for o1 in orderLine:
+
+                        sampObj = SampPayFeeInfo.objects.filter(order_line_id=o1.id)
+                        if receip_custom:
+                            sampObj = sampObj.filter(custom=receip_custom)
+                        if pay_custom:
+                            sampObj = sampObj.filter(pay_custom=pay_custom)
+                        if fee_no_status:
+                            sampObj = sampObj.filter(fee_no_status=fee_no_status)
+                        for o3 in sampObj:
+                            zamp = {}
+                            zamp["order_id"] = one.id
+                            zamp["create_time"] = one.create_time
+                            zamp["indicate_time"] = one.indicate_time
+                            zamp["order_type"] = one.order_type
+                            zamp["custom"] = one.custom
+                            zamp["price_code"] = one.price_code
+                            zamp["dhkhao"] = one.dhkhao
+                            zamp["invoice_num"] = one.invoice_num
+                            zamp["fee_num"] = one.fee_num
+                            zamp["order_num"] = one.order_num
+                            zamp["status"] = "订单状态"
+                            zamp['pay_project'] = o3.pay_project
+                            zamp['price_type'] = o3.price_type
+                            zamp['pay_price'] = o3.pay_amount
+                            zamp['pay_amount'] = o3.pay_amount
+                            zamp['receip_custom'] = o3.custom
+                            zamp['pay_custom'] = o3.pay_custom
+                            zamp['fee_no'] = o3.fee_no
+                            zamp['fee_amount'] = o3.fee_amount
+                            zamp['fee_no_status'] = o3.fee_no_status
+                            samp.append(zamp)
+                temp = {}
+                temp["data"] = samp
+                temp['error_code'] = 0
+                temp['message'] = "成功"
+                temp['request'] = request.method + '  ' + request.get_full_path()
+                return Response(temp)
+
+            except:
+                msg = "未找到对应的企划订单"
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+
+
+# 其他发票档案
+class showReceiptOtherDataView(APIView):
+    @csrf_exempt
+    def get(self, request):
+        sn = "60104"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+        data = request.query_params
+        valObj = showReceiptDataSerializer(data=request.query_params)
+        if valObj.is_valid():
+            try:
+                rObj = PlanOrder.objects.filter(delete_time=None)
+                order_type = valObj.data['order_type'] if valObj.data['order_type'] is not None else 0
+                order_custom = valObj.data['order_custom'] if valObj.data['order_custom'] is not None else ""
+                price_code = valObj.data['price_code'] if valObj.data['price_code'] is not None else ""
+                dhkhao = valObj.data['dhkhao'] if valObj.data['dhkhao'] is not None else ""
+                sort_type = valObj.data['sort_type'] if valObj.data['sort_type'] is not None else 0
+                receip_custom = valObj.data['receip_custom'] if valObj.data['receip_custom'] is not None else ""
+                pay_custom = valObj.data['pay_custom'] if valObj.data['pay_custom'] is not None else ""
+                fee_no_status = valObj.data['fee_no_status'] if valObj.data['fee_no_status'] is not None else 0
+                if order_type != 0:
+                    rObj = rObj.filter(order_type=order_type)
+                if order_custom:
+                    rObj = rObj.filter(custom=order_custom)
+                if price_code:
+                    rObj = rObj.filter(price_code=price_code)
+                if dhkhao:
+                    rObj = rObj.filter(dhkhao=dhkhao)
+                if sort_type == 1:
+                    rObj = rObj.order_by("indicate_time")
+                if sort_type == 2:
+                    rObj = rObj.order_by("create_time")
+                samp = []
+
+                for one in rObj:
+                    prodObj = ProductPayStatic.objects.filter(type=3,delete_time=None,order_id=one.id)
+                    if receip_custom:
+                        prodObj = prodObj.filter(custom=receip_custom)
+                    if pay_custom:
+                        prodObj = prodObj.filter(pay_custom=pay_custom)
+                    if fee_no_status:
+                        prodObj = prodObj.filter(fee_no_status=fee_no_status)
+                    for o1 in prodObj:
+                        zamp = {}
+                        zamp["order_id"] = one.id
+                        zamp["create_time"] = one.create_time
+                        zamp["indicate_time"] = one.indicate_time
+                        zamp["order_type"] = one.order_type
+                        zamp["custom"] = one.custom
+                        zamp["price_code"] = one.price_code
+                        zamp["dhkhao"] = one.dhkhao
+                        zamp["invoice_num"] = one.invoice_num
+                        zamp["fee_num"] = one.fee_num
+                        zamp["order_num"] = one.order_num
+                        zamp["status"] = "订单状态"
+                        zamp['pay_project'] = o1.pay_project
+                        zamp['price_type'] = o1.price_type
+                        zamp['pay_price'] = o1.pay_price
+                        zamp['pay_amount'] = o1.pay_amount
+                        zamp['receip_custom'] = o1.custom
+                        zamp['pay_custom'] = o1.pay_custom
+                        zamp['fee_no'] = o1.fee_no
+                        zamp['fee_amount'] = o1.fee_amount
+                        zamp['fee_no_status'] = o1.fee_no_status
+                        samp.append(zamp)
+                    orderPay = OrderPay.objects.filter(order_id=one.id)
+                    for o2 in orderPay:
+                        zamp = {}
+                        zamp["order_id"] = one.id
+                        zamp["create_time"] = one.create_time
+                        zamp["indicate_time"] = one.indicate_time
+                        zamp["order_type"] = one.order_type
+                        zamp["custom"] = one.custom
+                        zamp["price_code"] = one.price_code
+                        zamp["dhkhao"] = one.dhkhao
+                        zamp["invoice_num"] = one.invoice_num
+                        zamp["fee_num"] = one.fee_num
+                        zamp["order_num"] = one.order_num
+                        zamp["status"] = "订单状态"
+                        zamp['pay_project'] = o2.pay_content
+                        zamp['price_type'] = o2.pay_type
+                        zamp['pay_price'] = o2.pay_price
+                        zamp['pay_amount'] = o2.amount
+                        zamp['receip_custom'] = o2.custom
+                        zamp['pay_custom'] = o2.provide_custom
+                        zamp['fee_no'] = o2.fee_no
+                        zamp['fee_amount'] = o2.fee_amount
+                        zamp['fee_no_status'] = o2.fee_no_status
+                        samp.append(zamp)
+                    sampObj = SamplePayStatic.objects.filter(order_id=one.id)
+                    for o3 in sampObj:
+                        zamp = {}
+                        zamp["order_id"] = one.id
+                        zamp["create_time"] = one.create_time
+                        zamp["indicate_time"] = one.indicate_time
+                        zamp["order_type"] = one.order_type
+                        zamp["custom"] = one.custom
+                        zamp["price_code"] = one.price_code
+                        zamp["dhkhao"] = one.dhkhao
+                        zamp["invoice_num"] = one.invoice_num
+                        zamp["fee_num"] = one.fee_num
+                        zamp["order_num"] = one.order_num
+                        zamp["status"] = "订单状态"
+                        zamp['pay_project'] = o3.pay_comment
+                        zamp['price_type'] = o3.price_type
+                        zamp['pay_price'] = o3.pay_price
+                        zamp['pay_amount'] = o3.pay_amount
+                        zamp['receip_custom'] = o3.custom
+                        zamp['pay_custom'] = o3.pay_custom
+                        zamp['fee_no'] = o3.fee_no
+                        zamp['fee_amount'] = o3.fee_amount
+                        zamp['fee_no_status'] = o3.fee_no_status
+                        samp.append(zamp)
+
+                temp = {}
+                temp["data"] = samp
+                temp['error_code'] = 0
+                temp['message'] = "成功"
+                temp['request'] = request.method + '  ' + request.get_full_path()
+                return Response(temp)
+
+            except:
+                msg = "未找到对应的企划订单"
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
+
 
 # 发票信息保存
 class saveReceiptView(APIView):
@@ -11895,7 +12401,7 @@ class getOtherReceiptOneView(APIView):
             temp['request'] = request.method + '  ' + request.get_full_path()
             return Response(temp)
         except:
-            msg = "未找到对应加工费报价"
+            msg = "未找到对应其他发票信息"
             error_code = 10030
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -11904,6 +12410,7 @@ class getOtherReceiptOneView(APIView):
                 "request": request,
             }
             return Response(post_result)
+
 
 class getSampReceiptOneView(APIView):
     # 获取确认报价

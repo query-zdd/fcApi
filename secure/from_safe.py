@@ -1136,6 +1136,18 @@ class showReceiptSerializer(serializers.Serializer):
     page_size = serializers.IntegerField(default=10)
     page = serializers.IntegerField(default=1)
 
+class showReceiptDataSerializer(serializers.Serializer):
+    sort_type = serializers.IntegerField(default=1)
+    order_type = serializers.IntegerField(default=0)
+    order_custom = serializers.CharField(default="")
+    price_code = serializers.CharField(default="")
+    dhkhao = serializers.CharField(default="")
+    receip_custom = serializers.CharField(default="")
+    pay_custom = serializers.CharField(default="")
+    fee_no_status = serializers.IntegerField(default=0)
+    page_size = serializers.IntegerField(default=10)
+    page = serializers.IntegerField(default=1)
+
 
 class saveReceiptSerializer(serializers.Serializer):
     type = serializers.CharField(error_messages={'required': '必须传入发票类型'})

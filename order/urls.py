@@ -135,6 +135,11 @@ urlpatterns = [
     # 发票管理
     url('^showReceipt$', views.showReceiptView.as_view()),
     url('^saveReceipt$', views.saveReceiptView.as_view()),
+    # 档案
+    url('^showReceiptBuyData$', views.showReceiptBuyDataView.as_view()),
+    url('^showReceiptMakeData$', views.showReceiptMakeDataView.as_view()),
+    url('^showReceiptOtherData$', views.showReceiptOtherDataView.as_view()),
+    url('^showReceiptSampData$', views.showReceiptSampDataView.as_view()),
     # 采购发票
     url('^getBuyReceipt/(?P<nid>\d+)', views.getBuyReceiptOneView.as_view()),
     #加工费
