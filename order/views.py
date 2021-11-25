@@ -13519,7 +13519,286 @@ class shipmentFXInSureOneView(APIView):
             }
             return Response(post_result)
 
-
+    @csrf_exempt
+    def post(self, request,nid):
+        sn = "0"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+        data = request.data
+        valObj = orderClothSerializer(data=request.data)
+        if valObj.is_valid():
+            work_type = valObj.data['work_type'] if valObj.data['work_type'] is not None else ""
+            dhkhao = valObj.data['dhkhao'] if valObj.data['dhkhao'] is not None else ""
+            #################校验数据################################
+            d_flag = 0
+            d_num = 0
+            l_msg = []
+            dataone = data['data']
+            for done in dataone:
+                d_num = d_num + 1
+                valObjline = orderClothLineSerializer(data=done)
+                if not valObjline.is_valid():
+                    d_flag = 1
+                    samp = {}
+                    samp['msg'] = valObjline.errors
+                    samp['key_num'] = d_num
+                    l_msg.append(samp)
+                subdata = done['sub_data']
+                s_flag = 0
+                s_num = 0
+                for sdone in subdata:
+                    s_num = s_num + 1
+                    valObjline = orderClothLineSubSerializer(data=sdone)
+                    if not valObjline.is_valid():
+                        s_flag = 1
+                        samp = {}
+                        samp['msg'] = valObjline.errors
+                        samp['key_num'] = s_num
+                        l_msg.append(samp)
+            #################校验数据################################
+            dt = datetime.now()
+            ##############保存出货方案#############################
+            if d_flag == 0 and s_flag == 0:
+                for done in dataone:
+                    try:
+                        try:
+                            mid = done["id"]
+                            if mid:
+                                bObj = OrderCloth.objects.get(id=mid)
+                                bObj.update_time = dt
+                                # #编辑时，删除已有的sku数据
+                                # nbObj = OrderClothShip.objects.filter(order_cloth_id=mid)
+                                # for one in nbObj:
+                                #     nbObjline = OrderClothLineShip.objects.filter(order_cloth_id=mid)
+                                #     for sub in nbObjline:
+                                #         sub.delete()
+                                #         sub.save()
+                                #     one.delete()
+                                #     one.save()
+                            else:
+                                bObj = OrderCloth()
+                                bObj.create_time = dt
+                        except:
+                            bObj = OrderCloth()
+                            bObj.create_time = dt
+                        bObj.order_id = data['order_id']
+                        bObj.plan_id = data['plan_id']
+                        bObj.plan_material_id = done['plan_material_id']
+                        bObj.cloth_type = done['cloth_type']
+                        bObj.cloth_cat = done['cloth_cat']
+                        bObj.cloth_name = done['cloth_name']
+                        bObj.delivery_type = done['delivery_type']
+                        bObj.delivery_name = done['delivery_name']
+                        try:
+                            bObj.is_inspect = done['is_inspect']
+                        except:
+                            bObj.is_inspect = 0
+                        bObj.buy_all_num = done['buy_all_num']
+                        bObj.loss_lv = done['loss_lv']
+                        bObj.is_new = 1
+                        bObj.save()
+                        if mid:
+                            order_cloth_id = mid
+                        else:
+                            ocOne = OrderCloth.objects.latest("id")
+                            order_cloth_id = ocOne.id
+                        # 保存发货方案
+                        try:
+                            if not mid:
+                                nbObj = OrderClothShip()
+                                planmObj = PlanMaterial.objects.filter(id=done['plan_material_id'], delete_time=None)
+                                if planmObj.count() > 0:
+                                    nbObj.supplier = planmObj[0].complayer
+                                nbObj.plan_material_id = done['plan_material_id']
+                                nbObj.create_time = dt
+                                nbObj.order_id = data['order_id']
+                                nbObj.plan_id = data['plan_id']
+                                nbObj.cloth_type = done['cloth_type']
+                                nbObj.cloth_cat = done['cloth_cat']
+                                nbObj.cloth_name = done['cloth_name']
+                                nbObj.delivery_type = done['delivery_type']
+                                nbObj.delivery_name = done['delivery_name']
+                                try:
+                                    nbObj.is_inspect = done['is_inspect']
+                                except:
+                                    nbObj.is_inspect = 0
+                                nbObj.buy_all_num = done['buy_all_num']
+                                nbObj.loss_lv = done['loss_lv']
+                                nbObj.order_cloth_id = order_cloth_id
+                                nbObj.save()
+                            if mid:
+                                ocsObj = OrderClothShip.objects.filter(order_cloth_id=mid)
+                                for ocs in ocsObj:
+                                    planmObj = PlanMaterial.objects.filter(id=done['plan_material_id'],
+                                                                           delete_time=None)
+                                    if planmObj.count() > 0:
+                                        ocs.supplier = planmObj[0].complayer
+                                    ocs.plan_material_id = done['plan_material_id']
+                                    ocs.create_time = dt
+                                    ocs.order_id = data['order_id']
+                                    ocs.plan_id = data['plan_id']
+                                    ocs.cloth_type = done['cloth_type']
+                                    ocs.cloth_cat = done['cloth_cat']
+                                    ocs.cloth_name = done['cloth_name']
+                                    try:
+                                        ocs.is_inspect = done['is_inspect']
+                                    except:
+                                        ocs.is_inspect = 0
+                                    ocs.buy_all_num = done['buy_all_num']
+                                    ocs.loss_lv = done['loss_lv']
+                                    ocs.save()
+                        except:
+                            pass
+                        # 保存面辅料的sku
+                        subdata = done['sub_data']
+                        for sub in subdata:
+                            try:
+                                s_id = sub["id"]
+                                if s_id:
+                                    sbObj = OrderClothLine.objects.get(id=s_id)
+                                    sbObj.update_time = dt
+                                else:
+                                    sbObj = OrderClothLine()
+                                    sbObj.create_time = dt
+                            except:
+                                sbObj = OrderClothLine()
+                                sbObj.create_time = dt
+                            sbObj.order_id = data['order_id']
+                            sbObj.order_cloth_id = order_cloth_id
+                            if done['cloth_type'] == 4:
+                                sbObj.color = sub['color']
+                                sbObj.color_num = sub['color_num']
+                                sbObj.specs = sub['specs']
+                                outStackObj = OutStock.objects.filter(order_id=data['order_id'], color=sub['color'],
+                                                                      color_num=sub['color_num'], specs=sub['specs'])
+                                order_num = 0
+                                for one in outStackObj:
+                                    order_num += one.order_num
+                                sbObj.order_num = order_num
+                            if done['cloth_type'] == 3:
+                                sbObj.specs = sub['specs']
+                                outStackObj = OutStock.objects.filter(order_id=data['order_id'], specs=sub['specs'])
+                                order_num = 0
+                                for one in outStackObj:
+                                    order_num += one.order_num
+                                sbObj.order_num = order_num
+                            if done['cloth_type'] == 2:
+                                sbObj.color = sub['color']
+                                sbObj.color_num = sub['color_num']
+                                outStackObj = OutStock.objects.filter(order_id=data['order_id'], color=sub['color'],
+                                                                      color_num=sub['color_num'])
+                                order_num = 0
+                                for one in outStackObj:
+                                    order_num += one.order_num
+                                sbObj.order_num = order_num
+                            if done['cloth_type'] == 1:
+                                orderOne = PlanOrder.objects.get(id=data['order_id'])
+                                sbObj.order_num = orderOne.order_num
+                            sbObj.guige = sub['guige']
+                            sbObj.buy_num = sub['buy_num']
+                            sbObj.is_inspect = sub['is_inspect']
+                            sbObj.save()
+                            if s_id:
+                                order_cloth_line_id = s_id
+                            else:
+                                ocOne = OrderClothLine.objects.latest("id")
+                                order_cloth_line_id = ocOne.id
+                            # 保存发货方案的sku
+                            if not mid:
+                                ncOne = OrderClothShip.objects.latest("id")
+                                try:
+                                    nblObj = OrderClothLineShip()
+                                    nblObj.create_time = dt
+                                    nblObj.order_id = data['order_id']
+                                    nblObj.order_cloth_id = order_cloth_id
+                                    if done['cloth_type'] == 4:
+                                        nblObj.color = sub['color']
+                                        nblObj.color_num = sub['color_num']
+                                        nblObj.specs = sub['specs']
+                                    if done['cloth_type'] == 3:
+                                        nblObj.specs = sub['specs']
+                                    if done['cloth_type'] == 2:
+                                        nblObj.color = sub['color']
+                                        nblObj.color_num = sub['color_num']
+                                    nblObj.guige = sub['guige']
+                                    nblObj.buy_num = sub['buy_num']
+                                    nblObj.order_cloth_line_id = order_cloth_line_id
+                                    nblObj.order_cloth_ship_id = ncOne.id
+                                    if planmObj.count() > 0:
+                                        nblObj.price = planmObj[0].price
+                                        nblObj.amount = planmObj[0].total
+                                    nblObj.save()
+                                except:
+                                    pass
+                            if mid:
+                                if s_id:
+                                    ocslObj = OrderClothLineShip.objects.filter(order_cloth_line_id=s_id,
+                                                                                order_cloth_id=order_cloth_id)
+                                    for ocsl in ocslObj:
+                                        ocsl.buy_num = sub['buy_num']
+                                        ocsl.guige = sub['guige']
+                                        ocsl.save()
+                    except:
+                        msg = "参数错误"
+                        error_code = 10030
+                        request = request.method + '  ' + request.get_full_path()
+                        post_result = {
+                            "error_code": error_code,
+                            "message": msg,
+                            "request": request,
+                        }
+                        return Response(post_result)
+                try:
+                    # 更新order
+                    order = PlanOrder.objects.get(id=data['order_id'])
+                    order.is_buyprogram = 1
+                    bg_num = OrderCloth.objects.filter(order_id=data['order_id'], delete_time=None).count()
+                    order.buyprogram_num = bg_num
+                    if dhkhao:
+                        order.dhkhao = dhkhao
+                    if work_type:
+                        order.work_type = work_type
+                    order.save()
+                except:
+                    pass
+                msg = "创建/编辑面辅料采购"
+                error_code = 0
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+            else:
+                msg = l_msg
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
 
 
 class showFXOutStockOneView(APIView):

@@ -760,6 +760,7 @@ class OrderCloth(models.Model):
     plan_material_id = models.IntegerField(blank=True, null=True)
     is_sure_in_store = models.IntegerField(blank=True, null=True)
     is_sure = models.IntegerField(blank=True, null=True)
+    is_new = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
