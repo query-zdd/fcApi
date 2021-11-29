@@ -856,6 +856,7 @@ class OrderClothShip(models.Model):
     price_type = models.CharField(max_length=255, blank=True, null=True)
     is_sure_pay = models.IntegerField(blank=True, null=True)
     is_finish_pay = models.IntegerField(blank=True, null=True)
+    is_new = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False

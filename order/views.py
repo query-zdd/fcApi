@@ -8992,6 +8992,8 @@ class productMakeAccountsOneView(APIView):
             coop_mode_all = ""
             # 检品数据
             fm_list = []
+            new_amount = Decimal(0)
+            all_amount = Decimal(0)
             for one in factoryObj:
                 fm_dic = {}
                 fm_dic['make_factory_id'] = one.id
@@ -9002,8 +9004,17 @@ class productMakeAccountsOneView(APIView):
                 fm_dic['price_type'] = one.price_type
                 fm_dic['plan_price'] = planPrice.plan_price
                 fm_dic['amount'] = one.amount
+                if one.amount:
+                    all_amount += one.amount
                 fm_dic['sure_amount'] = one.sure_amount
-
+                fmpObj = ProductPayStatic.objects.filter(factory_make_id=one.id)
+                one_new_amount = Decimal(0)
+                for o1 in fmpObj:
+                    if o1.set_amount:
+                        one_new_amount += o1.set_amount
+                        new_amount += o1.set_amount
+                        all_amount += o1.set_amount
+                fm_dic['new_amount'] =one_new_amount
                 order_line_list = []
                 # 订单项数据
                 for one1 in orderLine:
@@ -9018,7 +9029,6 @@ class productMakeAccountsOneView(APIView):
             temp = {}
             temp["data"] = fm_list
 
-
             temp['coop_mode'] = coop_mode
             temp['ticketing_custom'] = ticketing_custom
             temp['order_id'] = nid
@@ -9028,6 +9038,7 @@ class productMakeAccountsOneView(APIView):
             temp["invoice_num"] = order.invoice_num
             temp["fee_num"] = order.fee_num
             temp["work_type"] = order.work_type
+            temp["new_lv"] =round(new_amount/all_amount,2)
             temp['error_code'] = 0
             temp['message'] = "成功"
             temp['request'] = request.method + '  ' + request.get_full_path()
@@ -13407,6 +13418,24 @@ class shipmentFXSureOneView(APIView):
     @csrf_exempt
     def get(self, request, nid):
         try:
+            # 加工工厂数据
+            mObj = FactoryMake.objects.filter(delete_time=None, order_id=nid)
+            fac_name = []
+            coop_mode = ""
+            inspect_num = 0
+            b_num = 0
+            make_num = 0
+            for o1 in mObj:
+                fac_name.append(o1.make_factory)
+                coop_mode += o1.coop_mode + "|"
+                mlineObj = FactoryMakeLine.objects.filter(delete_time=None, factory_make_id=o1.id)
+                for o2 in mlineObj:
+                    if o2.inspect_num:
+                        inspect_num += o2.inspect_num
+                        make_num += o2.inspect_num
+                    if o2.b_num:
+                        b_num += o2.b_num
+                        make_num += o2.b_num
             orderClothOne = OrderClothShip.objects.filter(order_id=nid,delete_time=None)
             orderObj = PlanOrder.objects.get(delete_time=None, id=nid)
             orderClothShip = OrderClothShip.objects.filter(delete_time=None,order_id=nid).order_by("order_cloth_id","supplier")
@@ -13422,6 +13451,22 @@ class shipmentFXSureOneView(APIView):
                 samp['buy_all_num'] = one.buy_all_num
                 samp['loss_lv'] = one.loss_lv
                 samp['supplier'] = one.supplier
+                try:
+                    samp['make_all_use'] = one.buy_all_num
+                    samp['send_all_use'] = round(Decimal(inspect_num/make_num)*one.buy_all_num,2)
+                    planM = PlanMaterial.objects.get(id=one.plan_material_id)
+                    error_num = one.buy_all_num - planM.m_use
+                    samp['make_one_error_num'] = error_num/make_num
+                    samp['send_one_error_num'] = error_num/inspect_num
+                    samp['make_all_error_num'] =error_num
+                    samp['send_all_error_num'] = round(Decimal(inspect_num / make_num) * error_num, 2)
+                except:
+                    samp['make_all_use'] = None
+                    samp['send_all_use'] = None
+                    samp['make_one_error_num'] = None
+                    samp['send_one_error_num'] = None
+                    samp['make_all_error_num'] = None
+                    samp['send_all_error_num'] = None
                 samp['order_cloth_ship_id'] = one.id
                 rObj = OrderClothLineShip.objects.filter(delete_time=None, order_cloth_id=one.order_cloth_id,order_cloth_ship_id=one.id).order_by('color', 'specs')
                 sub_data = []
@@ -13442,9 +13487,15 @@ class shipmentFXSureOneView(APIView):
                 samp['sub_data'] = sub_data
                 samplist.append(samp)
 
+
             temp = {}
             temp["data"] = samplist
             temp["orderObj"] = model_to_dict(orderObj)
+            temp['fac_name'] = fac_name
+            temp['coop_mode'] = coop_mode
+            temp['make_num'] = make_num
+            temp['inspect_num'] = inspect_num
+            temp['b_num'] = b_num
             temp['error_code'] = 0
             temp['message'] = "成功"
             temp['request'] = request.method + '  ' + request.get_full_path()
@@ -13461,18 +13512,38 @@ class shipmentFXSureOneView(APIView):
             return Response(post_result)
 
 
-
-
 class shipmentFXInSureOneView(APIView):
     # 获取生产用料分析
     @csrf_exempt
     def get(self, request, nid):
         try:
+            # 加工工厂数据
+            mObj = FactoryMake.objects.filter(delete_time=None, order_id=nid)
+            fac_name = []
+            coop_mode = ""
+            inspect_num = 0
+            b_num = 0
+            make_num = 0
+            for o1 in mObj:
+                fac_name.append(o1.make_factory)
+                coop_mode += o1.coop_mode + "|"
+                mlineObj = FactoryMakeLine.objects.filter(delete_time=None, factory_make_id=o1.id)
+                for o2 in mlineObj:
+                    if o2.inspect_num:
+                        inspect_num += o2.inspect_num
+                        make_num += o2.inspect_num
+                    if o2.b_num:
+                        b_num += o2.b_num
+                        make_num += o2.b_num
             orderClothOne = OrderClothShip.objects.filter(order_id=nid,delete_time=None)
             orderObj = PlanOrder.objects.get(delete_time=None, id=nid)
             orderClothShip = OrderClothShip.objects.filter(delete_time=None,order_id=nid).order_by("order_cloth_id","supplier")
             samplist=[]
+            new_num = 0
+            new_amount = Decimal(0)
+            all_cloth_amount = Decimal(0)
             for one in orderClothShip:
+                all_cloth_amount +=  one.all_amount
                 samp={}
                 samp['cloth_type'] = one.cloth_type
                 samp['cloth_cat'] = one.cloth_cat
@@ -13483,6 +13554,22 @@ class shipmentFXInSureOneView(APIView):
                 samp['buy_all_num'] = one.buy_all_num
                 samp['loss_lv'] = one.loss_lv
                 samp['supplier'] = one.supplier
+                samp['all_amount'] = one.all_amount
+                try:
+                    samp['make_all_loss'] = round(one.buy_all_num*one.loss_lv/inspect_num,2)
+                    samp['send_all_loss'] = round(one.buy_all_num*one.loss_lv/make_num,2)
+                    samp['make_one_price'] = round(one.all_amount/make_num,2)
+                    samp['send_one_price'] = round(one.all_amount/inspect_num,2)
+                except:
+                    samp['make_all_loss'] = None
+                    samp['send_all_loss'] = None
+                    samp['make_one_price'] = None
+                    samp['send_one_price'] = None
+                samp['is_new'] = one.is_new
+                if one.is_new == 1:
+                    new_num += 1
+                    new_amount = one.all_amount
+
                 samp['order_cloth_ship_id'] = one.id
                 rObj = OrderClothLineShip.objects.filter(delete_time=None, order_cloth_id=one.order_cloth_id,order_cloth_ship_id=one.id).order_by('color', 'specs')
                 sub_data = []
@@ -13497,15 +13584,27 @@ class shipmentFXInSureOneView(APIView):
                     zamp['provide_num'] = one1.provide_num
                     zamp['provide_time'] = one1.provide_time
                     zamp['sample_send_time'] = one1.sample_send_time
+                    zamp['price'] = one1.price
+                    zamp['inspect_num'] = inspect_num
+                    zamp['make_num'] = make_num
                     zamp['sure_comment'] = one1.sure_comment
                     zamp['is_sure'] = one1.is_sure
                     sub_data.append(zamp)
                 samp['sub_data'] = sub_data
                 samplist.append(samp)
 
+
             temp = {}
             temp["data"] = samplist
             temp["orderObj"] = model_to_dict(orderObj)
+            temp['fac_name'] = fac_name
+            temp['coop_mode'] = coop_mode
+            temp['make_num'] = make_num
+            temp['inspect_num'] = inspect_num
+            temp['b_num'] = b_num
+            temp['new_num'] = new_num
+            temp['new_amount'] = new_amount
+            temp['new_lv'] = round(new_amount/all_cloth_amount,2)
             temp['error_code'] = 0
             temp['message'] = "成功"
             temp['request'] = request.method + '  ' + request.get_full_path()
@@ -13577,15 +13676,6 @@ class shipmentFXInSureOneView(APIView):
                             if mid:
                                 bObj = OrderCloth.objects.get(id=mid)
                                 bObj.update_time = dt
-                                # #编辑时，删除已有的sku数据
-                                # nbObj = OrderClothShip.objects.filter(order_cloth_id=mid)
-                                # for one in nbObj:
-                                #     nbObjline = OrderClothLineShip.objects.filter(order_cloth_id=mid)
-                                #     for sub in nbObjline:
-                                #         sub.delete()
-                                #         sub.save()
-                                #     one.delete()
-                                #     one.save()
                             else:
                                 bObj = OrderCloth()
                                 bObj.create_time = dt
@@ -13636,6 +13726,7 @@ class shipmentFXInSureOneView(APIView):
                                 nbObj.buy_all_num = done['buy_all_num']
                                 nbObj.loss_lv = done['loss_lv']
                                 nbObj.order_cloth_id = order_cloth_id
+                                nbObj.is_new = 1
                                 nbObj.save()
                             if mid:
                                 ocsObj = OrderClothShip.objects.filter(order_cloth_id=mid)
