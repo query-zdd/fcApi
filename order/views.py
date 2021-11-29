@@ -14009,7 +14009,7 @@ class showFXOutStockOneView(APIView):
 
 
 
-##############################################################成衣应付-其他
+##############################################################订单分析-其他
 class newOtherAccountsView(APIView):
     # 添加/编辑 生产组织其他应付
     @csrf_exempt
@@ -14108,10 +14108,12 @@ class newOtherAccountsView(APIView):
             }
             return Response(post_result)
 
-    #批量删除 生产组织其他应付
+
+
+class newOtherOneAccountsView(APIView):
     @csrf_exempt
-    def delete(self, request):
-        sn = "50301"
+    def get(self, request,nid):
+        sn = "60104"
         ret, msg = checkPermission(request, sn)
         if ret == False:
             msg = msg
@@ -14123,26 +14125,125 @@ class newOtherAccountsView(APIView):
                 "request": request,
             }
             return Response(post_result)
-        try:
-            data = request.data
-            ids = data['ids']
-            for nid in ids:
-                bObj = SamplePayStatic.objects.get(id=nid)
-                dt = datetime.now()
-                bObj.delete_time = dt
-                bObj.save()
-            # 返回数据
-            request = request.method + '  ' + request.get_full_path()
-            error_code = 0
-            post_result = {
-                "error_code": error_code,
-                "message": "生产组织其他应付删除成功!",
-                "request": request,
-            }
-            return Response(post_result)
-        except:
-            msg = "生产组织其他应付不存在!",
-            error_code = 10020
+        data = request.query_params
+        valObj = showReceiptDataSerializer(data=request.query_params)
+        if valObj.is_valid():
+            try:
+                all_amount = Decimal(0)
+                samp = []
+                # 加工工厂数据
+                mObj = FactoryMake.objects.filter(delete_time=None, order_id=nid)
+                fac_name = []
+                coop_mode = ""
+                inspect_num = 0
+                b_num = 0
+                make_num = 0
+                for o1 in mObj:
+                    fac_name.append(o1.make_factory)
+                    coop_mode += o1.coop_mode + "|"
+                    mlineObj = FactoryMakeLine.objects.filter(delete_time=None, factory_make_id=o1.id)
+                    for o2 in mlineObj:
+                        if o2.inspect_num:
+                            inspect_num += o2.inspect_num
+                            make_num += o2.inspect_num
+                        if o2.b_num:
+                            b_num += o2.b_num
+                            make_num += o2.b_num
+
+                prodObj = ProductPayStatic.objects.filter(type=3, delete_time=None, order_id=nid)
+                for o1 in prodObj:
+                    zamp = {}
+                    zamp['pay_project'] = o1.pay_project
+                    zamp['price_type'] = o1.price_type
+                    zamp['pay_price'] = o1.pay_price
+                    zamp['pay_amount'] = o1.pay_amount
+                    if o1.pay_amount:
+                        all_amount += o1.pay_amount
+                    zamp['receip_custom'] = o1.custom
+                    zamp['pay_custom'] = o1.pay_custom
+                    zamp['fee_no'] = o1.fee_no
+                    zamp['fee_amount'] = o1.fee_amount
+                    zamp['fee_no_status'] = o1.fee_no_status
+                    zamp["is_new"] = 0
+                    samp.append(zamp)
+                orderPay = OrderPay.objects.filter(order_id=nid)
+                for o2 in orderPay:
+                    zamp = {}
+                    zamp['pay_project'] = o2.pay_content
+                    zamp['price_type'] = o2.pay_type
+                    zamp['pay_price'] = o2.pay_price
+                    zamp['pay_amount'] = o2.amount
+                    if o2.amount:
+                        all_amount +=  o2.amount
+                    zamp['receip_custom'] = o2.custom
+                    zamp['pay_custom'] = o2.provide_custom
+                    zamp['fee_no'] = o2.fee_no
+                    zamp['fee_amount'] = o2.fee_amount
+                    zamp['fee_no_status'] = o2.fee_no_status
+                    zamp["is_new"] = 0
+                    samp.append(zamp)
+                sampObj = SamplePayStatic.objects.filter(order_id=nid)
+                for o3 in sampObj:
+                    zamp = {}
+                    zamp["status"] = "订单状态"
+                    zamp['pay_project'] = o3.pay_comment
+                    zamp['price_type'] = o3.price_type
+                    zamp['pay_price'] = o3.pay_price
+                    zamp['pay_amount'] = o3.pay_amount
+                    if o3.pay_amount:
+                        all_amount +=  o3.pay_amount
+                    zamp['receip_custom'] = o3.custom
+                    zamp['pay_custom'] = o3.pay_custom
+                    zamp['fee_no'] = o3.fee_no
+                    zamp['fee_amount'] = o3.fee_amount
+                    zamp['fee_no_status'] = o3.fee_no_status
+                    zamp["is_new"] = 0
+                    samp.append(zamp)
+                newObj = OtherAccountNew.objects.filter(order_id=nid)
+                new_amount = Decimal(0)
+                for o4 in newObj:
+                    zamp = {}
+                    zamp['pay_project'] = o4.pay_comment
+                    zamp['price_type'] = o4.price_type
+                    zamp['pay_price'] = o4.pay_price
+                    zamp['pay_amount'] = o4.pay_amount
+                    zamp['receip_custom'] = o4.custom
+                    zamp['pay_custom'] = o4.pay_custom
+                    if o4.pay_amount:
+                        new_amount +=o4.pay_amount
+                        all_amount += o4.pay_amount
+                    zamp['fee_no'] = o4.fee_no
+                    zamp['fee_amount'] = o4.fee_amount
+                    zamp['fee_no_status'] = o4.fee_no_status
+                    zamp["is_new"] = 1
+                    samp.append(zamp)
+                custom_dic,custom_list = getAllCustom(nid)
+                temp = {}
+                temp["data"] = samp
+                temp['inspect_num'] = inspect_num
+                temp['make_num'] = make_num
+                temp['merchanrt'] = "南通风尚国际"
+                temp['custom_dic'] =custom_dic
+                temp['custom_list'] =custom_list
+                temp['new_lv'] = round(new_amount/all_amount,2)
+                temp['error_code'] = 0
+                temp['message'] = "成功"
+                temp['request'] = request.method + '  ' + request.get_full_path()
+                return Response(temp)
+
+            except:
+                msg = "未找到对应的企划订单"
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
             request = request.method + '  ' + request.get_full_path()
             post_result = {
                 "error_code": error_code,
@@ -14150,6 +14251,7 @@ class newOtherAccountsView(APIView):
                 "request": request,
             }
             return Response(post_result)
+
 
 
 
