@@ -14156,6 +14156,7 @@ class newOtherOneAccountsView(APIView):
                     zamp['pay_project'] = o1.pay_project
                     zamp['price_type'] = o1.price_type
                     zamp['pay_price'] = o1.pay_price
+                    zamp['pay_num'] = o1.pay_num
                     zamp['pay_amount'] = o1.pay_amount
                     if o1.pay_amount:
                         all_amount += o1.pay_amount
@@ -14172,6 +14173,8 @@ class newOtherOneAccountsView(APIView):
                     zamp['pay_project'] = o2.pay_content
                     zamp['price_type'] = o2.pay_type
                     zamp['pay_price'] = o2.pay_price
+                    zamp['pay_num'] = o2.pay_num
+
                     zamp['pay_amount'] = o2.amount
                     if o2.amount:
                         all_amount +=  o2.amount
@@ -14189,6 +14192,7 @@ class newOtherOneAccountsView(APIView):
                     zamp['pay_project'] = o3.pay_comment
                     zamp['price_type'] = o3.price_type
                     zamp['pay_price'] = o3.pay_price
+                    zamp['pay_num'] = o3.pay_num
                     zamp['pay_amount'] = o3.pay_amount
                     if o3.pay_amount:
                         all_amount +=  o3.pay_amount
@@ -14206,6 +14210,7 @@ class newOtherOneAccountsView(APIView):
                     zamp['pay_project'] = o4.pay_comment
                     zamp['price_type'] = o4.price_type
                     zamp['pay_price'] = o4.pay_price
+                    zamp['pay_num'] = o4.pay_num
                     zamp['pay_amount'] = o4.pay_amount
                     zamp['receip_custom'] = o4.custom
                     zamp['pay_custom'] = o4.pay_custom
