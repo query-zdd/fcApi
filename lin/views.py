@@ -8241,6 +8241,86 @@ class archiveView(APIView):
             }
             return Response(post_result)
 
+# 获取指定数据
+class getArchiveView(APIView):
+    @csrf_exempt
+    def get(self, request):
+        sn = "902"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+        data = request.query_params
+        valObj = archivesSerializer(data=request.query_params)
+        if valObj.is_valid():
+            start, page_size, flag = zddpaginate(int(data['page']), int(data['page_size']))
+            if not flag:
+                msg = "访问页码错误，请确认"
+                error_code = 10100
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+            result = []
+            try:
+                rObj = Archives.objects.filter(delete_time=None)
+                status = valObj.data['status'] if valObj.data['status'] is not None else 2
+                department_id = valObj.data['department_id'] if valObj.data['department_id'] is not None else 0
+                post_id = valObj.data['post_id'] if valObj.data['post_id'] is not None else 0
+                name = valObj.data['name'] if valObj.data['name'] is not None else ""
+                if status != 2:
+                    rObj = rObj.filter(status = status)
+                if department_id:
+                    rObj = rObj.filter(department_id = department_id)
+                if post_id:
+                    rObj = rObj.filter(post_id = post_id)
+                if name:
+                    rObj = rObj.filter(name__contains = name)
+                total = rObj.count()
+                if rObj.count() > start:
+                    rObj = rObj.all()[start:start+page_size].values()
+                    temp = {}
+                    temp["data"] = rObj
+                    temp['page_size'] = page_size
+                    temp['total'] = total
+                    return Response(temp)
+                else:
+                    temp = {}
+                    temp["data"] = rObj
+                    temp['page_size'] = page_size
+                    temp['total'] = total
+                    return Response(temp)
+            except:
+                msg = "未找到对应的工号"
+                error_code = 10030
+                request = request.method + '  ' + request.get_full_path()
+                post_result = {
+                    "error_code": error_code,
+                    "message": msg,
+                    "request": request,
+                }
+                return Response(post_result)
+        else:
+            msg = valObj.errors
+            error_code = 10030
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
+
 
 class archiveOneView(APIView):
     #员工档案更新-active

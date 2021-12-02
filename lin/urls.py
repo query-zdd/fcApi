@@ -114,6 +114,7 @@ urlpatterns = [
 
     #入离职档案设置
     url('^archive$', views.archiveView.as_view()),
+    url('^getArchive$', views.getArchiveView.as_view()),
     url('^archive/(?P<nid>\d+)', views.archiveOneView.as_view()),
 
     #入离职档案设置

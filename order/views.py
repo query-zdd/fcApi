@@ -5624,11 +5624,11 @@ class indicateDateView(APIView):
                     rObj = rObj.values()
                     for o1 in rObj:
                         orderLine = PlanOrderLine.objects.filter(order_id=o1["id"])
-                        d1 = orderLine[1].inspect_time
+                        d1 = orderLine[0].send_time
                         for o2 in orderLine:
-                            if d1>o2.inspect_time:
-                                d1 = o2.inspect_time
-                        o1["inspect_time"] = d1
+                            if d1>o2.send_time:
+                                d1 = o2.send_time
+                        o1["send_time"] = d1
                     temp = {}
                     temp["data"] = rObj
                     temp["n_num"] = n_num
