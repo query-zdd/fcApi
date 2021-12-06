@@ -6445,6 +6445,10 @@ class makeFactoryInspectOneView(APIView):
             comments=""
             # 检品数据
             fm_list = []
+            try:
+                overflow_num = order.order_num - order.contract_num
+            except:
+                overflow_num = 0
             for one in factoryObj:
                 fm_dic = {}
                 fm_dic['make_factory_id'] = one.id
@@ -6509,6 +6513,7 @@ class makeFactoryInspectOneView(APIView):
             temp["data"] = fm_list
             temp['comments'] = comments
             temp['orderObj'] = model_to_dict(order)
+            temp['overflow_num'] = overflow_num
             temp['custom_list'] = custom_list
             temp['order_color_list'] = order_color_list
             temp['order_specs_list'] = order_specs_list
