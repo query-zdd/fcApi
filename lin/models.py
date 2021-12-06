@@ -1357,6 +1357,7 @@ class PlanOrder(models.Model):
     real_start_date = models.DateTimeField(blank=True, null=True)
     is_sure_drop_lable = models.IntegerField(blank=True, null=True)
     inspect_name = models.CharField(max_length=255, blank=True, null=True)
+    indicate_flag = models.CharField(max_length=255, blank=True, null=True)
     indicate_time = models.DateField(blank=True, null=True)
     export_goods_name = models.CharField(max_length=255, blank=True, null=True)
     inport_goods_name = models.CharField(max_length=255, blank=True, null=True)

@@ -5516,6 +5516,18 @@ class indicateDateView(APIView):
     # 添加/编辑 装箱指示
     @csrf_exempt
     def post(self, request):
+        sn = "401"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.data
         try:
             #################校验数据################################
@@ -5539,9 +5551,17 @@ class indicateDateView(APIView):
                 for done in dataone:
                     try:
                         mid = done["order_id"]
+                        # 获取标识
+                        flag =""
+                        if done['indicate_flag'] == 0:
+                            flag = "0"
+                        else:
+                            for o1 in mid:
+                                flag += str(o1)
                         for one in mid:
                             bObj = PlanOrder.objects.get(id=one)
                             bObj.indicate_time = done['indicate_time']
+                            bObj.indicate_flag = flag
                             bObj.save()
                     except:
                         msg = "参数错误"
@@ -5586,6 +5606,18 @@ class indicateDateView(APIView):
     # 获取订单 生产准备
     @csrf_exempt
     def get(self, request):
+        sn = "401"
+        ret, msg = checkPermission(request, sn)
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = indicateDateSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -5602,7 +5634,7 @@ class indicateDateView(APIView):
                 return Response(post_result)
             result = []
             try:
-                rObj = PlanOrder.objects.filter(delete_time=None).order_by("indicate_time","id")
+                rObj = PlanOrder.objects.filter(delete_time=None).order_by("-indicate_flag","indicate_time","id")
                 order_custom = valObj.data['order_custom'] if valObj.data['order_custom'] is not None else ""
                 order_type = valObj.data['order_type'] if valObj.data['order_type'] is not None else 0
                 price_code = valObj.data['price_code'] if valObj.data['price_code'] is not None else ""
@@ -5629,6 +5661,9 @@ class indicateDateView(APIView):
                             if d1>o2.send_time:
                                 d1 = o2.send_time
                         o1["send_time"] = d1
+                        o1['order_status'] = "订单状态"
+                        if o1["indicate_flag"] == None:
+                            o1["indicate_flag"] = "0"
                     temp = {}
                     temp["data"] = rObj
                     temp["n_num"] = n_num
@@ -5883,7 +5918,7 @@ class reightSpaceView(APIView):
                 if dhkhao:
                     rObj = rObj.filter(dhkhao=dhkhao)
                 order_ids = [one.id for one in rObj]
-                orderLine = PlanOrderLine.objects.filter(delete_time=None,order_id__in=order_ids).order_by("-reight_space_id","order_id")
+                orderLine = PlanOrderLine.objects.filter(delete_time=None,order_id__in=order_ids,order_type__in=[1,3]).order_by("-reight_space_id","order_id")
                 temp = {}
                 data = orderLine.values()
                 for one in data:
@@ -5905,6 +5940,7 @@ class reightSpaceView(APIView):
                         one['reight_s_time'] = None
                     one['dhkhao'] = orderObj.dhkhao
                     one['price_code'] = orderObj.price_code
+                    one['order_status'] = "订单状态"
 
                 temp["data"] = data
                 temp['error_code'] = 0
@@ -6200,7 +6236,7 @@ class exportCustomsDeclarationView(APIView):
                         one['indicate_time'] = orderObj.indicate_time
                     one['dhkhao'] = orderObj.dhkhao
                     one['price_code'] = orderObj.price_code
-                # 获取送检报告
+                    # 获取送检报告
                     mfi_num, mfi_y_num = getMakeFatoryInspect(one["order_id"])
                     one["mfi_num"] = mfi_num
                     one["mfi_y_num"] = mfi_y_num
@@ -6210,6 +6246,7 @@ class exportCustomsDeclarationView(APIView):
 
                     one["export_info_num"] = 1
                     one["export_info_y_num"] = 1
+                    one['order_status'] = "订单状态"
 
                 temp["data"] = data
                 temp['error_code'] = 0
@@ -6749,6 +6786,7 @@ class inportCustomsDeclarationView(APIView):
                     mfi_num, mfi_y_num = getMakeFatoryInspect(one["order_id"])
                     one["mfi_num"] = mfi_num
                     one["mfi_y_num"] = mfi_y_num
+                    one['order_status'] = "订单状态"
                 temp["data"] = data
                 temp['error_code'] = 0
                 temp['message'] = "成功"

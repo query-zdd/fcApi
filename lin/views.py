@@ -15747,7 +15747,7 @@ class showAuthorityRoleView(APIView):
                         newOne = Role.objects.filter(role_name=done['role_name'])
                         if newOne.count()>0:
                             msg = "当前角色已经存在！"
-                            error_code = 10001
+                            error_code = 10030
                             request = request.method + '  ' + request.get_full_path()
                             post_result = {
                                 "error_code": error_code,
@@ -16184,6 +16184,10 @@ class showLoginView(APIView):
                 new_token.type = user[0].id
                 new_token.token = token
                 new_token.save()
+                authority_list_name = []
+                for one1 in json.loads(role.authority_list):
+                    auObj = AuthorityInfo.objects.get(authority_sn=one1)
+                    authority_list_name.append(auObj.authority_name)
                 msg = "登录账户成功"
                 error_code = 0
                 request = request.method + '  ' + request.get_full_path()
@@ -16193,6 +16197,8 @@ class showLoginView(APIView):
                     "request": request,
                     "token":token,
                     "authority":role.authority_list,
+                    "authority_name": authority_list_name,
+                    "role_name":role.role_name
                 }
                 return Response(post_result)
             else:

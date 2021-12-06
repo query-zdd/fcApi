@@ -860,6 +860,7 @@ class submisInfoSerializer(serializers.Serializer):
 
 class indicateDateoneSerializer(serializers.Serializer):
     indicate_time = serializers.CharField(error_messages={'required': '必须传入指示发货日期！'})
+    indicate_flag = serializers.IntegerField(error_messages={'required': '必须传入指示发货日期标识！'})
     order_id = serializers.ListField(error_messages={'required': '必须传入订单id'})
 
 class indicateDateSerializer(serializers.Serializer):
