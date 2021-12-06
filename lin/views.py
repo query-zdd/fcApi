@@ -15680,7 +15680,7 @@ class showAuthorityRoleView(APIView):
             request = request.method + '  ' + request.get_full_path()
             temp["data"] = bObj.values()
             temp['message'] = "检索数据成功"
-            temp['error_code'] = 10030
+            temp['error_code'] = 0
             temp["request"] = request
             return Response(temp)
         except:
@@ -15696,6 +15696,17 @@ class showAuthorityRoleView(APIView):
     #添加角色管理
     @csrf_exempt
     def post(self, request):
+        ret, msg = checkPermission(request, "903")
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         # data = request.query_params
         # valObj = BasicInsertSerializer(data=request.query_params)
         data = request.data
@@ -15733,8 +15744,20 @@ class showAuthorityRoleView(APIView):
                         bObj = Role.objects.get(id=mid)
                         bObj.update_time = dt
                     else:
-                        bObj = Role()
-                        bObj.create_time = dt
+                        newOne = Role.objects.filter(role_name=done['role_name'])
+                        if newOne.count()>0:
+                            msg = "当前角色已经存在！"
+                            error_code = 10001
+                            request = request.method + '  ' + request.get_full_path()
+                            post_result = {
+                                "error_code": error_code,
+                                "message": msg,
+                                "request": request,
+                            }
+                            return Response(post_result)
+                        else:
+                            bObj = Role()
+                            bObj.create_time = dt
                     bObj.role_name = done['role_name']
                     bObj.authority_list = done['authority_list']
                     bObj.active = done['active']
@@ -15752,7 +15775,7 @@ class showAuthorityRoleView(APIView):
                         "request": request,
                     }
                     return Response(post_result)
-            msg = "添加基础资料成功"
+            msg = "添加角色成功"
             error_code = 0
             request = request.method + '  ' + request.get_full_path()
             post_result = {
@@ -15774,6 +15797,17 @@ class showAuthorityRoleView(APIView):
 
     @csrf_exempt
     def delete(self, request):
+        ret, msg = checkPermission(request, "903")
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -15804,8 +15838,19 @@ class showAuthorityRoleView(APIView):
 
 
 class showAuthorityRoleSortView(APIView):
-    #基础资料排序
+    #角色管理排序
     def put(self,request,bid):
+        ret, msg = checkPermission(request, "903")
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = BasicSortSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -15848,9 +15893,20 @@ class showAuthorityRoleSortView(APIView):
 
 #################账户管理
 class showRegisterRoleView(APIView):
-    #查询角色管理
+    #查询账户管理
     @csrf_exempt
     def get(self, request):
+        ret, msg = checkPermission(request, "903")
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         # data = request.query_params
         # valObj = BasicTypeSerializer(data=request.query_params)
         result = []
@@ -15858,12 +15914,14 @@ class showRegisterRoleView(APIView):
             bObj = RoleMenu.objects.filter(delete_time=None)
             cObj =  bObj.values()
             for one in cObj:
+                roleObj = Role.objects.get(id = one['role_id'])
                 one["password"] = "xxxxxxxx"
+                one["role_name"] = roleObj.role_name
             temp = {}
             request = request.method + '  ' + request.get_full_path()
             temp["data"] = cObj
             temp['message'] = "检索数据成功"
-            temp['error_code'] = 10030
+            temp['error_code'] = 0
             temp["request"] = request
             return Response(temp)
         except:
@@ -15876,9 +15934,20 @@ class showRegisterRoleView(APIView):
                 "request": request,
             }
             return Response(post_result)
-    #添加角色管理
+    #添加账户管理
     @csrf_exempt
     def post(self, request):
+        ret, msg = checkPermission(request, "903")
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         # data = request.query_params
         # valObj = BasicInsertSerializer(data=request.query_params)
         data = request.data
@@ -15960,6 +16029,17 @@ class showRegisterRoleView(APIView):
 
     @csrf_exempt
     def delete(self, request):
+        ret, msg = checkPermission(request, "903")
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             data = request.data
             ids = data['ids']
@@ -15990,8 +16070,19 @@ class showRegisterRoleView(APIView):
 
 
 class showRegisterRoleSortView(APIView):
-    #基础资料排序
+    #账号排序
     def put(self,request,bid):
+        ret, msg = checkPermission(request, "903")
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         data = request.query_params
         valObj = BasicSortSerializer(data=request.query_params)
         if valObj.is_valid():
@@ -16037,9 +16128,17 @@ class showLoginView(APIView):
     #查询角色管理
     @csrf_exempt
     def get(self, request):
-        # data = request.query_params
-        # valObj = BasicTypeSerializer(data=request.query_params)
-        result = []
+        ret, msg = checkPermission(request, "903")
+        if ret == False:
+            msg = msg
+            error_code = 10001
+            request = request.method + '  ' + request.get_full_path()
+            post_result = {
+                "error_code": error_code,
+                "message": msg,
+                "request": request,
+            }
+            return Response(post_result)
         try:
             bObj = RoleMenu.objects.filter(delete_time=None)
             cObj =  bObj.values()
@@ -16048,8 +16147,8 @@ class showLoginView(APIView):
             temp = {}
             request = request.method + '  ' + request.get_full_path()
             temp["data"] = cObj
-            temp['message'] = "检索数据成功"
-            temp['error_code'] = 10030
+            temp['message'] = "检索账户信息成功"
+            temp['error_code'] = 0
             temp["request"] = request
             return Response(temp)
         except:
@@ -16085,7 +16184,7 @@ class showLoginView(APIView):
                 new_token.type = user[0].id
                 new_token.token = token
                 new_token.save()
-                msg = "添加/编辑账户资料成功"
+                msg = "登录账户成功"
                 error_code = 0
                 request = request.method + '  ' + request.get_full_path()
                 post_result = {
