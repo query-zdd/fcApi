@@ -5560,7 +5560,8 @@ class indicateDateView(APIView):
                                 flag += str(o1)
                         for one in mid:
                             bObj = PlanOrder.objects.get(id=one)
-                            bObj.indicate_time = done['indicate_time']
+                            if flag != "0":
+                                bObj.indicate_time = done['indicate_time']
                             bObj.indicate_flag = flag
                             bObj.save()
                     except:
