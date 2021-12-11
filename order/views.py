@@ -5848,7 +5848,9 @@ class reightSpaceView(APIView):
                             bObj = bObj[0]
                             temp = json.loads(bObj.order_line_ids)
                             temp.remove(done['order_line_id'])
+                            bObj.order_line_ids = temp
                             bObj.save()
+                        planLine.reight_space_id = None
                     planLine.reightspace_flag = done['reightspace_flag']
                     planLine.save()
 
