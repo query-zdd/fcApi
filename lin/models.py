@@ -1420,6 +1420,7 @@ class PlanOrderLine(models.Model):
     fee_no = models.CharField(max_length=255, blank=True, null=True)
     fee_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     fee_no_status = models.IntegerField(blank=True, null=True)
+    reightspace_flag = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1635,6 +1636,7 @@ class ReightSpace(models.Model):
     order_line_ids = models.CharField(max_length=255, blank=True, null=True)
     indicate_time = models.DateTimeField(blank=True, null=True)
     status = models.IntegerField(blank=True, null=True)
+    reightspace_flag = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         managed = False

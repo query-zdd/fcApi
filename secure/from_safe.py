@@ -859,9 +859,9 @@ class submisInfoSerializer(serializers.Serializer):
 
 
 class indicateDateoneSerializer(serializers.Serializer):
-    indicate_time = serializers.CharField(allow_null=True, allow_blank=True,default="2021-01-01")
+    indicate_time = serializers.CharField(error_messages={'required': '必须传入指示发货日期！'})
     indicate_flag = serializers.IntegerField(error_messages={'required': '必须传入指示发货日期标识！'})
-    order_id = serializers.ListField(error_messages={'required': '必须传入订单id'})
+    order_id = serializers.IntegerField(error_messages={'required': '必须传入订单id'})
 
 class indicateDateSerializer(serializers.Serializer):
     order_custom = serializers.CharField(default="")
@@ -888,6 +888,11 @@ class reightSpaceSerializer(serializers.Serializer):
     transportation = serializers.CharField(error_messages={'required': '必须传入出口运输方式'})
     exporter_way = serializers.CharField(error_messages={'required': '必须传入出口承运方'})
     id = serializers.IntegerField(default=0)
+
+class reightSpaceobjSerializer(serializers.Serializer):
+    indicate_time = serializers.CharField(error_messages={'required': '必须传入指示发货日期！'})
+    reightspace_flag = serializers.CharField(error_messages={'required': '必须传入合并标识！'})
+    order_line_id = serializers.CharField(error_messages={'required': '必须传入订单项id'})
 
 
 class inportCustomsDeclarationsaveSerializer(serializers.Serializer):

@@ -5551,18 +5551,10 @@ class indicateDateView(APIView):
                 for done in dataone:
                     try:
                         mid = done["order_id"]
-                        # 获取标识
-                        flag =""
-                        if done['indicate_flag'] == 0:
-                            flag = "0"
-                        else:
-                            for o1 in mid:
-                                flag += str(o1)
-                        for one in mid:
-                            bObj = PlanOrder.objects.get(id=one)
-                            if flag != "0":
-                                bObj.indicate_time = done['indicate_time']
-                            bObj.indicate_flag = flag
+                        if mid:
+                            bObj = PlanOrder.objects.get(id=mid)
+                            bObj.indicate_time = done['indicate_time']
+                            bObj.indicate_flag = str(done['indicate_flag'])
                             bObj.save()
                     except:
                         msg = "参数错误"
@@ -5811,7 +5803,7 @@ class reightSpaceView(APIView):
         dataone = request.data
         for done in dataone:
             d_num = d_num + 1
-            valObjline = reightSpaceSerializer(data=done)
+            valObjline = reightSpaceobjSerializer(data=done)
             if not valObjline.is_valid():
                 d_flag = 1
                 samp = {}
@@ -5824,38 +5816,42 @@ class reightSpaceView(APIView):
         if d_flag == 0:
             for done in dataone:
                 try:
-                    mid =done['id']
-                    if mid:
-                        bObj = ReightSpace.objects.get(id=mid)
-                        bObj.update_time = dt
+                    order_line_id =done['order_line_id']
+                    planLine = PlanOrderLine.objects.get(id=order_line_id)
+                    if done['reightspace_flag']!=-1:
+                        bObj = ReightSpace.objects.filter(reightspace_flag=done['reightspace_flag'])
+                        if bObj.count()>0:
+                            bObj = bObj[0]
+                            temp = json.loads(bObj.order_line_ids)
+                            if done['order_line_id'] not in temp:
+                                temp.append(done['order_line_id'])
+                                bObj.order_line_ids = temp
+                                bObj.save()
+                        else:
+                            temp = []
+                            temp.append(done['order_line_id'])
+                            bObj = ReightSpace()
+                            bObj.create_time = dt
+                            bObj.indicate_time = done['indicate_time']
+                            bObj.reightspace_flag = done["reightspace_flag"]
+                            bObj.exporter_way = planLine.exporter_way
+                            bObj.pol = planLine.pol
+                            bObj.pod = planLine.pod
+                            bObj.transportation = planLine.transportation
+                            bObj.order_line_ids = temp
+                            bObj.status = 0
+                            bObj.save()
+                        planLine.reight_space_id =bObj.id
                     else:
-                        bObj = ReightSpace()
-                        bObj.create_time = dt
-                    bObj.indicate_time = done['indicate_time']
-                    # bObj.shou_huo_term_id = valObj.data['shou_huo_term_id']
-                    # bObj.shou_huo_term_name = valObj.data['shou_huo_term_name']
-                    # bObj.space_name = valObj.data['space_name']
-                    bObj.exporter_way = done['exporter_way']
-                    bObj.pol = done['pol']
-                    bObj.pod = done['pod']
-                    bObj.transportation = done['transportation']
-                    bObj.order_line_ids = done['order_line_ids']
-                    bObj.status = 0
-                    bObj.save()
-                    if mid:
-                        reight_space_id = mid
-                    else:
-                        bOne = ReightSpace.objects.latest("id")
-                        reight_space_id = bOne.id
-                    try:
-                        line_id_line =  done['order_line_ids'].split(",")
-                        for l_id in line_id_line:
-                            if l_id:
-                                planLine = PlanOrderLine.objects.get(id=l_id)
-                                planLine.reight_space_id = reight_space_id
-                                planLine.save()
-                    except:
-                        pass
+                        bObj = ReightSpace.objects.filter(reightspace_flag=planLine.reightspace_flag)
+                        if bObj.count() > 0:
+                            bObj = bObj[0]
+                            temp = json.loads(bObj.order_line_ids)
+                            temp.remove(done['order_line_id'])
+                            bObj.save()
+                    planLine.reightspace_flag = done['reightspace_flag']
+                    planLine.save()
+
                 except:
                     msg = "id参数错误"
                     error_code = 10030
