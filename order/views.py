@@ -6151,6 +6151,16 @@ class reightSpaceOneView(APIView):
                 bObj.shou_huo_term_name = request.query_params["shou_huo_term_name"]
                 bObj.space_name = request.query_params["space_name"]
                 bObj.save()
+                # 更改进仓日
+                line_id = bObj.order_line_ids
+                try:
+                    line_id_list = json.loads(line_id)
+                    for o1 in line_id_list:
+                        orderlne = PlanOrderLine.objects.get(id = o1)
+                        orderlne.warehouse_time = request.query_params["warehouse_time"]
+                        orderlne.save()
+                except:
+                    pass
                 msg = "确认预定仓位"
                 error_code = 0
                 request = request.method + '  ' + request.get_full_path()
@@ -6239,6 +6249,16 @@ class exportCustomsDeclarationView(APIView):
                     mfi_num, mfi_y_num = getMakeFatoryInspect(one["order_id"])
                     one["mfi_num"] = mfi_num
                     one["mfi_y_num"] = mfi_y_num
+
+                    # 确认报关和结算
+                    pxObj = PlanClothSampleLine.objects.filter(plan_id=orderObj.plan_id)
+                    pcsl_num = pxObj.count()
+                    pcsl_sure_num = 0
+                    for o2 in pxObj:
+                        if o2.is_sure == 1:
+                            pcsl_sure_num +=1
+                    one["pcsl_num"] = pcsl_num
+                    one["pcsl_sure_num"] = pcsl_sure_num
 
                     one["custom_dec_num"] = 1
                     one["custom_dec_y_num"] = 1

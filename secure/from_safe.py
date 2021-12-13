@@ -942,6 +942,7 @@ class orderAccountOneSerializer(serializers.Serializer):
 class reightSpaceOne1Serializer(serializers.Serializer):
     shou_huo_term_name = serializers.CharField(error_messages={'required': '必须传入收货人条款'})
     space_name = serializers.CharField(error_messages={'required': '必须传入预定商品品名'})
+    warehouse_time = serializers.CharField(error_messages={'required': '必须传入确定的进仓日'})
 
 class purchasRecordsUploadSerializer(serializers.Serializer):
     file_url = serializers.ListField(error_messages={'required': '必须传入文件路径'})
