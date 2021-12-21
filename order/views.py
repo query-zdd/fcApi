@@ -6251,7 +6251,7 @@ class exportCustomsDeclarationView(APIView):
                     one["mfi_y_num"] = mfi_y_num
 
                     # 确认报关和结算
-                    pxObj = PlanClothSampleLine.objects.filter(plan_id=orderObj.plan_id)
+                    pxObj = PlanClothSampleLine.objects.filter(plan_id=orderObj.plan_id,delete_time=None,is_pay=1, send_custom=one["order_custom"])
                     pcsl_num = pxObj.count()
                     pcsl_sure_num = 0
                     for o2 in pxObj:
