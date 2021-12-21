@@ -6316,7 +6316,7 @@ class exportClothSampleView(APIView):
         try:
             orderLine = PlanOrderLine.objects.get(id=nid)
             order = PlanOrder.objects.get(id=orderLine.order_id)
-            pclsObj = PlanClothSampleLine.objects.filter(plan_id=order.plan_id, delete_time=None,is_fee=1, send_custom=orderLine.order_custom)
+            pclsObj = PlanClothSampleLine.objects.filter(plan_id=order.plan_id, delete_time=None,is_pay=1, send_custom=orderLine.order_custom)
             temp = {}
             temp["data"] = pclsObj.values()
             temp['order_custom'] = orderLine.order_custom
