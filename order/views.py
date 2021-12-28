@@ -336,6 +336,7 @@ class showOutStockOneView(APIView):
                     samplist = rObj.values()
 
                 else:
+                    short_overflow_num = 0
                     orderline = PlanOrderLine.objects.filter(delete_time=None,order_id=nid)
                     samplist=[]
                     for one in orderline:
@@ -347,6 +348,9 @@ class showOutStockOneView(APIView):
                         rObj = OutStock.objects.filter(delete_time=None, order_line_id=one.id).order_by('color', 'specs')
                         if rObj.count()>0:
                             samp['out_stock'] = rObj.values()
+                            for one in rObj:
+                                if one.order_num and one.contract_num:
+                                    short_overflow_num += one.order_num - one.contract_num
                         else:
                             samp['out_stock'] = []
                             samp['short_overflow'] = one.short_overflow
@@ -356,6 +360,7 @@ class showOutStockOneView(APIView):
                 temp["data"] = samplist
                 orderObj = PlanOrder.objects.get(id=nid)
                 temp['orderObj'] = model_to_dict(orderObj)
+                temp['short_overflow_num'] = short_overflow_num
                 temp['error_code'] = 0
                 temp['message'] = "成功"
                 temp['request'] = request.method + '  ' + request.get_full_path()
@@ -638,11 +643,15 @@ class factoryMakeOneView(APIView):
                     samp['subline'] = rObj.values()
                     samplist.append(samp)
                 temp = {}
+                short_overflow_num = 0
+                outobj = OutStock.objects.filter(delete_time=None,order_id = nid)
+                for one in outobj:
+                    short_overflow_num +=one.order_num-one.contract_num
                 temp["data"] = samplist
                 temp['work_type'] = orderObj.work_type
                 temp['contract_num'] = orderObj.contract_num
                 temp['order_num'] = orderObj.order_num
-                temp['short_overflow_num'] = orderObj.order_num
+                temp['short_overflow_num'] = short_overflow_num
                 temp['inspect_company'] = orderLineObj[0].inspect_company
                 temp['error_code'] = 0
                 temp['message'] = "成功"
