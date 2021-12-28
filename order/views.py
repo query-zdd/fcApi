@@ -6960,7 +6960,10 @@ class PackInfoOneView(APIView):
                 temp["data"] = model_to_dict(orderPackInfo[0])
             else:
                 temp["data"] = {}
-                temp['data']['order_num'] = orderLine.order_num
+                if not orderLine.order_num:
+                    temp['data']['order_num'] = orderLine.order_num
+                else:
+                    temp['data']['order_num'] = orderLine.order_num
             temp['order_num'] = orderLine.order_num
             temp['order_line_id'] = nid
             if packlineOne.count()>0:
