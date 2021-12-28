@@ -4271,6 +4271,8 @@ class purchasRecordsOneView(APIView):
             if not lineshipdic["add_up_num"]:
                 lineshipdic["add_up_num"] = 0
             if not lineshipdic['short_send_num']:
+                if not lineshipdic['provide_num']:
+                    lineshipdic['provide_num'] = 0
                 lineshipdic['short_send_num'] = lineshipdic['provide_num'] - lineshipdic["add_up_num"]
             temp["lineShipObj"] = lineshipdic
             short_overflow_num, short_overflow = getOverflow(lineShipObj.order_id)
