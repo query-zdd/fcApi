@@ -4602,18 +4602,18 @@ class productReadyView(APIView):
     # 添加/编辑 生产准备
     @csrf_exempt
     def post(self, request):
-        sn = "301"
-        ret, msg = checkPermission(request, sn)
-        if ret == False:
-            msg = msg
-            error_code = 10001
-            request = request.method + '  ' + request.get_full_path()
-            post_result = {
-                "error_code": error_code,
-                "message": msg,
-                "request": request,
-            }
-            return Response(post_result)
+        # sn = "301"
+        # ret, msg = checkPermission(request, sn)
+        # if ret == False:
+        #     msg = msg
+        #     error_code = 10001
+        #     request = request.method + '  ' + request.get_full_path()
+        #     post_result = {
+        #         "error_code": error_code,
+        #         "message": msg,
+        #         "request": request,
+        #     }
+        #     return Response(post_result)
         data = request.data
         try:
             #################校验数据################################
@@ -6960,6 +6960,7 @@ class PackInfoOneView(APIView):
                 temp["data"] = model_to_dict(orderPackInfo[0])
             else:
                 temp["data"] = {}
+                temp['data']['order_num'] = orderLine.order_num
             temp['order_num'] = orderLine.order_num
             temp['order_line_id'] = nid
             if packlineOne.count()>0:
