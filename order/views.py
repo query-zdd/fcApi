@@ -6961,7 +6961,7 @@ class PackInfoOneView(APIView):
             else:
                 temp["data"] = {}
                 if not orderLine.order_num:
-                    temp['data']['order_num'] = orderLine.order_num
+                    temp['data']['order_num'] = 0
                 else:
                     temp['data']['order_num'] = orderLine.order_num
             temp['order_num'] = orderLine.order_num
