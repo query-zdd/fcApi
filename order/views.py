@@ -6965,7 +6965,7 @@ class PackInfoOneView(APIView):
                 else:
                     temp['data']['order_num'] = orderLine.order_num
             temp['order_num'] = orderLine.order_num
-            temp['order_line_id'] = nid
+            temp['order_line_id'] = orderLine.id
             if packlineOne.count()>0:
                 temp['specs'] = packlineOne[0].specs
                 temp['scale'] = packlineOne[0].scale
