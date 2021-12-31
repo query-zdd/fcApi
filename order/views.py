@@ -6578,7 +6578,7 @@ class makeFactoryInspectOneView(APIView):
                         zamp['box_hao_type'] = None
                         zamp['box_num'] = None
                         zamp['color'] = None
-                        zamp['specs'] = None
+                        zamp['specs'] = specs_list
                         zamp['num'] = None
                         zamp['total'] = None
                         zamp['gw'] = None
