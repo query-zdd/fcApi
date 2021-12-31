@@ -6561,17 +6561,30 @@ class makeFactoryInspectOneView(APIView):
                         order_line_dic['volume'] = None
                     # 已保存数据
                     mkfacObj = MakeFatoryInspect.objects.filter(order_id=nid,make_factory_id=one.id,order_line_id=one1.id).order_by("color")
-                    # if mkfacObj.count()>0:
-                    order_line_dic["inspect_info"]= mkfacObj.values()
-                    # else:
-                    #     zamp = {}
-                    #     zamp['id'] = 0
-                    #     zamp['custom'] = one1.order_custom
-                    #     zamp['order_id'] = order.id
-                    #     zamp['make_factory_id'] = one.id
-                    #     zamp['order_line_id'] = one1.id
-                    #     zamp['make_factory'] = one.make_factory
-
+                    if mkfacObj.count()>0:
+                        order_line_dic["inspect_info"]= mkfacObj.values()
+                    else:
+                        zamp = {}
+                        zamp['id'] = 0
+                        zamp['custom'] = one1.order_custom
+                        zamp['order_id'] = order.id
+                        zamp['make_factory_id'] = one.id
+                        zamp['order_line_id'] = one1.id
+                        zamp['make_factory'] = one.make_factory
+                        zamp['box_hao_start'] = None
+                        zamp['box_hao_end'] = None
+                        zamp['box_hao_type'] = None
+                        zamp['box_num'] = None
+                        zamp['color'] = None
+                        zamp['specs'] = None
+                        zamp['num'] = None
+                        zamp['total'] = None
+                        zamp['gw'] = None
+                        zamp['nw'] = None
+                        zamp['meas'] = None
+                        llist = []
+                        llist.append(zamp)
+                        order_line_dic["inspect_info"] = llist
 
                     order_line_list.append(order_line_dic)
                 fm_dic['order_line_info'] = order_line_list
