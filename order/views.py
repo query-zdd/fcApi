@@ -6537,6 +6537,8 @@ class makeFactoryInspectOneView(APIView):
                         if one2.color not in color_list:
                             color_list.append(one2.color)
                         if one2.specs not in specs_list:
+                            s_spes = {}
+                            s_spec[str(one2.specs)] = one2.specs
                             specs_list.append(one2.specs)
                         if one2.color not in order_color_list:
                             order_color_list.append(one2.color)
