@@ -7638,6 +7638,7 @@ class orderAccountsView(APIView):
                     zamp["other_pay_num"] = other_pay_num
                     zamp["other_pay_sure_num"] = other_pay_sure_num
                     zamp["status"] = status
+                    zamp["order_status"] = "订单状态"
                     samp.append(zamp)
                 temp = {}
                 temp["data"] = samp
