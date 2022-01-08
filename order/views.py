@@ -8084,7 +8084,10 @@ class orderInAccountsView(APIView):
                 if fee_num:
                     rObj = rObj.filter(fee_num__in=fee_num)
                 if status:
-                    rObj = rObj.filter(pay_status=status)
+                    if status !=1:
+                        rObj = rObj.filter(~Q(is_finish_pay=1))
+                    else:
+                        rObj = rObj.filter(is_finish_pay=1)
                 samp = []
                 for one in rObj:
                     zamp = {}
@@ -8126,7 +8129,8 @@ class orderInAccountsView(APIView):
                     zamp["all_amount"] = all_amount
                     zamp["pay_amount"] = pay_amount
                     zamp['fee_no'] = fee_no
-                    zamp["status"] = "订单状态"
+                    zamp["order_status"] = "订单状态"
+                    zamp["status"] = status
                     samp.append(zamp)
                 temp = {}
                 pay_info = getOrderPayNum()
@@ -8249,6 +8253,7 @@ class orderInAccountsView(APIView):
                         orderPay.pay_y_amount = y_amount
                         orderPay.pay_n_amount = amount-y_amount
                         orderPay.save()
+
                 except:
                     msg = "id参数错误"
                     error_code = 10030
@@ -8552,7 +8557,10 @@ class orderInAllAccountsView(APIView):
                 if fee_num:
                     rObj = rObj.filter(fee_num__in=fee_num)
                 if status:
-                    rObj = rObj.filter(pay_status=status)
+                    if status != 1:
+                        rObj = rObj.filter(~Q(is_finish_pay=1))
+                    else:
+                        rObj = rObj.filter(is_finish_pay=1)
                 samp = []
                 for one in rObj:
                     # 订单应收
@@ -8579,11 +8587,12 @@ class orderInAllAccountsView(APIView):
                             zamp["pay_finish_deg"] = 0
                         zamp['is_finish_pay'] = order.is_finish_pay
                         zamp['fee_no_status'] = order.fee_no_status
-                        zamp["status"] = "订单状态"
+                        zamp["order_status"] = "订单状态"
                         zamp['account_type'] = 1
                         zamp['order_line_id'] = order.id
                         zamp["order_other_pay_id"] = 0
                         zamp['fee_no'] = order.fee_no
+                        zamp["status"] = status
                         samp.append(zamp)
                     #其他应收
                     otherPay = OrderPay.objects.filter(order_id=one.id)
@@ -8608,11 +8617,12 @@ class orderInAllAccountsView(APIView):
                             zamp['pay_finish_deg'] = 0
                         zamp['is_finish_pay'] = other.is_finish_pay
                         zamp['fee_no_status'] = other.fee_no_status
-                        zamp["status"] = "订单状态"
+                        zamp["order_status"] = "订单状态"
                         zamp['account_type'] = 2
                         zamp['order_line_id'] = 0
                         zamp["order_other_pay_id"] = other.id
                         zamp['fee_no'] = other.fee_no
+                        zamp["status"] = status
                         samp.append(zamp)
 
                 temp = {}

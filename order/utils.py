@@ -316,6 +316,8 @@ def orderPayStatus(order_id):
     return pay_finish_deg,pay_status,all_amount,pay_amount
 
 
+
+
 # 获取所有订单的未付款金额
 def getOrderPayNum():
     order = PlanOrder.objects.filter(delete_time=None)
