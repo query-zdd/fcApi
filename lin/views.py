@@ -9821,7 +9821,7 @@ class other_categoryView(APIView):
                         temp['active'] = False
                     temp["category_name"] = one.category_name
                     temp["weight"] = one.weight
-                    temp['id'] = one.id
+                    temp['category_id'] = one.id
                     subcat = OtherSubCategory.objects.filter(category_id=one.id, delete_time=None)
                     samp = []
                     for o in subcat:
